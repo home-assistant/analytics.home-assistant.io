@@ -1,0 +1,1 @@
+# analytics.home-assistant.io
