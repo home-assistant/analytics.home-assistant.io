@@ -1,0 +1,30 @@
+{
+  "name": "Home Assistant Analyticss",
+  "image": "mcr.microsoft.com/vscode/devcontainers/typescript-node:14",
+  "context": "..",
+  "remoteEnv": {
+    "PATH":"${containerEnv:PATH}:./node_modules/.bin"
+  },
+  "postCreateCommand": "script/bootstrap",
+  "appPort": ["8080:8080", "3001:3001"],
+  "extensions": [
+  "github.vscode-pull-request-github",
+  "dbaeumer.vscode-eslint",
+  "ms-vscode.vscode-typescript-tslint-plugin",
+  "esbenp.prettier-vscode",
+  "bierner.lit-html",
+  "runem.lit-plugin"
+  ],
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "files.eol": "\n",
+    "editor.tabSize": 2,
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+  "files.trimTrailingWhitespace": true
+  }
+}
