@@ -1,28 +1,41 @@
-import '@google-web-components/google-chart'
-import { css, customElement, html, LitElement, property } from 'lit-element'
-import './analytics-active-installations'
-import './analytics-average'
-import './analytics-integrations'
-import './analytics-versions'
-import { AnalyticsData } from './type'
+import "@google-web-components/google-chart";
+import {
+  css,
+  customElement,
+  html,
+  LitElement,
+  internalProperty,
+  PropertyValues,
+} from "lit-element";
+import "./analytics-active-installations";
+import "./analytics-average";
+import "./analytics-integrations";
+import "./analytics-versions";
+import { AnalyticsData } from "./type";
 
-@customElement('analytics-element')
+@customElement("analytics-element")
 export class AnalyticsElement extends LitElement {
-  @property({ attribute: false }) public data?: AnalyticsData
+  @internalProperty() private _data?: AnalyticsData;
 
-  connectedCallback() {
-    super.connectedCallback()
-    this.getData()
+  @internalProperty() private _error: boolean = false;
+
+  protected firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+    this.getData();
   }
 
   render() {
-    if (this.data === undefined) {
-      return html``
+    if (this._error) {
+      return html`<p>Could not load data.</p>`;
+    }
+
+    if (this._data === undefined) {
+      return html``;
     }
 
     const lastUpdated = new Date(
-      Number(Object.keys(this.data).reverse().slice(0, 1)[0]),
-    )
+      Number(Object.keys(this._data).reverse().slice(0, 1)[0])
+    );
 
     return html`
       <div class="intro">
@@ -34,7 +47,7 @@ export class AnalyticsElement extends LitElement {
             title="Documentation"
             href="https://next.home-assistant.io/integrations/analytics"
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noreferrer"
           >
             analytics integration
           </a>
@@ -43,22 +56,31 @@ export class AnalyticsElement extends LitElement {
         </p>
       </div>
       <div class="content">
-        <analytics-active-installations .data=${this.data}>
+        <analytics-active-installations .data=${this._data}>
         </analytics-active-installations>
         <div class="half">
-          <analytics-versions .data=${this.data}></analytics-versions>
-          <analytics-average .data=${this.data}></analytics-average>
+          <analytics-versions .data=${this._data}></analytics-versions>
+          <analytics-average .data=${this._data}></analytics-average>
         </div>
 
-        <analytics-integrations .data=${this.data}></analytics-integrations>
+        <analytics-integrations .data=${this._data}></analytics-integrations>
         <div>Last updated: ${lastUpdated.toDateString()}</div>
       </div>
-    `
+    `;
   }
 
   async getData() {
-    const response = await fetch('https://analytics-api.home-assistant.io')
-    this.data = await response.json()
+    try {
+      const response = await fetch("https://analytics-api.home-assistant.io");
+      if (response.ok) {
+        this._data = await response.json();
+      } else {
+        this._error = true;
+      }
+    } catch (_) {
+      this._error = true;
+    }
+    this._error = false;
   }
 
   static styles = css`
@@ -96,11 +118,11 @@ export class AnalyticsElement extends LitElement {
         width: calc(100vw - 64px);
       }
     }
-  `
+  `;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'analytics-element': AnalyticsElement
+    "analytics-element": AnalyticsElement;
   }
 }

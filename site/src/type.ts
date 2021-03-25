@@ -1,37 +1,28 @@
 interface InstallationTypes {
-  core: number
-  container: number
-  supervised: number
-  os: number
-}
-export interface Integrations {
-  [key: string]: number
+  core: number;
+  container: number;
+  supervised: number;
+  os: number;
 }
 
-export interface Addons {
-  [key: string]: number
-}
-interface Versions {
-  [key: string]: number
-}
+type Integrations = Record<string, number>;
+type Addons = Record<string, number>;
+type Versions = Record<string, number>;
+export type AnalyticsData = Record<string, Analytics>;
 
 export interface Analytics {
-  installation_types: InstallationTypes
-  integrations: Integrations
-  addons: Addons
-  versions: Versions
-  avg_users: number
-  avg_automations: number
-  avg_integrations: number
-  avg_addons: number
-  avg_states: number
-  active_installations: number
+  active_installations: number;
+  addons: Addons;
+  avg_addons: number;
+  avg_automations: number;
+  avg_integrations: number;
+  avg_states: number;
+  avg_users: number;
+  installation_types: InstallationTypes;
+  integrations: Integrations;
+  versions: Versions;
 }
 
 export interface CurrentAnalytics extends Analytics {
-  last_updated?: number
-}
-
-export interface AnalyticsData {
-  [key: string]: Analytics
+  last_updated?: number;
 }

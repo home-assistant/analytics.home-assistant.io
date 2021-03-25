@@ -1,112 +1,113 @@
 // Scheduled taks handler to manage the KV store
 
-import { CurrentAnalytics } from '../../../site/src/type'
-import { SanitizedPayload } from '../data'
-import { average, formatDate } from '../utils'
+import { CurrentAnalytics } from "../../../site/src/type";
+import { SanitizedPayload } from "../data";
+import { average } from "../utils/average";
+import { formatDate } from "../utils/date";
 
 export async function handleSchedule(event: ScheduledEvent): Promise<void> {
-  const storedAnalytics = JSON.parse(await KV.get('core_analytics')) || {}
-  const storedData = await listStoredData()
-  console.log(JSON.stringify(storedData))
-  const currentDataset: CurrentAnalytics = generateCurrentDataset(storedData)
+  const storedAnalytics = JSON.parse(await KV.get("core_analytics")) || {};
+  const storedData = await listStoredData();
+  console.log(JSON.stringify(storedData));
+  const currentDataset: CurrentAnalytics = generateCurrentDataset(storedData);
 
-  const currentDate = formatDate(new Date())
+  const currentDate = formatDate(new Date());
   const currentDateObj = new Date(
     currentDate.year,
     currentDate.month,
-    currentDate.day,
-  )
-  const timestampString = String(currentDateObj.getTime())
-  storedAnalytics[timestampString] = currentDataset
+    currentDate.day
+  );
+  const timestampString = String(currentDateObj.getTime());
+  storedAnalytics[timestampString] = currentDataset;
 
-  await KV.put('core_analytics', JSON.stringify(storedAnalytics))
+  await KV.put("core_analytics", JSON.stringify(storedAnalytics));
 }
 
 async function listStoredData(): Promise<SanitizedPayload[]> {
-  const huuidList: string[] = []
-  const huuidData: SanitizedPayload[] = []
+  const huuidList: string[] = [];
+  const huuidData: SanitizedPayload[] = [];
 
-  let lastResponse
+  let lastResponse;
   while (lastResponse == undefined || !lastResponse.list_complete) {
     // @ts-expect-error - Wrong type on list function
     lastResponse = await KV.list({
-      prefix: lastResponse === undefined ? 'huuid' : null,
+      prefix: lastResponse === undefined ? "huuid" : null,
       cusor: lastResponse !== undefined ? lastResponse.cursor : null,
-    })
+    });
 
     for (const key of lastResponse.keys) {
-      huuidList.push(key.name)
+      huuidList.push(key.name);
     }
   }
 
   for (const huuid of huuidList) {
-    huuidData.push(JSON.parse(await KV.get(huuid)))
+    huuidData.push(JSON.parse(await KV.get(huuid)));
   }
 
-  return huuidData
+  return huuidData;
 }
 
 const generateCurrentDataset = (
-  huuidData: SanitizedPayload[],
+  huuidData: SanitizedPayload[]
 ): CurrentAnalytics => {
-  const last_updated = new Date().getTime()
-  const installation_types = { os: 0, container: 0, core: 0, supervised: 0 }
-  const integrations: Record<string, number> = {}
-  const addons: Record<string, number> = {}
-  const versions: Record<string, number> = {}
-  const count_addons: number[] = []
-  const count_automations: number[] = []
-  const count_integrations: number[] = []
-  const count_states: number[] = []
-  const count_users: number[] = []
+  const last_updated = new Date().getTime();
+  const installation_types = { os: 0, container: 0, core: 0, supervised: 0 };
+  const integrations: Record<string, number> = {};
+  const addons: Record<string, number> = {};
+  const versions: Record<string, number> = {};
+  const count_addons: number[] = [];
+  const count_automations: number[] = [];
+  const count_integrations: number[] = [];
+  const count_states: number[] = [];
+  const count_users: number[] = [];
 
   for (const huuid of huuidData) {
     if (!versions[huuid.version]) {
-      versions[huuid.version] = 1
+      versions[huuid.version] = 1;
     } else {
-      versions[huuid.version]++
+      versions[huuid.version]++;
     }
 
     if (huuid.addon_count) {
-      count_addons.push(huuid.addon_count)
+      count_addons.push(huuid.addon_count);
     }
     if (huuid.automation_count) {
-      count_automations.push(huuid.automation_count)
+      count_automations.push(huuid.automation_count);
     }
     if (huuid.integration_count) {
-      count_integrations.push(huuid.integration_count)
+      count_integrations.push(huuid.integration_count);
     }
     if (huuid.state_count) {
-      count_states.push(huuid.state_count)
+      count_states.push(huuid.state_count);
     }
     if (huuid.user_count) {
-      count_users.push(huuid.user_count)
+      count_users.push(huuid.user_count);
     }
 
     for (const integration of huuid.integrations || []) {
       if (!integrations[integration]) {
-        integrations[integration] = 1
+        integrations[integration] = 1;
       } else {
-        integrations[integration]++
+        integrations[integration]++;
       }
     }
 
     for (const addon of huuid.addons || []) {
       if (!addons[addon.slug]) {
-        addons[addon.slug] = 1
+        addons[addon.slug] = 1;
       } else {
-        addons[addon.slug]++
+        addons[addon.slug]++;
       }
     }
 
-    if (huuid.installation_type === 'Home Assistant OS') {
-      installation_types.os++
-    } else if (huuid.installation_type === 'Home Assistant Container') {
-      installation_types.container++
-    } else if (huuid.installation_type === 'Home Assistant Core') {
-      installation_types.core++
-    } else if (huuid.installation_type === 'Home Assistant Supervised') {
-      installation_types.supervised++
+    if (huuid.installation_type === "Home Assistant OS") {
+      installation_types.os++;
+    } else if (huuid.installation_type === "Home Assistant Container") {
+      installation_types.container++;
+    } else if (huuid.installation_type === "Home Assistant Core") {
+      installation_types.core++;
+    } else if (huuid.installation_type === "Home Assistant Supervised") {
+      installation_types.supervised++;
     }
   }
 
@@ -126,5 +127,5 @@ const generateCurrentDataset = (
     integrations,
     addons,
     versions,
-  }
-}
+  };
+};

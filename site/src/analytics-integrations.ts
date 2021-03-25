@@ -1,10 +1,10 @@
-import '@polymer/iron-icon/iron-icon.js'
-import '@polymer/iron-icons/iron-icons.js'
-import '@polymer/paper-dropdown-menu/paper-dropdown-menu'
-import '@polymer/paper-icon-button/paper-icon-button'
-import '@polymer/paper-item/paper-item'
-import '@polymer/paper-listbox/paper-listbox'
-import '@polymer/paper-tooltip/paper-tooltip'
+import "@polymer/iron-icon/iron-icon.js";
+import "@polymer/iron-icons/iron-icons.js";
+import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
+import "@polymer/paper-icon-button/paper-icon-button";
+import "@polymer/paper-item/paper-item";
+import "@polymer/paper-listbox/paper-listbox";
+import "@polymer/paper-tooltip/paper-tooltip";
 import {
   css,
   customElement,
@@ -12,52 +12,55 @@ import {
   internalProperty,
   LitElement,
   property,
-} from 'lit-element'
-import { AnalyticsData } from './type'
+  PropertyValues,
+} from "lit-element";
+import { AnalyticsData } from "./type";
 
-@customElement('analytics-integrations')
+@customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {
-  @property({ attribute: false }) public data?: AnalyticsData
+  @property({ attribute: false }) public data?: AnalyticsData;
 
   @internalProperty() private _integrations?: {
-    integration: string
-    installations: number
-  }[]
+    integration: string;
+    installations: number;
+  }[];
 
-  @internalProperty() private _currentTableSize = 10
-  @internalProperty() private _currentTablePage = 0
+  @internalProperty() private _currentTableSize = 10;
+  @internalProperty() private _currentTablePage = 0;
 
-  protected firstUpdated() {
-    const dataKeys = Object.keys(this.data!)
-    const lastEntry = this.data![dataKeys[dataKeys.length - 1]]
+  protected firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+
+    const dataKeys = Object.keys(this.data!);
+    const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
     this._integrations = Object.keys(lastEntry.integrations).map(
       (integration) => {
         return {
           integration,
           installations: lastEntry.integrations[integration],
-        }
-      },
-    )
+        };
+      }
+    );
   }
 
   render() {
     if (this._integrations === undefined) {
-      return html``
+      return html``;
     }
 
-    const tableStart = this._currentTablePage * this._currentTableSize
+    const tableStart = this._currentTablePage * this._currentTableSize;
     const tableEnd =
       tableStart + this._currentTableSize <= this._integrations.length
         ? tableStart + this._currentTableSize
-        : this._integrations.length
+        : this._integrations.length;
 
     const tableData = this._integrations
       .sort(
         (a, b) =>
           b.installations - a.installations ||
-          a.integration.localeCompare(b.integration),
+          a.integration.localeCompare(b.integration)
       )
-      .slice(tableStart, tableEnd)
+      .slice(tableStart, tableEnd);
 
     return html`
       <h3>Integration usage</h3>
@@ -72,9 +75,9 @@ export class AnalyticsIntegrations extends LitElement {
               <td class="integration">
                 <a
                   title="Documentation"
-                  href="https://home-assistant.io/integrations/${entry.integration}"
+                  href="https://www.home-assistant.io/integrations/${entry.integration}"
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noreferrer"
                 >
                   <img
                     src="https://brands.home-assistant.io/_/${entry.integration}/icon.png"
@@ -84,7 +87,7 @@ export class AnalyticsIntegrations extends LitElement {
               </td>
               <td>${entry.installations}</td>
             </tr>
-          `,
+          `
         )}
       </table>
       <div class="table-footer">
@@ -97,7 +100,7 @@ export class AnalyticsIntegrations extends LitElement {
             slot="dropdown-content"
           >
             ${[10, 25, 50, 100].map(
-              (size) => html` <paper-item .size=${size}>${size}</paper-item> `,
+              (size) => html` <paper-item .size=${size}>${size}</paper-item> `
             )}
           </paper-listbox>
         </paper-dropdown-menu>
@@ -125,20 +128,20 @@ export class AnalyticsIntegrations extends LitElement {
           Next page
         </paper-tooltip>
       </div>
-    `
+    `;
   }
 
   private _sizeChanged(ev: CustomEvent) {
-    this._currentTableSize = (ev.currentTarget as any).selected
-    this._currentTablePage = 0
+    this._currentTableSize = (ev.currentTarget as any).selected;
+    this._currentTablePage = 0;
   }
 
   private _nextPage() {
-    this._currentTablePage++
+    this._currentTablePage++;
   }
 
   private _prevPage() {
-    this._currentTablePage--
+    this._currentTablePage--;
   }
 
   static styles = css`
@@ -216,11 +219,11 @@ export class AnalyticsIntegrations extends LitElement {
         width: 80%;
       }
     }
-  `
+  `;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'analytics-integrations': AnalyticsIntegrations
+    "analytics-integrations": AnalyticsIntegrations;
   }
 }
