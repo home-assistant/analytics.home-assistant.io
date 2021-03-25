@@ -26,3 +26,5 @@ export interface Analytics {
 export interface CurrentAnalytics extends Analytics {
   last_updated?: number;
 }
+
+export const fetchData = () => fetch("https://analytics-api.home-assistant.io");

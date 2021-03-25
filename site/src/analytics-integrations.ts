@@ -14,7 +14,7 @@ import {
   property,
   PropertyValues,
 } from "lit-element";
-import { AnalyticsData } from "./type";
+import { AnalyticsData } from "./data";
 
 @customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {

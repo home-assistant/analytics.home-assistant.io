@@ -1,17 +1,17 @@
-import '@google-web-components/google-chart'
-import { css, customElement, html, LitElement, property } from 'lit-element'
-import { AnalyticsData } from './type'
+import "@google-web-components/google-chart";
+import { css, customElement, html, LitElement, property } from "lit-element";
+import { AnalyticsData } from "./data";
 
-const mql = matchMedia('(prefers-color-scheme: dark)')
-const mobile = matchMedia('(max-width: 600px)')
+const mql = matchMedia("(prefers-color-scheme: dark)");
+const mobile = matchMedia("(max-width: 600px)");
 
-@customElement('analytics-active-installations')
+@customElement("analytics-active-installations")
 export class AnalyticsActiveInstallations extends LitElement {
-  @property({ attribute: false }) public data?: AnalyticsData
+  @property({ attribute: false }) public data?: AnalyticsData;
 
   render() {
     if (this.data === undefined) {
-      return html``
+      return html``;
     }
 
     const rows = Object.keys(this.data).map((timestamp) => [
@@ -21,44 +21,44 @@ export class AnalyticsActiveInstallations extends LitElement {
       this.data![timestamp].installation_types.container,
       this.data![timestamp].installation_types.core,
       this.data![timestamp].installation_types.supervised,
-    ])
+    ]);
 
     return html`
       <google-chart
         type="line"
         .cols=${[
-          { label: 'Date', type: 'date' },
-          { label: 'Total', type: 'number' },
-          { label: 'Operating System', type: 'number' },
-          { label: 'Container', type: 'number' },
-          { label: 'Core', type: 'number' },
-          { label: 'Supervised', type: 'number' },
+          { label: "Date", type: "date" },
+          { label: "Total", type: "number" },
+          { label: "Operating System", type: "number" },
+          { label: "Container", type: "number" },
+          { label: "Core", type: "number" },
+          { label: "Supervised", type: "number" },
         ]}
         .options=${{
-          title: 'Active Home Assistant Installations',
-          chartArea: { width: '70%', height: '80%' },
-          backgroundColor: mql.matches ? '#111111' : '#fafafa',
+          title: "Active Home Assistant Installations",
+          chartArea: { width: "70%", height: "80%" },
+          backgroundColor: mql.matches ? "#111111" : "#fafafa",
           titleTextStyle: {
-            color: mql.matches ? '#e1e1e1' : '#212121',
+            color: mql.matches ? "#e1e1e1" : "#212121",
           },
           legend: {
-            position: mobile.matches ? 'top' : 'right',
-            alignment: 'start',
+            position: mobile.matches ? "top" : "right",
+            alignment: "start",
             textStyle: {
-              color: mql.matches ? '#e1e1e1' : '#212121',
+              color: mql.matches ? "#e1e1e1" : "#212121",
             },
           },
           hAxis: {
-            title: 'Date',
+            title: "Date",
           },
           vAxis: {
-            title: 'Active installations',
+            title: "Active installations",
           },
         }}
         .rows=${rows}
       >
       </google-chart>
-    `
+    `;
   }
 
   static styles = css`
@@ -72,11 +72,11 @@ export class AnalyticsActiveInstallations extends LitElement {
       height: 500px;
       width: 100%;
     }
-  `
+  `;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'analytics-active-installations': AnalyticsActiveInstallations
+    "analytics-active-installations": AnalyticsActiveInstallations;
   }
 }

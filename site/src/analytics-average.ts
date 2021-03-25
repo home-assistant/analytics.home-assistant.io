@@ -1,17 +1,17 @@
-import { css, customElement, html, LitElement, property } from 'lit-element'
-import { AnalyticsData } from './type'
+import { css, customElement, html, LitElement, property } from "lit-element";
+import { AnalyticsData } from "./data";
 
-@customElement('analytics-average')
+@customElement("analytics-average")
 export class AnalyticsAverage extends LitElement {
-  @property({ attribute: false }) public data?: AnalyticsData
+  @property({ attribute: false }) public data?: AnalyticsData;
 
   render() {
     if (this.data === undefined) {
-      return html``
+      return html``;
     }
 
-    const dataKeys = Object.keys(this.data)
-    const lastEntry = this.data[dataKeys[dataKeys.length - 1]]
+    const dataKeys = Object.keys(this.data);
+    const lastEntry = this.data[dataKeys[dataKeys.length - 1]];
 
     return html`<div class="grid">
       <div class="metric">
@@ -30,7 +30,7 @@ export class AnalyticsAverage extends LitElement {
         <span>Average users</span>
         <span>${Math.round(lastEntry.avg_users)}</span>
       </div>
-    </div>`
+    </div>`;
   }
 
   static styles = css`
@@ -69,11 +69,11 @@ export class AnalyticsAverage extends LitElement {
         margin: auto;
       }
     }
-  `
+  `;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'analytics-average': AnalyticsAverage
+    "analytics-average": AnalyticsAverage;
   }
 }

@@ -11,7 +11,7 @@ import "./analytics-active-installations";
 import "./analytics-average";
 import "./analytics-integrations";
 import "./analytics-versions";
-import { AnalyticsData } from "./type";
+import { AnalyticsData, fetchData } from "./data";
 
 @customElement("analytics-element")
 export class AnalyticsElement extends LitElement {
@@ -71,7 +71,7 @@ export class AnalyticsElement extends LitElement {
 
   async getData() {
     try {
-      const response = await fetch("https://analytics-api.home-assistant.io");
+      const response = await ((window as any).dataPromise || fetchData());
       if (response.ok) {
         this._data = await response.json();
       } else {
@@ -80,7 +80,6 @@ export class AnalyticsElement extends LitElement {
     } catch (_) {
       this._error = true;
     }
-    this._error = false;
   }
 
   static styles = css`
