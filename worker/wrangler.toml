@@ -6,7 +6,7 @@ zone_id = "0ba583492080d3db28c103574f1d19cf"
 route = "https://analytics-api.home-assistant.io/v1"
 
 kv_namespaces = [
-         { binding = "KV", id = "6adec5ed3e034b0b931964820c7cce38", preview_id = "6adec5ed3e034b0b931964820c7cce38"}
+         { binding = "KV", id = "6adec5ed3e034b0b931964820c7cce38"}
 ]
 
 [triggers]
