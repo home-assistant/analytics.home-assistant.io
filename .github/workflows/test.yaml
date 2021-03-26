@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  NODE_VERSION: '14.2.0'
+  NODE_VERSION: "14.2.0"
 
 jobs:
   worker:
@@ -33,4 +33,4 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Build
-        run: script/site_build
+        run: script/build

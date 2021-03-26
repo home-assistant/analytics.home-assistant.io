@@ -18,3 +18,8 @@ The source of the https://analytics.home-assistant.io website.
 The website is bundled with [Vite](https://vitejs.dev/) and served with [CloudFlare pages](https://pages.cloudflare.com/).
 
 The website source are located in the site directory.
+
+## Development
+
+To do local development of the website first clone the repository and open the devcontainer.
+Once the devcontainer has started run `script/develop` in the terminal, a preview of the site will open in your default browser.
