@@ -1,10 +1,8 @@
-import "@polymer/iron-icon/iron-icon.js";
-import "@polymer/iron-icons/iron-icons.js";
-import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
-import "@polymer/paper-icon-button/paper-icon-button";
-import "@polymer/paper-item/paper-item";
-import "@polymer/paper-listbox/paper-listbox";
-import "@polymer/paper-tooltip/paper-tooltip";
+import "@material/mwc-select";
+import "@material/mwc-icon-button";
+import "@material/mwc-list/mwc-list-item";
+
+import { mdiChevronLeft, mdiChevronRight } from "@mdi/js";
 import {
   css,
   customElement,
@@ -25,7 +23,7 @@ export class AnalyticsIntegrations extends LitElement {
     installations: number;
   }[];
 
-  @internalProperty() private _currentTableSize = 10;
+  @internalProperty() private _currentTableSize = 30;
   @internalProperty() private _currentTablePage = 0;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
@@ -62,6 +60,8 @@ export class AnalyticsIntegrations extends LitElement {
       )
       .slice(tableStart, tableEnd);
 
+    console.log(tableEnd);
+
     return html`
       <h3>Integration usage</h3>
       <table>
@@ -91,48 +91,41 @@ export class AnalyticsIntegrations extends LitElement {
         )}
       </table>
       <div class="table-footer">
-        <div>Lines per page</div>
-        <paper-dropdown-menu no-label-float vertical-align="bottom">
-          <paper-listbox
-            attr-for-selected="size"
-            @iron-select=${this._sizeChanged}
-            .selected=${this._currentTableSize}
-            slot="dropdown-content"
-          >
-            ${[10, 25, 50, 100].map(
-              (size) => html` <paper-item .size=${size}>${size}</paper-item> `
-            )}
-          </paper-listbox>
-        </paper-dropdown-menu>
-        <div class="status">
-          ${tableStart + 1}-${tableEnd} of ${this._integrations.length}
-        </div>
-        <paper-icon-button
-          id="previousPageBtn"
-          icon="chevron-left"
+        <mwc-select label="Lines per page" @selected=${this._sizeChanged}>
+          ${[30, 50, 100].map(
+            (size) =>
+              html`<mwc-list-item
+                .selected=${size === this._currentTableSize}
+                value=${size}
+              >
+                ${size}
+              </mwc-list-item> `
+          )}
+        </mwc-select>
+
+        <mwc-icon-button
           .disabled=${this._currentTablePage === 0}
-          @tap=${this._prevPage}
+          @click=${this._prevPage}
         >
-        </paper-icon-button>
-        <paper-tooltip for="previousPageBtn" position="top">
-          Previous page
-        </paper-tooltip>
-        <paper-icon-button
-          id="nextPageBtn"
-          icon="chevron-right"
+          <svg>
+            <path d=${mdiChevronLeft} />
+          </svg>
+        </mwc-icon-button>
+        <div>${tableStart + 1}-${tableEnd} of ${this._integrations.length}</div>
+        <mwc-icon-button
           .disabled=${tableData.length < this._currentTableSize}
-          @tap=${this._nextPage}
+          @click=${this._nextPage}
         >
-        </paper-icon-button>
-        <paper-tooltip for="nextPageBtn" position="top">
-          Next page
-        </paper-tooltip>
+          <svg>
+            <path d=${mdiChevronRight} />
+          </svg>
+        </mwc-icon-button>
       </div>
     `;
   }
 
   private _sizeChanged(ev: CustomEvent) {
-    this._currentTableSize = (ev.currentTarget as any).selected;
+    this._currentTableSize = Number((ev.currentTarget as any).value);
     this._currentTablePage = 0;
   }
 
@@ -179,9 +172,7 @@ export class AnalyticsIntegrations extends LitElement {
     .table-header {
       background-color: var(--primary-background-color);
     }
-    .status {
-      margin-right: 16px;
-    }
+
     .table-footer {
       border-top: 1px solid var(--divider-color);
       font-size: 12px;
@@ -194,17 +185,24 @@ export class AnalyticsIntegrations extends LitElement {
     .integration {
       width: 40%;
     }
-    paper-dropdown-menu {
-      width: 60px;
-      margin-right: 32px;
-      margin-left: 8px;
-      --paper-listbox-background-color: var(--primary-background-color);
-      --paper-listbox-color: var(--primary-text-color);
-      --paper-input-container-input-color: var(--primary-text-color);
-      --paper-input-container-underline_-_display: none;
-      --paper-input-container-shared-input-style_-_font-weight: 500;
-      --paper-input-container-shared-input-style_-_text-align: right;
-      --paper-input-container-shared-input-style_-_font-size: 12px;
+    mwc-icon-button {
+      --mdc-theme-text-disabled-on-light: var(--secondary-text-color);
+      --mdc-icon-size: 24px;
+    }
+
+    mwc-select {
+      --mdc-select-label-ink-color: rgba(0, 0, 0, 0.75);
+      --mdc-menu-item-height: 32px;
+      --mdc-select-fill-color: var(--secondary-background-color);
+      --mdc-select-ink-color: var(--primary-text-color);
+      --mdc-select-label-ink-color: var(--primary-text-color);
+      --mdc-select-dropdown-icon-color: var(--secondary-text-color);
+      --mdc-select-idle-line-color: var(--secondary-text-color);
+      --mdc-theme-surface: var(--secondary-background-color);
+
+      /* inherits the styles of mwc-list internally */
+      --mdc-list-vertical-padding: 0px;
+      --mdc-list-side-padding: 8px;
     }
     a {
       color: var(--primary-text-color);

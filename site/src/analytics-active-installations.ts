@@ -2,8 +2,8 @@ import "@google-web-components/google-chart";
 import { css, customElement, html, LitElement, property } from "lit-element";
 import { AnalyticsData } from "./data";
 
-const mql = matchMedia("(prefers-color-scheme: dark)");
-const mobile = matchMedia("(max-width: 600px)");
+const isDarkMode = matchMedia("(prefers-color-scheme: dark)").matches;
+const isMobile = matchMedia("(max-width: 600px)").matches;
 
 @customElement("analytics-active-installations")
 export class AnalyticsActiveInstallations extends LitElement {
@@ -37,15 +37,15 @@ export class AnalyticsActiveInstallations extends LitElement {
         .options=${{
           title: "Active Home Assistant Installations",
           chartArea: { width: "70%", height: "80%" },
-          backgroundColor: mql.matches ? "#111111" : "#fafafa",
+          backgroundColor: isDarkMode ? "#111111" : "#fafafa",
           titleTextStyle: {
-            color: mql.matches ? "#e1e1e1" : "#212121",
+            color: isDarkMode ? "#e1e1e1" : "#212121",
           },
           legend: {
-            position: mobile.matches ? "top" : "right",
+            position: isMobile ? "top" : "right",
             alignment: "start",
             textStyle: {
-              color: mql.matches ? "#e1e1e1" : "#212121",
+              color: isDarkMode ? "#e1e1e1" : "#212121",
             },
           },
           hAxis: {

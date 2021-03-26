@@ -13,7 +13,10 @@
     <meta property="og:site_name" content="Home Assistant Analytics" />
     <meta property="og:url" content="https://analytics.home-assistant.io/" />
     <meta property="og:type" content="website" />
-    <meta property="og:description" content="Home Assistant Analytics" />
+    <meta
+      property="og:description"
+      content="Summary of the collected Home Assistant usage statistics."
+    />
     <meta
       property="og:image"
       content="https://brands.home-assistant.io/analytics/icon.png"
@@ -21,7 +24,10 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@home_assistant" />
     <meta name="twitter:title" content="Home Assistant Analytics" />
-    <meta name="twitter:description" content="Home Assistant Analytics" />
+    <meta
+      name="twitter:description"
+      content="Summary of the collected Home Assistant usage statistics."
+    />
     <meta
       name="twitter:image"
       content="https://brands.home-assistant.io/analytics/icon.png"
@@ -35,6 +41,8 @@
         --secondary-background-color: #ffffff;
         --divider-color: rgba(0, 0, 0, 0.12);
         --primary-color: #03a9f4;
+        --mdc-theme-primary: var(--primary-color);
+        --mdc-theme-text-primary-on-background: var(--primary-text-color);
         font-family: var(--paper-font-body1_-_font-family);
         -webkit-font-smoothing: var(
           --paper-font-body1_-_-webkit-font-smoothing
@@ -65,7 +73,7 @@
   </head>
   <body>
     <script>
-      window.dataPromise = fetch("https://analytics-api.home-assistant.io");
+      window.dataPromise = fetch("https://analytics-api.home-assistant.io/v1");
     </script>
     <analytics-element></analytics-element>
   </body>

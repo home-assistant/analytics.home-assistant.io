@@ -30,7 +30,7 @@ export class AnalyticsElement extends LitElement {
     }
 
     if (this._data === undefined) {
-      return html``;
+      return html`Loading…`;
     }
 
     const lastUpdated = new Date(
@@ -54,14 +54,14 @@ export class AnalyticsElement extends LitElement {
           if you want to help with this data configure that integration in your
           installation
         </p>
-      </div>
+      </div><!--
       <div class="content">
         <analytics-active-installations .data=${this._data}>
         </analytics-active-installations>
         <div class="half">
           <analytics-versions .data=${this._data}></analytics-versions>
           <analytics-average .data=${this._data}></analytics-average>
-        </div>
+        </div>-->
 
         <analytics-integrations .data=${this._data}></analytics-integrations>
         <div>Last updated: ${lastUpdated.toDateString()}</div>
@@ -85,8 +85,9 @@ export class AnalyticsElement extends LitElement {
   static styles = css`
     :host {
       display: block;
-      height: calc(100vh - 32px);
-      width: calc(100% - 32px);
+      box-sizing: border-box;
+      height: 100vh;
+      width: 100%;
     }
     .intro {
       padding: 16px 32px;
