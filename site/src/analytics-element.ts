@@ -54,14 +54,14 @@ export class AnalyticsElement extends LitElement {
           if you want to help with this data configure that integration in your
           installation
         </p>
-      </div><!--
+      </div>
       <div class="content">
         <analytics-active-installations .data=${this._data}>
         </analytics-active-installations>
         <div class="half">
           <analytics-versions .data=${this._data}></analytics-versions>
           <analytics-average .data=${this._data}></analytics-average>
-        </div>-->
+        </div>
 
         <analytics-integrations .data=${this._data}></analytics-integrations>
         <div>Last updated: ${lastUpdated.toDateString()}</div>
