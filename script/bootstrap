@@ -1,0 +1,9 @@
+#! /bin/sh
+# Resolve all dependencies that the application requires to develop.
+
+# Stop on errors
+set -e
+
+cd "$(dirname "$0")/.."
+
+npm install

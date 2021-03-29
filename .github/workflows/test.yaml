@@ -1,0 +1,36 @@
+name: Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  NODE_VERSION: "14.2.0"
+
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+    name: Build worker
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Build
+        run: script/worker_build
+
+  site:
+    runs-on: ubuntu-latest
+    name: Build site
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Build
+        run: script/build

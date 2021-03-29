@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://brands.home-assistant.io/analytics/icon.png"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home Assistant Analytics</title>
+    <meta property="og:title" content="Home Assistant Analytics" />
+    <meta property="og:site_name" content="Home Assistant Analytics" />
+    <meta property="og:url" content="https://analytics.home-assistant.io/" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:description"
+      content="Summary of the collected Home Assistant usage statistics."
+    />
+    <meta
+      property="og:image"
+      content="https://brands.home-assistant.io/analytics/icon.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@home_assistant" />
+    <meta name="twitter:title" content="Home Assistant Analytics" />
+    <meta
+      name="twitter:description"
+      content="Summary of the collected Home Assistant usage statistics."
+    />
+    <meta
+      name="twitter:image"
+      content="https://brands.home-assistant.io/analytics/icon.png"
+    />
+    <script type="module" src="/src/analytics-element.ts"></script>
+    <style>
+      :root {
+        --primary-text-color: #212121;
+        --secondary-text-color: #727272;
+        --primary-background-color: #fafafa;
+        --secondary-background-color: #ffffff;
+        --divider-color: rgba(0, 0, 0, 0.12);
+        --primary-color: #03a9f4;
+        --mdc-theme-primary: var(--primary-color);
+        --mdc-theme-text-primary-on-background: var(--primary-text-color);
+        font-family: var(--paper-font-body1_-_font-family);
+        -webkit-font-smoothing: var(
+          --paper-font-body1_-_-webkit-font-smoothing
+        );
+        font-size: var(--paper-font-body1_-_font-size);
+        font-weight: var(--paper-font-body1_-_font-weight);
+      }
+
+      body {
+        margin: auto;
+        background-color: var(--primary-background-color);
+        color: var(--primary-text-color);
+        width: 100%;
+        max-width: 1440px;
+        height: 100vh;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --primary-text-color: #e1e1e1;
+          --secondary-text-color: #9b9b9b;
+          --primary-background-color: #111111;
+          --secondary-background-color: #202020;
+          --divider-color: rgba(225, 225, 225, 0.12);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      window.dataPromise = fetch("https://analytics-api.home-assistant.io/v1");
+    </script>
+    <analytics-element></analytics-element>
+  </body>
+</html>

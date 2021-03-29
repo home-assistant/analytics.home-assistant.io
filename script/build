@@ -1,0 +1,14 @@
+#! /bin/sh
+# Build the site
+
+# Stop on errors
+set -e
+
+cd "$(dirname "$0")/.."
+
+if [ ! -d node_modules ]; then
+  script/bootstrap
+fi
+
+cd ./site
+../node_modules/.bin/vite build

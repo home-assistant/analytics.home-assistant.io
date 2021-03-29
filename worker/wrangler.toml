@@ -1,0 +1,13 @@
+name = "analytics-v1"
+type = "webpack"
+webpack_config = "webpack.config.js"
+account_id = "dc9f963dfa4a630ca83eda7ccd8f363d"
+zone_id = "0ba583492080d3db28c103574f1d19cf"
+route = "https://analytics-api.home-assistant.io/v1"
+
+kv_namespaces = [
+         { binding = "KV", id = "6adec5ed3e034b0b931964820c7cce38"}
+]
+
+[triggers]
+crons = ["00 05 * * *"]
