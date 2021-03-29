@@ -1,6 +1,5 @@
 // Scheduled taks handler to manage the KV store
-
-import { CurrentAnalytics } from "../../../site/src/type";
+import { CurrentAnalytics } from "../../../site/src/data";
 import { SanitizedPayload } from "../data";
 import { average } from "../utils/average";
 import { formatDate } from "../utils/date";
@@ -15,7 +14,8 @@ export async function handleSchedule(event: ScheduledEvent): Promise<void> {
   const currentDateObj = new Date(
     currentDate.year,
     currentDate.month,
-    currentDate.day
+    currentDate.day,
+    currentDate.hour
   );
   const timestampString = String(currentDateObj.getTime());
   storedAnalytics[timestampString] = currentDataset;
