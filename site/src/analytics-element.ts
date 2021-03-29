@@ -38,9 +38,7 @@ export class AnalyticsElement extends LitElement {
     );
 
     return html`
-      <div class="intro">
-        <h1>Home Assistant Analytics</h1>
-      </div>
+      <h1>Home Assistant Analytics</h1>
       <div class="content">
         <analytics-active-installations .data=${this._data}>
         </analytics-active-installations>
@@ -83,9 +81,6 @@ export class AnalyticsElement extends LitElement {
       box-sizing: border-box;
       height: 100vh;
       width: 100%;
-    }
-    .intro {
-      padding: 16px 32px;
     }
     a {
       color: var(--primary-color);
