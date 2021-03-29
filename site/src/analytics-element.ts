@@ -48,16 +48,16 @@ export class AnalyticsElement extends LitElement {
         </div>
 
         <analytics-integrations .data=${this._data}></analytics-integrations>
-        <div class="footer">
-          <a
-            title="Documentation"
-            href="https://next.home-assistant.io/integrations/analytics"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Learn more about how this data is gathered</a
-          >Last updated: ${lastUpdated.toDateString()}
-        </div>
+      </div>
+      <div class="footer">
+        <a
+          title="Documentation"
+          href="https://next.home-assistant.io/integrations/analytics"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Learn more about how this data is gathered</a
+        >Last updated: ${lastUpdated.toDateString()}
       </div>
     `;
   }
@@ -85,9 +85,9 @@ export class AnalyticsElement extends LitElement {
     a {
       color: var(--primary-color);
     }
-    .content {
+    .content,
+    .footer {
       width: 100%;
-      padding-bottom: 64px;
     }
     .half {
       display: flex;
@@ -96,6 +96,9 @@ export class AnalyticsElement extends LitElement {
     .footer {
       display: flex;
       justify-content: space-between;
+      width: calc(100% - 32px);
+      margin: 16px;
+      padding: 16px;
     }
 
     analytics-versions,
