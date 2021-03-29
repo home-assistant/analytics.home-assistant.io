@@ -29,3 +29,27 @@ export interface CurrentAnalytics extends Analytics {
 
 export const fetchData = () =>
   fetch("https://analytics-api.home-assistant.io/v1");
+
+export const relativeTime = (targetTimestamp: number): string => {
+  const now = new Date();
+  let count = 0;
+  let postfix;
+  const secondsPast = (now.getTime() - targetTimestamp) / 1000;
+  if (secondsPast < 60) {
+    postfix = secondsPast === 1 ? "second" : "seconds";
+  }
+  if (secondsPast < 3600) {
+    count = Math.round(secondsPast / 60);
+    postfix = count === 1 ? "minute" : "minutes";
+  }
+  if (secondsPast < 86400) {
+    count = Math.round(secondsPast / 3600);
+    postfix = count === 1 ? "hour" : "hours";
+  }
+  if (secondsPast > 86400) {
+    count = Math.round(secondsPast / 86400);
+    postfix = count === 1 ? "day" : "days";
+  }
+
+  return `${count} ${postfix} ago`;
+};

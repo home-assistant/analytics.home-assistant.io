@@ -11,7 +11,7 @@ import "./analytics-active-installations";
 import "./analytics-average";
 import "./analytics-integrations";
 import "./analytics-versions";
-import { AnalyticsData, fetchData } from "./data";
+import { AnalyticsData, fetchData, relativeTime } from "./data";
 
 @customElement("analytics-element")
 export class AnalyticsElement extends LitElement {
@@ -57,7 +57,7 @@ export class AnalyticsElement extends LitElement {
           rel="noreferrer"
         >
           Learn more about how this data is gathered</a
-        >Last updated: ${lastUpdated.toDateString()}
+        >Last updated: ${relativeTime(lastUpdated.getTime())}
       </div>
     `;
   }
