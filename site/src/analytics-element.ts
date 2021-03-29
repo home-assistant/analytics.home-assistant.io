@@ -40,17 +40,6 @@ export class AnalyticsElement extends LitElement {
     return html`
       <div class="intro">
         <h1>Home Assistant Analytics</h1>
-        <p>
-          Data gathered by the
-          <a
-            title="Documentation"
-            href="https://next.home-assistant.io/integrations/analytics"
-            target="_blank"
-            rel="noreferrer"
-          >
-            analytics integration</a
-          >.
-        </p>
       </div>
       <div class="content">
         <analytics-active-installations .data=${this._data}>
@@ -61,7 +50,16 @@ export class AnalyticsElement extends LitElement {
         </div>
 
         <analytics-integrations .data=${this._data}></analytics-integrations>
-        <div>Last updated: ${lastUpdated.toDateString()}</div>
+        <div class="footer">
+          <a
+            title="Documentation"
+            href="https://next.home-assistant.io/integrations/analytics"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Learn more about how this data is gathered</a
+          >Last updated: ${lastUpdated.toDateString()}
+        </div>
       </div>
     `;
   }
@@ -98,6 +96,11 @@ export class AnalyticsElement extends LitElement {
     }
     .half {
       display: flex;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
     }
 
     analytics-versions,
