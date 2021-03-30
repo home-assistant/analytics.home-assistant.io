@@ -140,8 +140,8 @@ export class AnalyticsIntegrations extends LitElement {
   static styles = css`
     :host {
       display: block;
-      width: calc(100% - 32px);
-      margin: 16px;
+      width: 100%;
+      box-sizing: border-box;
       background-color: var(--secondary-background-color);
       padding: 16px;
       border-radius: 6px;
