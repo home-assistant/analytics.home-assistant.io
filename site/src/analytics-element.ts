@@ -98,7 +98,9 @@ export class AnalyticsElement extends LitElement {
     .half {
       display: flex;
     }
-
+    .content > * {
+      margin-bottom: 16px;
+    }
     .footer {
       display: flex;
       justify-content: space-between;
