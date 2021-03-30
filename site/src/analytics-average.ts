@@ -41,7 +41,8 @@ export class AnalyticsAverage extends LitElement {
       grid-gap: 32px;
       height: 100%;
       width: 100%;
-      margin: 16px;
+      padding: 16px;
+      box-sizing: border-box;
     }
     .metric {
       border-radius: 6px;
