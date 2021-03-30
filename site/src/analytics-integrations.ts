@@ -12,11 +12,20 @@ import {
   property,
   PropertyValues,
 } from "lit-element";
-import { AnalyticsData } from "./data";
+import {
+  AnalyticsData,
+  fetchIntegrationDetails,
+  IntegrationDetails,
+} from "./data";
 
 @customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {
   @property({ attribute: false }) public data?: AnalyticsData;
+
+  @internalProperty() private _integrationDetails: Record<
+    string,
+    IntegrationDetails
+  > = {};
 
   @internalProperty() private _integrations?: {
     integration: string;
@@ -28,6 +37,8 @@ export class AnalyticsIntegrations extends LitElement {
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
+
+    this.getData();
 
     const dataKeys = Object.keys(this.data!);
     const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
@@ -82,7 +93,10 @@ export class AnalyticsIntegrations extends LitElement {
                   <img
                     src="https://brands.home-assistant.io/_/${entry.integration}/icon.png"
                   />
-                  <span>${entry.integration}</span>
+                  <span
+                    >${this._integrationDetails[entry.integration]?.title ||
+                    entry.integration}</span
+                  >
                 </a>
               </td>
               <td>${entry.installations}</td>
@@ -122,6 +136,18 @@ export class AnalyticsIntegrations extends LitElement {
         </mwc-icon-button>
       </div>
     `;
+  }
+
+  async getData() {
+    try {
+      const response = await ((window as any).integrationsPromise ||
+        fetchIntegrationDetails());
+      if (response.ok) {
+        this._integrationDetails = await response.json();
+      }
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   private _sizeChanged(ev: CustomEvent) {

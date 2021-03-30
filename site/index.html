@@ -73,6 +73,9 @@
   <body>
     <script>
       window.dataPromise = fetch("https://analytics-api.home-assistant.io/v1");
+      window.integrationsPromise = fetch(
+        "https://www.home-assistant.io/integrations.json"
+      );
     </script>
     <analytics-element></analytics-element>
   </body>
