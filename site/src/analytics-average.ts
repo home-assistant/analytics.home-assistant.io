@@ -38,11 +38,9 @@ export class AnalyticsAverage extends LitElement {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(2, 1fr);
-      grid-gap: 32px;
+      grid-gap: 16px;
       height: 100%;
       width: 100%;
-      padding: 16px;
-      box-sizing: border-box;
     }
     .metric {
       border-radius: 6px;
