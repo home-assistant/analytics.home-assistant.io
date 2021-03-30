@@ -92,6 +92,8 @@ export class AnalyticsElement extends LitElement {
     .content,
     .footer {
       width: 100%;
+      padding: 16px;
+      box-sizing: border-box;
     }
     .half {
       display: flex;
