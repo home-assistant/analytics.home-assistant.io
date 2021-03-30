@@ -71,8 +71,6 @@ export class AnalyticsIntegrations extends LitElement {
       )
       .slice(tableStart, tableEnd);
 
-    console.log(tableEnd);
-
     return html`
       <h3>Integration usage</h3>
       <table>
@@ -144,6 +142,22 @@ export class AnalyticsIntegrations extends LitElement {
         fetchIntegrationDetails());
       if (response.ok) {
         this._integrationDetails = await response.json();
+
+        this._integrations = this._integrations!.concat(
+          Object.keys(this._integrationDetails)
+            .filter(
+              (doc_integration) =>
+                !this._integrations?.some(
+                  (integration) => integration.integration === doc_integration
+                )
+            )
+            .map((doc_integration) => {
+              return {
+                integration: doc_integration,
+                installations: 0,
+              };
+            })
+        );
       }
     } catch (err) {
       console.log(err);
