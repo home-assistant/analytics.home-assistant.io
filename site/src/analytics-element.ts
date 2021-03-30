@@ -108,17 +108,12 @@ export class AnalyticsElement extends LitElement {
 
     analytics-versions,
     analytics-average {
-      width: 50%;
-      margin: auto;
+      flex: 1;
     }
 
     @media only screen and (max-width: 600px) {
       .half {
-        display: block;
-      }
-      analytics-versions,
-      analytics-average {
-        width: 100%;
+        flex-direction: column;
       }
     }
   `;
