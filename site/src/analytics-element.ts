@@ -78,9 +78,13 @@ export class AnalyticsElement extends LitElement {
   static styles = css`
     :host {
       display: block;
-      box-sizing: border-box;
       height: 100vh;
       width: 100%;
+      margin: auto;
+      max-width: 1440px;
+    }
+    h1 {
+      padding: 0 16px;
     }
     a {
       color: var(--primary-color);
@@ -96,9 +100,8 @@ export class AnalyticsElement extends LitElement {
     .footer {
       display: flex;
       justify-content: space-between;
-      width: calc(100% - 32px);
-      margin: 16px;
       padding: 16px;
+      box-sizing: border-box;
     }
 
     analytics-versions,
@@ -113,7 +116,7 @@ export class AnalyticsElement extends LitElement {
       }
       analytics-versions,
       analytics-average {
-        width: calc(100vw - 64px);
+        width: 100%;
       }
     }
   `;
