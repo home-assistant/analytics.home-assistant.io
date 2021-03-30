@@ -11,7 +11,7 @@ import "./analytics-active-installations";
 import "./analytics-average";
 import "./analytics-integrations";
 import "./analytics-versions";
-import { AnalyticsData, fetchData } from "./data";
+import { AnalyticsData, fetchData, relativeTime } from "./data";
 
 @customElement("analytics-element")
 export class AnalyticsElement extends LitElement {
@@ -38,23 +38,7 @@ export class AnalyticsElement extends LitElement {
     );
 
     return html`
-      <div class="intro">
-        <h1>Home Assistant Analytics</h1>
-        <p>
-          Every piece of information on this page comes from real instances that
-          have enabled and configured the
-          <a
-            title="Documentation"
-            href="https://next.home-assistant.io/integrations/analytics"
-            target="_blank"
-            rel="noreferrer"
-          >
-            analytics integration
-          </a>
-          if you want to help with this data configure that integration in your
-          installation
-        </p>
-      </div>
+      <h1>Home Assistant Analytics</h1>
       <div class="content">
         <analytics-active-installations .data=${this._data}>
         </analytics-active-installations>
@@ -64,7 +48,16 @@ export class AnalyticsElement extends LitElement {
         </div>
 
         <analytics-integrations .data=${this._data}></analytics-integrations>
-        <div>Last updated: ${lastUpdated.toDateString()}</div>
+      </div>
+      <div class="footer">
+        <a
+          title="Documentation"
+          href="https://next.home-assistant.io/integrations/analytics"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Learn more about how this data is gathered</a
+        >Last updated: ${relativeTime(lastUpdated.getTime())}
       </div>
     `;
   }
@@ -89,18 +82,23 @@ export class AnalyticsElement extends LitElement {
       height: 100vh;
       width: 100%;
     }
-    .intro {
-      padding: 16px 32px;
-    }
     a {
       color: var(--primary-color);
     }
-    .content {
+    .content,
+    .footer {
       width: 100%;
-      padding-bottom: 64px;
     }
     .half {
       display: flex;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      width: calc(100% - 32px);
+      margin: 16px;
+      padding: 16px;
     }
 
     analytics-versions,
