@@ -62,12 +62,6 @@ export class AnalyticsActiveInstallations extends LitElement {
   }
 
   static styles = css`
-    :host {
-      display: block;
-      width: calc(100% - 64px);
-      margin: 16px;
-    }
-
     google-chart {
       height: 500px;
       width: 100%;

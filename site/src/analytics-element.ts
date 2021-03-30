@@ -78,9 +78,13 @@ export class AnalyticsElement extends LitElement {
   static styles = css`
     :host {
       display: block;
-      box-sizing: border-box;
       height: 100vh;
       width: 100%;
+      margin: auto;
+      max-width: 1440px;
+    }
+    h1 {
+      padding: 0 16px;
     }
     a {
       color: var(--primary-color);
@@ -88,32 +92,30 @@ export class AnalyticsElement extends LitElement {
     .content,
     .footer {
       width: 100%;
+      padding: 16px;
+      box-sizing: border-box;
     }
     .half {
       display: flex;
     }
-
+    .content > * {
+      margin-bottom: 16px;
+    }
     .footer {
       display: flex;
       justify-content: space-between;
-      width: calc(100% - 32px);
-      margin: 16px;
       padding: 16px;
+      box-sizing: border-box;
     }
 
     analytics-versions,
     analytics-average {
-      width: 50%;
-      margin: auto;
+      flex: 1;
     }
 
     @media only screen and (max-width: 600px) {
       .half {
-        display: block;
-      }
-      analytics-versions,
-      analytics-average {
-        width: calc(100vw - 64px);
+        flex-direction: column;
       }
     }
   `;
