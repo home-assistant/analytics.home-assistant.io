@@ -35,7 +35,7 @@ export const fetchData = () =>
   fetch("https://analytics-api.home-assistant.io/v1");
 
 export const fetchIntegrationDetails = () =>
-  fetch("https://www.home-assistant.io/integrations.json");
+  fetch("https://www.home-assistant.io/integrations.json", { mode: "no-cors" });
 
 export const relativeTime = (targetTimestamp: number): string => {
   const now = new Date();
