@@ -52,7 +52,7 @@ export class AnalyticsElement extends LitElement {
       <div class="footer">
         <a
           title="Documentation"
-          href="https://rc.home-assistant.io/integrations/analytics"
+          href="https://www.home-assistant.io/integrations/analytics"
           target="_blank"
           rel="noreferrer"
         >
