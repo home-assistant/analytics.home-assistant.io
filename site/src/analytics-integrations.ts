@@ -47,15 +47,12 @@ export class AnalyticsIntegrations extends LitElement {
       return html``;
     }
 
-    let idx = 0;
-
     const sortedTableData = this._integrations
       .sort(
         (a, b) =>
           b.installations - a.installations || a.title.localeCompare(b.title)
       )
-      .map((entry) => {
-        idx++;
+      .map((entry, idx) => {
         return { ...entry, idx };
       })
       .filter((entry) =>
@@ -107,7 +104,7 @@ export class AnalyticsIntegrations extends LitElement {
         ${tableData.map(
           (entry) => html`
             <tr>
-              ${!isMobile ? html`<td class="idx">${entry.idx}</td>` : ""}
+              ${!isMobile ? html`<td class="idx">${entry.idx + 1}</td>` : ""}
               <td class="integration">
                 <a
                   title="Documentation"
@@ -171,41 +168,30 @@ export class AnalyticsIntegrations extends LitElement {
   }
 
   async getData() {
+    const domains: Set<string> = new Set();
     const dataKeys = Object.keys(this.data!);
     const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
     try {
       const response = await ((window as any).integrationsPromise ||
         fetchIntegrationDetails());
-      if (response.ok) {
-        this._integrationDetails = await response.json();
-
-        this._integrations = Object.keys(lastEntry.integrations)
-          .map((domain) => {
-            return {
-              domain,
-              title: this._integrationDetails[domain]?.title || domain,
-              installations: lastEntry.integrations[domain] || 0,
-            };
-          })
-          .concat(
-            Object.keys(this._integrationDetails)
-              .filter(
-                (doc_integration) =>
-                  !this._integrations?.some(
-                    (integration) => integration.domain === doc_integration
-                  )
-              )
-              .map((doc_integration) => {
-                return {
-                  domain: doc_integration,
-                  title:
-                    this._integrationDetails[doc_integration]?.title ||
-                    doc_integration,
-                  installations: 0,
-                };
-              })
-          );
+      if (!response.ok) {
+        return;
       }
+
+      this._integrationDetails = await response.json();
+
+      Object.keys(lastEntry.integrations)
+        .concat(Object.keys(this._integrationDetails))
+        .forEach((entry) => domains.add(entry));
+      console.log(domains);
+
+      this._integrations = Array.from(domains).map((domain) => {
+        return {
+          domain,
+          title: this._integrationDetails[domain]?.title || domain,
+          installations: lastEntry.integrations[domain] || 0,
+        };
+      });
     } catch (err) {
       console.log(err);
     }
