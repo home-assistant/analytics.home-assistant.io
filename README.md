@@ -1,6 +1,6 @@
 # analytics.home-assistant.io
 
-This repository contains the source of the https://analytics.home-assistant.io website and the [CloudFlare worker](https://workers.cloudflare.com/) that recieves the payload from the [`analytics` integration](https://www.home-assistant.io/integrations/analytics/)
+This repository contains the source of the https://analytics.home-assistant.io website and the [CloudFlare worker](https://workers.cloudflare.com/) that recieves the payload from the [`analytics` integration](https://rc.home-assistant.io/integrations/analytics/)
 
 ## Worker
 
