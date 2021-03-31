@@ -53,6 +53,7 @@ export class AnalyticsActiveInstallations extends LitElement {
           },
           vAxis: {
             title: "Active installations",
+            logScale: true,
           },
         }}
         .rows=${rows}
