@@ -31,10 +31,7 @@ export class AnalyticsIntegrations extends LitElement {
     IntegrationDetails
   > = {};
 
-  @internalProperty() private _integrations?: {
-    integration: string;
-    installations: number;
-  }[];
+  @internalProperty() private _integrations?: IntegrationData[];
 
   @internalProperty() private _currentTableSize = 30;
   @internalProperty() private _currentTablePage = 0;
@@ -43,17 +40,6 @@ export class AnalyticsIntegrations extends LitElement {
     super.firstUpdated(_changedProperties);
 
     this.getData();
-
-    const dataKeys = Object.keys(this.data!);
-    const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
-    this._integrations = Object.keys(lastEntry.integrations).map(
-      (integration) => {
-        return {
-          integration,
-          installations: lastEntry.integrations[integration],
-        };
-      }
-    );
   }
 
   render() {
@@ -66,8 +52,7 @@ export class AnalyticsIntegrations extends LitElement {
     const sortedTableData = this._integrations
       .sort(
         (a, b) =>
-          b.installations - a.installations ||
-          this._computeName(a).localeCompare(this._computeName(b))
+          b.installations - a.installations || a.title.localeCompare(b.title)
       )
       .map((entry) => {
         idx++;
@@ -75,10 +60,8 @@ export class AnalyticsIntegrations extends LitElement {
       })
       .filter((entry) =>
         this._filter
-          ? this._computeName(entry)
-              .toLowerCase()
-              .includes(this._filter.toLowerCase()) ||
-            entry.integration.includes(this._filter.toLowerCase())
+          ? entry.title.toLowerCase().includes(this._filter.toLowerCase()) ||
+            entry.domain.includes(this._filter.toLowerCase())
           : true
       );
 
@@ -128,14 +111,14 @@ export class AnalyticsIntegrations extends LitElement {
               <td class="integration">
                 <a
                   title="Documentation"
-                  href="https://www.home-assistant.io/integrations/${entry.integration}"
+                  href="https://www.home-assistant.io/integrations/${entry.domain}"
                   target="_blank"
                   rel="noreferrer"
                 >
                   <img
-                    src="https://brands.home-assistant.io/_/${entry.integration}/icon.png"
+                    src="https://brands.home-assistant.io/_/${entry.domain}/icon.png"
                   />
-                  <span>${this._computeName(entry)}</span>
+                  <span>${entry.title}</span>
                 </a>
               </td>
               <td>${entry.installations}</td>
@@ -177,12 +160,6 @@ export class AnalyticsIntegrations extends LitElement {
     `;
   }
 
-  private _computeName(entry: IntegrationData): string {
-    return (
-      this._integrationDetails[entry.integration]?.title || entry.integration
-    );
-  }
-
   private _filterChange(ev: any) {
     this._currentTablePage = 0;
     this._filter = ev.currentTarget?.value || "";
@@ -194,27 +171,40 @@ export class AnalyticsIntegrations extends LitElement {
   }
 
   async getData() {
+    const dataKeys = Object.keys(this.data!);
+    const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
     try {
       const response = await ((window as any).integrationsPromise ||
         fetchIntegrationDetails());
       if (response.ok) {
         this._integrationDetails = await response.json();
 
-        this._integrations = this._integrations!.concat(
-          Object.keys(this._integrationDetails)
-            .filter(
-              (doc_integration) =>
-                !this._integrations?.some(
-                  (integration) => integration.integration === doc_integration
-                )
-            )
-            .map((doc_integration) => {
-              return {
-                integration: doc_integration,
-                installations: 0,
-              };
-            })
-        );
+        this._integrations = Object.keys(lastEntry.integrations)
+          .map((domain) => {
+            return {
+              domain,
+              title: this._integrationDetails[domain]?.title || domain,
+              installations: lastEntry.integrations[domain] || 0,
+            };
+          })
+          .concat(
+            Object.keys(this._integrationDetails)
+              .filter(
+                (doc_integration) =>
+                  !this._integrations?.some(
+                    (integration) => integration.domain === doc_integration
+                  )
+              )
+              .map((doc_integration) => {
+                return {
+                  domain: doc_integration,
+                  title:
+                    this._integrationDetails[doc_integration]?.title ||
+                    doc_integration,
+                  installations: 0,
+                };
+              })
+          );
       }
     } catch (err) {
       console.log(err);

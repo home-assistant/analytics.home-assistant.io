@@ -32,7 +32,8 @@ export interface IntegrationDetails {
 }
 
 export interface IntegrationData {
-  integration: string;
+  domain: string;
+  title: string;
   installations: number;
 }
 
