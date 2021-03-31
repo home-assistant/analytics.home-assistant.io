@@ -20,6 +20,23 @@ import {
 
 const isMobile = matchMedia("(max-width: 600px)").matches;
 
+const IGNORED_DOMAINS = [
+  "api",
+  "auth",
+  "analytics",
+  "config",
+  "device_automation",
+  "frontend",
+  "image",
+  "http",
+  "lovelace",
+  "onboarding",
+  "person",
+  "search",
+  "system_log",
+  "websocket_api",
+];
+
 @customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {
   @property({ attribute: false }) public data?: AnalyticsData;
@@ -185,13 +202,15 @@ export class AnalyticsIntegrations extends LitElement {
         )
       );
 
-      this._integrations = Array.from(domains).map((domain) => {
-        return {
-          domain,
-          title: this._integrationDetails[domain]?.title || domain,
-          installations: lastEntry.integrations[domain] || 0,
-        };
-      });
+      this._integrations = Array.from(domains)
+        .filter((domain) => !IGNORED_DOMAINS.includes(domain))
+        .map((domain) => {
+          return {
+            domain,
+            title: this._integrationDetails[domain]?.title || domain,
+            installations: lastEntry.integrations[domain] || 0,
+          };
+        });
     } catch (err) {
       console.log(err);
     }
