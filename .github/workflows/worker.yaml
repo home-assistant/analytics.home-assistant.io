@@ -21,7 +21,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Publish worker
-        uses: cloudflare/wrangler-action@1.2.0
+        uses: cloudflare/wrangler-action@1.3.0
         with:
           apiToken: ${{ secrets.CF_WORKER_API_TOKEN }}
           workingDirectory: 'worker'
