@@ -31,6 +31,11 @@ export interface IntegrationDetails {
   title: string;
 }
 
+export interface IntegrationData {
+  integration: string;
+  installations: number;
+}
+
 export const fetchData = () =>
   fetch("https://analytics-api.home-assistant.io/v1");
 

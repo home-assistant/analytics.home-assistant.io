@@ -1,8 +1,8 @@
-import "@material/mwc-select";
 import "@material/mwc-icon-button";
 import "@material/mwc-list/mwc-list-item";
-
-import { mdiChevronLeft, mdiChevronRight } from "@mdi/js";
+import "@material/mwc-select";
+import "@material/mwc-textfield";
+import { mdiChevronLeft, mdiChevronRight, mdiClose } from "@mdi/js";
 import {
   css,
   customElement,
@@ -15,12 +15,17 @@ import {
 import {
   AnalyticsData,
   fetchIntegrationDetails,
+  IntegrationData,
   IntegrationDetails,
 } from "./data";
+
+const isMobile = matchMedia("(max-width: 600px)").matches;
 
 @customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {
   @property({ attribute: false }) public data?: AnalyticsData;
+
+  @internalProperty() private _filter: string = "";
 
   @internalProperty() private _integrationDetails: Record<
     string,
@@ -57,30 +62,69 @@ export class AnalyticsIntegrations extends LitElement {
       return html``;
     }
 
-    const tableStart = this._currentTablePage * this._currentTableSize;
-    const tableEnd =
-      tableStart + this._currentTableSize <= this._integrations.length
-        ? tableStart + this._currentTableSize
-        : this._integrations.length;
+    let idx = 0;
 
-    const tableData = this._integrations
+    const sortedTableData = this._integrations
       .sort(
         (a, b) =>
           b.installations - a.installations ||
-          a.integration.localeCompare(b.integration)
+          this._computeName(a).localeCompare(this._computeName(b))
       )
-      .slice(tableStart, tableEnd);
+      .map((entry) => {
+        idx++;
+        return { ...entry, idx };
+      })
+      .filter((entry) =>
+        this._filter
+          ? this._computeName(entry)
+              .toLowerCase()
+              .includes(this._filter.toLowerCase())
+          : true
+      );
+
+    const tableStart = this._currentTablePage * this._currentTableSize;
+    const tableEnd =
+      tableStart + this._currentTableSize <= sortedTableData.length
+        ? tableStart + this._currentTableSize
+        : sortedTableData.length;
+
+    const tableData = sortedTableData.slice(tableStart, tableEnd);
 
     return html`
-      <h3>Integration usage</h3>
+      <div class="header">
+        <h3>Integration usage</h3>
+        ${!isMobile
+          ? html` <div class="search">
+              <input
+                class="searchbar"
+                .value=${this._filter}
+                @input=${this._filterChange}
+                placeholder="Search"
+              />
+              ${this._filter
+                ? html` <mwc-icon-button
+                    class="clear-search"
+                    @click=${this._clearFilter}
+                  >
+                    <svg>
+                      <path d=${mdiClose} />
+                    </svg>
+                  </mwc-icon-button>`
+                : ""}
+            </div>`
+          : ""}
+      </div>
+
       <table>
         <tr class="table-header">
+          ${!isMobile ? html`<th></th>` : ""}
           <th>Integration</th>
           <th>Installations</th>
         </tr>
         ${tableData.map(
           (entry) => html`
             <tr>
+              ${!isMobile ? html`<td class="idx">${entry.idx}</td>` : ""}
               <td class="integration">
                 <a
                   title="Documentation"
@@ -91,10 +135,7 @@ export class AnalyticsIntegrations extends LitElement {
                   <img
                     src="https://brands.home-assistant.io/_/${entry.integration}/icon.png"
                   />
-                  <span
-                    >${this._integrationDetails[entry.integration]?.title ||
-                    entry.integration}</span
-                  >
+                  <span>${this._computeName(entry)}</span>
                 </a>
               </td>
               <td>${entry.installations}</td>
@@ -123,7 +164,7 @@ export class AnalyticsIntegrations extends LitElement {
             <path d=${mdiChevronLeft} />
           </svg>
         </mwc-icon-button>
-        <div>${tableStart + 1}-${tableEnd} of ${this._integrations.length}</div>
+        <div>${tableStart + 1}-${tableEnd} of ${sortedTableData.length}</div>
         <mwc-icon-button
           .disabled=${tableData.length < this._currentTableSize}
           @click=${this._nextPage}
@@ -134,6 +175,20 @@ export class AnalyticsIntegrations extends LitElement {
         </mwc-icon-button>
       </div>
     `;
+  }
+
+  private _computeName(entry: IntegrationData): string {
+    return (
+      this._integrationDetails[entry.integration]?.title || entry.integration
+    );
+  }
+
+  private _filterChange(ev: any) {
+    this._filter = ev.currentTarget?.value || "";
+  }
+
+  private _clearFilter() {
+    this._filter = "";
   }
 
   async getData() {
@@ -224,6 +279,31 @@ export class AnalyticsIntegrations extends LitElement {
     }
     .integration {
       width: 40%;
+    }
+    .idx {
+      width: 12px;
+    }
+    .search {
+      display: flex;
+      height: 48px;
+      position: relative;
+    }
+    .searchbar {
+      width: 256px;
+      border: none;
+      border-bottom: 1px solid var(--primary-text-color);
+    }
+    .searchbar:focus {
+      outline: none;
+      border-bottom: 2px solid var(--primary-color);
+    }
+    .clear-search {
+      margin-left: -42px;
+      color: #d50000;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
     }
     mwc-icon-button {
       --mdc-theme-text-disabled-on-light: var(--secondary-text-color);
