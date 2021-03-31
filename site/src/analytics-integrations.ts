@@ -21,14 +21,14 @@ import {
 const isMobile = matchMedia("(max-width: 600px)").matches;
 
 const IGNORED_DOMAINS = [
+  "analytics",
   "api",
   "auth",
-  "analytics",
   "config",
   "device_automation",
   "frontend",
-  "image",
   "http",
+  "image",
   "lovelace",
   "onboarding",
   "person",
