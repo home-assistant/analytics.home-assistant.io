@@ -77,7 +77,8 @@ export class AnalyticsIntegrations extends LitElement {
         this._filter
           ? this._computeName(entry)
               .toLowerCase()
-              .includes(this._filter.toLowerCase())
+              .includes(this._filter.toLowerCase()) ||
+            entry.integration.includes(this._filter.toLowerCase())
           : true
       );
 
