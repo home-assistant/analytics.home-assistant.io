@@ -1,7 +1,6 @@
 import "@material/mwc-icon-button";
 import "@material/mwc-list/mwc-list-item";
 import "@material/mwc-select";
-import "@material/mwc-textfield";
 import { mdiChevronLeft, mdiChevronRight, mdiClose } from "@mdi/js";
 import {
   css,
