@@ -1,8 +1,7 @@
-import "@material/mwc-select";
 import "@material/mwc-icon-button";
 import "@material/mwc-list/mwc-list-item";
-
-import { mdiChevronLeft, mdiChevronRight } from "@mdi/js";
+import "@material/mwc-select";
+import { mdiChevronLeft, mdiChevronRight, mdiClose } from "@mdi/js";
 import {
   css,
   customElement,
@@ -12,16 +11,27 @@ import {
   property,
   PropertyValues,
 } from "lit-element";
-import { AnalyticsData } from "./data";
+import {
+  AnalyticsData,
+  fetchIntegrationDetails,
+  IntegrationData,
+  IntegrationDetails,
+} from "./data";
+
+const isMobile = matchMedia("(max-width: 600px)").matches;
 
 @customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {
   @property({ attribute: false }) public data?: AnalyticsData;
 
-  @internalProperty() private _integrations?: {
-    integration: string;
-    installations: number;
-  }[];
+  @internalProperty() private _filter: string = "";
+
+  @internalProperty() private _integrationDetails: Record<
+    string,
+    IntegrationDetails
+  > = {};
+
+  @internalProperty() private _integrations?: IntegrationData[];
 
   @internalProperty() private _currentTableSize = 30;
   @internalProperty() private _currentTablePage = 0;
@@ -29,16 +39,7 @@ export class AnalyticsIntegrations extends LitElement {
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
 
-    const dataKeys = Object.keys(this.data!);
-    const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
-    this._integrations = Object.keys(lastEntry.integrations).map(
-      (integration) => {
-        return {
-          integration,
-          installations: lastEntry.integrations[integration],
-        };
-      }
-    );
+    this.getData();
   }
 
   render() {
@@ -46,43 +47,75 @@ export class AnalyticsIntegrations extends LitElement {
       return html``;
     }
 
-    const tableStart = this._currentTablePage * this._currentTableSize;
-    const tableEnd =
-      tableStart + this._currentTableSize <= this._integrations.length
-        ? tableStart + this._currentTableSize
-        : this._integrations.length;
-
-    const tableData = this._integrations
+    const sortedTableData = this._integrations
       .sort(
         (a, b) =>
-          b.installations - a.installations ||
-          a.integration.localeCompare(b.integration)
+          b.installations - a.installations || a.title.localeCompare(b.title)
       )
-      .slice(tableStart, tableEnd);
+      .map((entry, idx) => {
+        return { ...entry, idx };
+      })
+      .filter((entry) =>
+        this._filter
+          ? entry.title.toLowerCase().includes(this._filter.toLowerCase()) ||
+            entry.domain.includes(this._filter.toLowerCase())
+          : true
+      );
 
-    console.log(tableEnd);
+    const tableStart = this._currentTablePage * this._currentTableSize;
+    const tableEnd =
+      tableStart + this._currentTableSize <= sortedTableData.length
+        ? tableStart + this._currentTableSize
+        : sortedTableData.length;
+
+    const tableData = sortedTableData.slice(tableStart, tableEnd);
 
     return html`
-      <h3>Integration usage</h3>
+      <div class="header">
+        <h3>Integration usage</h3>
+        ${!isMobile
+          ? html` <div class="search">
+              <input
+                class="searchbar"
+                .value=${this._filter}
+                @input=${this._filterChange}
+                placeholder="Search"
+              />
+              ${this._filter
+                ? html` <mwc-icon-button
+                    class="clear-search"
+                    @click=${this._clearFilter}
+                  >
+                    <svg>
+                      <path d=${mdiClose} />
+                    </svg>
+                  </mwc-icon-button>`
+                : ""}
+            </div>`
+          : ""}
+      </div>
+
       <table>
         <tr class="table-header">
+          ${!isMobile ? html`<th></th>` : ""}
           <th>Integration</th>
           <th>Installations</th>
         </tr>
         ${tableData.map(
           (entry) => html`
             <tr>
+              ${!isMobile ? html`<td class="idx">${entry.idx + 1}</td>` : ""}
               <td class="integration">
                 <a
                   title="Documentation"
-                  href="https://www.home-assistant.io/integrations/${entry.integration}"
+                  href="https://www.home-assistant.io/integrations/${entry.domain}"
                   target="_blank"
                   rel="noreferrer"
                 >
                   <img
-                    src="https://brands.home-assistant.io/_/${entry.integration}/icon.png"
+                    src="https://brands.home-assistant.io/_/${entry.domain}/icon.png"
                   />
-                  <span>${entry.integration}</span>
+                  <span>${entry.title}</span>
                 </a>
               </td>
               <td>${entry.installations}</td>
@@ -111,7 +144,7 @@ export class AnalyticsIntegrations extends LitElement {
             <path d=${mdiChevronLeft} />
           </svg>
         </mwc-icon-button>
-        <div>${tableStart + 1}-${tableEnd} of ${this._integrations.length}</div>
+        <div>${tableStart + 1}-${tableEnd} of ${sortedTableData.length}</div>
         <mwc-icon-button
           .disabled=${tableData.length < this._currentTableSize}
           @click=${this._nextPage}
@@ -122,6 +155,46 @@ export class AnalyticsIntegrations extends LitElement {
         </mwc-icon-button>
       </div>
     `;
+  }
+
+  private _filterChange(ev: any) {
+    this._currentTablePage = 0;
+    this._filter = ev.currentTarget?.value || "";
+  }
+
+  private _clearFilter() {
+    this._currentTablePage = 0;
+    this._filter = "";
+  }
+
+  async getData() {
+    const dataKeys = Object.keys(this.data!);
+    const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
+    try {
+      const response = await ((window as any).integrationsPromise ||
+        fetchIntegrationDetails());
+      if (!response.ok) {
+        return;
+      }
+
+      this._integrationDetails = await response.json();
+
+      const domains: Set<string> = new Set(
+        Object.keys(lastEntry.integrations).concat(
+          Object.keys(this._integrationDetails)
+        )
+      );
+
+      this._integrations = Array.from(domains).map((domain) => {
+        return {
+          domain,
+          title: this._integrationDetails[domain]?.title || domain,
+          installations: lastEntry.integrations[domain] || 0,
+        };
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   private _sizeChanged(ev: CustomEvent) {
@@ -184,6 +257,33 @@ export class AnalyticsIntegrations extends LitElement {
     }
     .integration {
       width: 40%;
+    }
+    .idx {
+      width: 12px;
+    }
+    .search {
+      display: flex;
+      height: 48px;
+      position: relative;
+    }
+    .searchbar {
+      width: 256px;
+      border: none;
+      color: var(--primary-text-color);
+      border-bottom: 1px solid var(--primary-text-color);
+      background-color: var(--secondary-background-color);
+    }
+    .searchbar:focus {
+      outline: none;
+      border-bottom: 2px solid var(--primary-color);
+    }
+    .clear-search {
+      margin-left: -42px;
+      color: #d50000;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
     }
     mwc-icon-button {
       --mdc-theme-text-disabled-on-light: var(--secondary-text-color);
