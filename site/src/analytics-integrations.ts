@@ -168,7 +168,6 @@ export class AnalyticsIntegrations extends LitElement {
   }
 
   async getData() {
-    const domains: Set<string> = new Set();
     const dataKeys = Object.keys(this.data!);
     const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
     try {
@@ -180,10 +179,11 @@ export class AnalyticsIntegrations extends LitElement {
 
       this._integrationDetails = await response.json();
 
-      Object.keys(lastEntry.integrations)
-        .concat(Object.keys(this._integrationDetails))
-        .forEach((entry) => domains.add(entry));
-      console.log(domains);
+      const domains: Set<string> = new Set(
+        Object.keys(lastEntry.integrations).concat(
+          Object.keys(this._integrationDetails)
+        )
+      );
 
       this._integrations = Array.from(domains).map((domain) => {
         return {
