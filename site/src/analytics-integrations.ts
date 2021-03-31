@@ -183,10 +183,12 @@ export class AnalyticsIntegrations extends LitElement {
   }
 
   private _filterChange(ev: any) {
+    this._currentTablePage = 0;
     this._filter = ev.currentTarget?.value || "";
   }
 
   private _clearFilter() {
+    this._currentTablePage = 0;
     this._filter = "";
   }
 
@@ -290,7 +292,9 @@ export class AnalyticsIntegrations extends LitElement {
     .searchbar {
       width: 256px;
       border: none;
+      color: var(--primary-text-color);
       border-bottom: 1px solid var(--primary-text-color);
+      background-color: var(--secondary-background-color);
     }
     .searchbar:focus {
       outline: none;
