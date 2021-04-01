@@ -50,10 +50,16 @@ export class AnalyticsActiveInstallations extends LitElement {
           },
           hAxis: {
             title: "Date",
+            titleTextStyle: {
+              color: isDarkMode ? "#e1e1e1" : "#212121",
+            },
           },
           vAxis: {
             title: "Active installations",
             logScale: true,
+            titleTextStyle: {
+              color: isDarkMode ? "#e1e1e1" : "#212121",
+            },
           },
         }}
         .rows=${rows}
