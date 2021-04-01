@@ -32,7 +32,7 @@ async function listStoredData(): Promise<SanitizedPayload[]> {
     // @ts-expect-error - Wrong type on list function
     lastResponse = await KV.list({
       prefix: lastResponse === undefined ? "huuid" : null,
-      cusor: lastResponse !== undefined ? lastResponse.cursor : null,
+      cursor: lastResponse !== undefined ? lastResponse.cursor : null,
     });
 
     for (const key of lastResponse.keys) {
