@@ -18,7 +18,7 @@ export class AnalyticsVersions extends LitElement {
     const lastEntry = this.data[dataKeys[dataKeys.length - 1]];
 
     const rows = Object.keys(lastEntry.versions)
-      .sort((a, b) => lastEntry.versions[a] - lastEntry.versions[b])
+      .sort((a, b) => lastEntry.versions[b] - lastEntry.versions[a])
       .slice(0, 4)
       .map((version) => [version, lastEntry.versions[version]]);
 
