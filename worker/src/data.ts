@@ -3,7 +3,7 @@ export interface SanitizedPayload {
   installation_type: string;
   integrations?: string[];
   addons?: { slug: string }[];
-  last_write: number;
+  last_write?: number;
   state_count?: number;
   addon_count?: number;
   automation_count?: number;
