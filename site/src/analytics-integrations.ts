@@ -34,6 +34,7 @@ const IGNORED_DOMAINS = [
   "person",
   "search",
   "system_log",
+  "trace",
   "websocket_api",
 ];
 
