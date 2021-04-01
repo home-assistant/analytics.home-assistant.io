@@ -5,7 +5,11 @@ import { average } from "../utils/average";
 import { formatDate } from "../utils/date";
 
 export async function handleSchedule(event: ScheduledEvent): Promise<void> {
-  const storedAnalytics = JSON.parse(await KV.get("core_analytics")) || {};
+  const storedAnalytics =
+    (await KV.get<{ [key: string]: CurrentAnalytics }>(
+      "core_analytics",
+      "json"
+    )) || {};
   const storedData = await listStoredData();
   console.log(JSON.stringify(storedData));
   const currentDataset: CurrentAnalytics = generateCurrentDataset(storedData);
@@ -24,24 +28,26 @@ export async function handleSchedule(event: ScheduledEvent): Promise<void> {
 }
 
 async function listStoredData(): Promise<SanitizedPayload[]> {
-  const huuidList: string[] = [];
+  const huuidList: Set<string> = new Set();
   const huuidData: SanitizedPayload[] = [];
 
   let lastResponse;
-  while (lastResponse == undefined || !lastResponse.list_complete) {
-    // @ts-expect-error - Wrong type on list function
+  while (lastResponse === undefined || !lastResponse.list_complete) {
     lastResponse = await KV.list({
-      prefix: lastResponse === undefined ? "huuid" : null,
-      cursor: lastResponse !== undefined ? lastResponse.cursor : null,
+      prefix: lastResponse === undefined ? "huuid" : undefined,
+      cursor: lastResponse !== undefined ? lastResponse.cursor : undefined,
     });
 
     for (const key of lastResponse.keys) {
-      huuidList.push(key.name);
+      huuidList.add(key.name);
     }
   }
 
   for (const huuid of huuidList) {
-    huuidData.push(JSON.parse(await KV.get(huuid)));
+    const payload = await KV.get<SanitizedPayload>(huuid, "json");
+    if (payload) {
+      huuidData.push(payload);
+    }
   }
 
   return huuidData;
