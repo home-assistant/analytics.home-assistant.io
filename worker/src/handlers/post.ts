@@ -7,8 +7,8 @@ import {
 import { daysToSeconds } from "../utils/date";
 import { deepEqual } from "../utils/deep-equal";
 
-const updateThreshold = daysToSeconds(30); // 7 days in seconds
-const expirationTtl = daysToSeconds(60); // 8 days in seconds
+const updateThreshold = daysToSeconds(30);
+const expirationTtl = daysToSeconds(60);
 
 export async function handlePost(request: Request): Promise<Response> {
   const payload = await request.json();
@@ -18,17 +18,18 @@ export async function handlePost(request: Request): Promise<Response> {
 
   const storageKey = `huuid:${payload.huuid}`;
 
-  const sanitizedPayload = sanitizePayload(payload);
+  let sanitizedPayload: SanitizedPayload;
 
-  if (sanitizedPayload instanceof Response) {
-    // Sanitize failed, return the prepared response
-    return sanitizedPayload;
+  try {
+    sanitizedPayload = sanitizePayload(payload);
+  } catch (err) {
+    return new Response(err.message, { status: 400 });
   }
 
   const currentTimestamp = new Date().getTime();
 
   // Get the current stored data for the storageKey if any
-  const stored = JSON.parse(await KV.get(storageKey));
+  const stored = await KV.get<SanitizedPayload>(storageKey, "json");
 
   if (!stored) {
     // First contact for HUUID, store payload
@@ -36,7 +37,7 @@ export async function handlePost(request: Request): Promise<Response> {
     return new Response();
   }
 
-  const lastWrite = stored.last_write;
+  const lastWrite = stored.last_write!;
   delete stored.last_write;
 
   if (deepEqual(stored, sanitizedPayload)) {
@@ -62,17 +63,14 @@ async function storePayload(
   );
 }
 
-const sanitizePayload = (payload: any): SanitizedPayload | Response => {
+const sanitizePayload = (payload: any): SanitizedPayload => {
   if (!payload.installation_type || !payload.version) {
-    return new Response("Missing required keys in the payload", {
-      status: 400,
-    });
+    throw new Error("Missing required keys in the payload");
   }
 
   if (!InstallationTypes.includes(payload.installation_type)) {
-    return new Response(
-      `${String(payload.installation_type)} is not a valid instalaltion type`,
-      { status: 400 }
+    throw new Error(
+      `${String(payload.installation_type)} is not a valid instalaltion type`
     );
   }
 
@@ -87,12 +85,7 @@ const sanitizePayload = (payload: any): SanitizedPayload | Response => {
         if (typeof integration === "string" || integration instanceof String) {
           continue;
         } else {
-          return new Response(
-            `${String(integration)} is not a valid integration`,
-            {
-              status: 400,
-            }
-          );
+          throw new Error(`${String(integration)} is not a valid integration`);
         }
       }
     }
