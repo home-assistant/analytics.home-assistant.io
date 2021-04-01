@@ -17,10 +17,23 @@ export class AnalyticsVersions extends LitElement {
     const dataKeys = Object.keys(this.data);
     const lastEntry = this.data[dataKeys[dataKeys.length - 1]];
 
-    const rows = Object.keys(lastEntry.versions)
-      .sort((a, b) => lastEntry.versions[a] - lastEntry.versions[b])
+    const sortedVersions = Object.keys(lastEntry.versions).sort(
+      (a, b) => lastEntry.versions[b] - lastEntry.versions[a]
+    );
+
+    const rows = sortedVersions
       .slice(0, 4)
       .map((version) => [version, lastEntry.versions[version]]);
+    rows.push([
+      "Other",
+      sortedVersions
+        .slice(4)
+        .reduce(
+          (accumulator, currentValue) =>
+            accumulator + lastEntry.versions[currentValue],
+          0
+        ),
+    ]);
 
     return html`
       <google-chart
