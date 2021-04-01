@@ -34,7 +34,7 @@ async function listStoredData(): Promise<SanitizedPayload[]> {
   let lastResponse;
   while (lastResponse === undefined || !lastResponse.list_complete) {
     lastResponse = await KV.list({
-      prefix: lastResponse === undefined ? "huuid" : undefined,
+      prefix: "huuid",
       cursor: lastResponse !== undefined ? lastResponse.cursor : undefined,
     });
 
