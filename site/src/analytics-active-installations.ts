@@ -14,7 +14,10 @@ export class AnalyticsActiveInstallations extends LitElement {
       return html``;
     }
 
-    const rows = Object.keys(this.data).map((timestamp) => [
+    const dataKeys = Object.keys(this.data!);
+    const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
+
+    const rows = dataKeys.map((timestamp) => [
       new Date(Number(timestamp)),
       this.data![timestamp].active_installations,
       this.data![timestamp].installation_types.os,
@@ -35,7 +38,7 @@ export class AnalyticsActiveInstallations extends LitElement {
           { label: "Supervised", type: "number" },
         ]}
         .options=${{
-          title: "Active Home Assistant Installations",
+          title: `${lastEntry.active_installations} Active Home Assistant Installations`,
           chartArea: { width: "70%", height: "80%" },
           backgroundColor: isDarkMode ? "#111111" : "#fafafa",
           titleTextStyle: {
