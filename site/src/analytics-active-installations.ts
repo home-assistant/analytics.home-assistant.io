@@ -20,10 +20,6 @@ export class AnalyticsActiveInstallations extends LitElement {
     const rows = dataKeys.map((timestamp) => [
       new Date(Number(timestamp)),
       this.data![timestamp].active_installations,
-      this.data![timestamp].installation_types.os,
-      this.data![timestamp].installation_types.container,
-      this.data![timestamp].installation_types.core,
-      this.data![timestamp].installation_types.supervised,
     ]);
 
     return html`
@@ -32,14 +28,38 @@ export class AnalyticsActiveInstallations extends LitElement {
         .cols=${[
           { label: "Date", type: "date" },
           { label: "Total", type: "number" },
-          { label: "Operating System", type: "number" },
-          { label: "Container", type: "number" },
-          { label: "Core", type: "number" },
-          { label: "Supervised", type: "number" },
         ]}
         .options=${{
           title: `${lastEntry.active_installations} Active Home Assistant Installations`,
-          chartArea: { width: "70%", height: "80%" },
+          chartArea: { width: "70%", height: "50%" },
+          backgroundColor: isDarkMode ? "#111111" : "#fafafa",
+          titleTextStyle: {
+            color: isDarkMode ? "#e1e1e1" : "#212121",
+          },
+          legend: { position: "none" },
+          hAxis: {
+            titleTextStyle: {
+              color: isDarkMode ? "#e1e1e1" : "#212121",
+            },
+          },
+          vAxis: {
+            title: "Active installations",
+            titleTextStyle: {
+              color: isDarkMode ? "#e1e1e1" : "#212121",
+            },
+          },
+        }}
+        .rows=${rows}
+      >
+      </google-chart>
+      <google-chart
+        type="pie"
+        .cols=${[
+          { label: "Installation type", type: "string" },
+          { label: "Count", type: "number" },
+        ]}
+        .options=${{
+          chartArea: { width: "100%", height: "50%" },
           backgroundColor: isDarkMode ? "#111111" : "#fafafa",
           titleTextStyle: {
             color: isDarkMode ? "#e1e1e1" : "#212121",
@@ -51,30 +71,35 @@ export class AnalyticsActiveInstallations extends LitElement {
               color: isDarkMode ? "#e1e1e1" : "#212121",
             },
           },
-          hAxis: {
-            title: "Date",
-            titleTextStyle: {
-              color: isDarkMode ? "#e1e1e1" : "#212121",
-            },
-          },
-          vAxis: {
-            title: "Active installations",
-            logScale: true,
-            titleTextStyle: {
-              color: isDarkMode ? "#e1e1e1" : "#212121",
-            },
-          },
         }}
-        .rows=${rows}
+        .rows=${[
+          ["Operating System", lastEntry.installation_types.os],
+          ["Container", lastEntry.installation_types.container],
+          ["Core", lastEntry.installation_types.core],
+          ["Supervised", lastEntry.installation_types.supervised],
+        ]}
       >
       </google-chart>
     `;
   }
 
   static styles = css`
+    :host {
+      display: flex;
+      flex-direction: row;
+    }
     google-chart {
       height: 500px;
-      width: 100%;
+      width: 50%;
+    }
+
+    @media only screen and (max-width: 600px) {
+      :host {
+        flex-direction: column;
+      }
+      google-chart {
+        width: 100%;
+      }
     }
   `;
 }
