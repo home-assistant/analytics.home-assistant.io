@@ -1,5 +1,6 @@
 export interface SanitizedPayload {
   version: string;
+  country?: string;
   installation_type: string;
   integrations?: string[];
   addons?: { slug: string }[];

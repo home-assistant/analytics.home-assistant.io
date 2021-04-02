@@ -17,11 +17,12 @@ export async function handlePost(request: Request): Promise<Response> {
   }
 
   const storageKey = `huuid:${payload.huuid}`;
+  const country = request.headers.get("cf-ipcountry");
 
   let sanitizedPayload: SanitizedPayload;
 
   try {
-    sanitizedPayload = sanitizePayload(payload);
+    sanitizedPayload = sanitizePayload(payload, country);
   } catch (err) {
     return new Response(err.message, { status: 400 });
   }
@@ -63,7 +64,10 @@ async function storePayload(
   );
 }
 
-const sanitizePayload = (payload: any): SanitizedPayload => {
+const sanitizePayload = (
+  payload: any,
+  country: string | null
+): SanitizedPayload => {
   if (!payload.installation_type || !payload.version) {
     throw new Error("Missing required keys in the payload");
   }
@@ -91,5 +95,6 @@ const sanitizePayload = (payload: any): SanitizedPayload => {
     }
   }
 
+  payload.country = country;
   return payload;
 };
