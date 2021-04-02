@@ -11,6 +11,7 @@ import "./analytics-active-installations";
 import "./analytics-average";
 import "./analytics-integrations";
 import "./analytics-versions";
+import "./analytics-installation-types";
 import { AnalyticsData, fetchData, relativeTime } from "./data";
 
 @customElement("analytics-element")
@@ -44,9 +45,10 @@ export class AnalyticsElement extends LitElement {
         </analytics-active-installations>
         <div class="half">
           <analytics-versions .data=${this._data}></analytics-versions>
-          <analytics-average .data=${this._data}></analytics-average>
+          <analytics-installation-types .data=${this._data}>
+          </analytics-installation-types>
         </div>
-
+        <analytics-average .data=${this._data}></analytics-average>
         <analytics-integrations .data=${this._data}></analytics-integrations>
       </div>
       <div class="footer">
@@ -109,7 +111,7 @@ export class AnalyticsElement extends LitElement {
     }
 
     analytics-versions,
-    analytics-average {
+    analytics-installation-types {
       flex: 1;
     }
 

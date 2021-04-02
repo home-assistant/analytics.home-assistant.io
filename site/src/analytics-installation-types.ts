@@ -5,8 +5,8 @@ import { AnalyticsData } from "./data";
 const isDarkMode = matchMedia("(prefers-color-scheme: dark)").matches;
 const isMobile = matchMedia("(max-width: 600px)").matches;
 
-@customElement("analytics-versions")
-export class AnalyticsVersions extends LitElement {
+@customElement("analytics-installation-types")
+export class AnalyticsInstallationTypes extends LitElement {
   @property({ attribute: false }) public data?: AnalyticsData;
 
   render() {
@@ -17,33 +17,15 @@ export class AnalyticsVersions extends LitElement {
     const dataKeys = Object.keys(this.data);
     const lastEntry = this.data[dataKeys[dataKeys.length - 1]];
 
-    const sortedVersions = Object.keys(lastEntry.versions).sort(
-      (a, b) => lastEntry.versions[b] - lastEntry.versions[a]
-    );
-
-    const rows = sortedVersions
-      .slice(0, 4)
-      .map((version) => [version, lastEntry.versions[version]]);
-    rows.push([
-      "Other",
-      sortedVersions
-        .slice(4)
-        .reduce(
-          (accumulator, currentValue) =>
-            accumulator + lastEntry.versions[currentValue],
-          0
-        ),
-    ]);
-
     return html`
       <google-chart
         type="pie"
         .cols=${[
-          { label: "Version", type: "string" },
+          { label: "Installation type", type: "string" },
           { label: "Count", type: "number" },
         ]}
         .options=${{
-          title: "Top 5 used versions",
+          title: "Installation types",
           chartArea: { width: "70%", height: "70%" },
           backgroundColor: isDarkMode ? "#111111" : "#fafafa",
           titleTextStyle: {
@@ -57,7 +39,12 @@ export class AnalyticsVersions extends LitElement {
             },
           },
         }}
-        .rows=${rows}
+        .rows=${[
+          ["Operating System", lastEntry.installation_types.os],
+          ["Container", lastEntry.installation_types.container],
+          ["Core", lastEntry.installation_types.core],
+          ["Supervised", lastEntry.installation_types.supervised],
+        ]}
       >
       </google-chart>
     `;
@@ -79,6 +66,6 @@ export class AnalyticsVersions extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "analytics-versions": AnalyticsVersions;
+    "analytics-installation-types": AnalyticsInstallationTypes;
   }
 }
