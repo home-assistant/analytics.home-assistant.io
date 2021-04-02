@@ -198,9 +198,7 @@ export class AnalyticsIntegrations extends LitElement {
       this._integrationDetails = await response.json();
 
       const domains: Set<string> = new Set(
-        Object.keys(lastEntry.integrations).concat(
-          Object.keys(this._integrationDetails)
-        )
+        Object.keys(this._integrationDetails)
       );
 
       this._integrations = Array.from(domains)
