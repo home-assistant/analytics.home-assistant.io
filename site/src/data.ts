@@ -20,6 +20,7 @@ export interface Analytics {
   avg_users: number;
   installation_types: InstallationTypes;
   integrations: Integrations;
+  reports_integrations: number;
   versions: Versions;
 }
 

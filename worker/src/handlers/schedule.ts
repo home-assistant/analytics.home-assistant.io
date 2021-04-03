@@ -56,6 +56,7 @@ async function listStoredData(): Promise<SanitizedPayload[]> {
 const generateCurrentDataset = (
   huuidData: SanitizedPayload[]
 ): CurrentAnalytics => {
+  let reports_integrations = 0;
   const last_updated = new Date().getTime();
   const installation_types = { os: 0, container: 0, core: 0, supervised: 0 };
   const integrations: Record<string, number> = {};
@@ -68,6 +69,8 @@ const generateCurrentDataset = (
   const count_users: number[] = [];
 
   for (const huuid of huuidData) {
+    const reported_integrations = huuid.integrations || [];
+
     if (!versions[huuid.version]) {
       versions[huuid.version] = 1;
     } else {
@@ -90,11 +93,14 @@ const generateCurrentDataset = (
       count_users.push(huuid.user_count);
     }
 
-    for (const integration of huuid.integrations || []) {
-      if (!integrations[integration]) {
-        integrations[integration] = 1;
-      } else {
-        integrations[integration]++;
+    if (reported_integrations.length === 0) {
+      reports_integrations++;
+      for (const integration of reported_integrations) {
+        if (!integrations[integration]) {
+          integrations[integration] = 1;
+        } else {
+          integrations[integration]++;
+        }
       }
     }
 
@@ -131,6 +137,7 @@ const generateCurrentDataset = (
     avg_addons: average(count_addons),
     avg_states: average(count_states),
     integrations,
+    reports_integrations,
     addons,
     versions,
   };
