@@ -34,6 +34,12 @@ export class AnalyticsInstallationTypes extends LitElement {
             width: isMobile ? "100%" : "70%",
             height: isMobile ? "80%" : "70%",
           },
+          slices: {
+            0: { color: "#dc3912" },
+            1: { color: "#ff9900" },
+            2: { color: "#109618" },
+            3: { color: "#990099" },
+          },
           backgroundColor: isDarkMode ? "#111111" : "#fafafa",
           titleTextStyle: {
             color: isDarkMode ? "#e1e1e1" : "#212121",
