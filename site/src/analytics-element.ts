@@ -47,13 +47,16 @@ export class AnalyticsElement extends LitElement {
         <analytics-active-installations .data=${this._data}>
         </analytics-active-installations>
         <div class="half">
-          <analytics-versions .lastDataEntry=${lastDataEntry}></analytics-versions>
+          <analytics-versions .lastDataEntry=${lastDataEntry}>
+          </analytics-versions>
           <analytics-installation-types .lastDataEntry=${lastDataEntry}>
           </analytics-installation-types>
         </div>
         <analytics-average .lastDataEntry=${lastDataEntry}></analytics-average>
-        <analytics-integrations .lastDataEntry=${lastDataEntry}></analytics-integrations>
-        </div>
+        <analytics-integrations
+          .lastDataEntry=${lastDataEntry}
+        ></analytics-integrations>
+      </div>
       <div class="footer">
         <a
           title="Documentation"
@@ -120,7 +123,7 @@ export class AnalyticsElement extends LitElement {
 
     @media only screen and (max-width: 600px) {
       .half {
-        flex-direction: column;
+        flex-direction: column-reverse;
       }
     }
   `;
