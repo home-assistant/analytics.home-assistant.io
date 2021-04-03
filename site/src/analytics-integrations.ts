@@ -328,6 +328,7 @@ export class AnalyticsIntegrations extends LitElement {
 
     mwc-checkbox {
       --mdc-theme-secondary: var(--primary-color);
+      --mdc-checkbox-unchecked-color: var(--secondary-text-color);
     }
 
     @media only screen and (max-width: 600px) {
