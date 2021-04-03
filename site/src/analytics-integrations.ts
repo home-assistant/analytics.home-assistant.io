@@ -14,7 +14,7 @@ import {
   PropertyValues,
 } from "lit-element";
 import {
-  AnalyticsData,
+  Analytics,
   fetchIntegrationDetails,
   IntegrationData,
   IntegrationDetails,
@@ -24,7 +24,7 @@ const isMobile = matchMedia("(max-width: 600px)").matches;
 
 @customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {
-  @property({ attribute: false }) public data?: AnalyticsData;
+  @property({ attribute: false }) public lastDataEntry?: Analytics;
 
   @internalProperty() private _filter: string = "";
 
@@ -186,8 +186,6 @@ export class AnalyticsIntegrations extends LitElement {
   }
 
   async getData() {
-    const dataKeys = Object.keys(this.data!);
-    const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
     try {
       const response = await ((window as any).integrationsPromise ||
         fetchIntegrationDetails());
@@ -202,7 +200,7 @@ export class AnalyticsIntegrations extends LitElement {
           return {
             domain,
             title: this._integrationDetails[domain].title || domain,
-            installations: lastEntry.integrations[domain] || 0,
+            installations: this.lastDataEntry?.integrations[domain] || 0,
           };
         }
       );
