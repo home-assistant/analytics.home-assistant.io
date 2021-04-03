@@ -5,6 +5,7 @@ import { average } from "../utils/average";
 import { formatDate } from "../utils/date";
 
 export async function handleSchedule(event: ScheduledEvent): Promise<void> {
+  const core_analytics: Record<string, any> = {};
   const storedAnalytics =
     (await KV.get<{ [key: string]: CurrentAnalytics }>(
       "core_analytics",
@@ -22,9 +23,19 @@ export async function handleSchedule(event: ScheduledEvent): Promise<void> {
     currentDate.hour
   );
   const timestampString = String(currentDateObj.getTime());
-  storedAnalytics[timestampString] = currentDataset;
+  const storeKey = `history:${timestampString}`;
 
-  await KV.put("core_analytics", JSON.stringify(storedAnalytics));
+  for (const key of Object.keys(storedAnalytics)) {
+    core_analytics[key] = {
+      active_installations: storedAnalytics[key].active_installations,
+      installation_types: storedAnalytics[key].installation_types,
+    };
+  }
+
+  core_analytics[timestampString] = currentDataset;
+
+  await KV.put(storeKey, JSON.stringify(currentDataset));
+  await KV.put("core_analytics", JSON.stringify(core_analytics));
 }
 
 async function listStoredData(): Promise<SanitizedPayload[]> {
