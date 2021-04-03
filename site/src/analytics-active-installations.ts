@@ -41,6 +41,13 @@ export class AnalyticsActiveInstallations extends LitElement {
           title: `${lastEntry.active_installations} Active Home Assistant Installations`,
           chartArea: { width: "70%", height: "80%" },
           backgroundColor: isDarkMode ? "#111111" : "#fafafa",
+          series: {
+            0: { color: "#3366cc" },
+            1: { color: "#dc3912" },
+            2: { color: "#ff9900" },
+            3: { color: "#109618" },
+            4: { color: "#990099" },
+          },
           titleTextStyle: {
             color: isDarkMode ? "#e1e1e1" : "#212121",
           },
