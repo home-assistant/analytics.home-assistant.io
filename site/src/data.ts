@@ -12,7 +12,7 @@ export type AnalyticsData = Record<string, Analytics>;
 
 export interface Analytics {
   active_installations: number;
-  country: Record<string, number>;
+  countries: Record<string, number>;
   addons: Addons;
   avg_addons: number;
   avg_automations: number;
