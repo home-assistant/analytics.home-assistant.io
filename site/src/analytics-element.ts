@@ -11,20 +11,27 @@ import "./analytics-active-installations";
 import "./analytics-average";
 import "./analytics-integrations";
 import "./analytics-versions";
+import "./analytics-header";
 import { AnalyticsData, fetchData, relativeTime } from "./data";
 
 @customElement("analytics-element")
 export class AnalyticsElement extends LitElement {
   @internalProperty() private _data?: AnalyticsData;
 
+  @internalProperty() private _currentPage = "installations";
+
   @internalProperty() private _error: boolean = false;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
+    if (window.location.hash) {
+      this._currentPage = window.location.hash.replace("#", "");
+    }
     this.getData();
   }
 
   render() {
+    console.log("render");
     if (this._error) {
       return html`<p>Could not load data.</p>`;
     }
@@ -38,7 +45,10 @@ export class AnalyticsElement extends LitElement {
     );
 
     return html`
-      <h1>Home Assistant Analytics</h1>
+      <analytics-header
+        @page-changed=${this._pageChanged}
+        .currentPage=${this._currentPage}
+      ></analytics-header>
       <div class="content">
         <analytics-active-installations .data=${this._data}>
         </analytics-active-installations>
@@ -73,6 +83,12 @@ export class AnalyticsElement extends LitElement {
     } catch (_) {
       this._error = true;
     }
+  }
+
+  private _pageChanged(ev: CustomEvent) {
+    const selectedPage = ev.detail;
+    this._currentPage = selectedPage;
+    window.location.hash = selectedPage;
   }
 
   static styles = css`

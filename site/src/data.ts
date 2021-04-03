@@ -38,6 +38,8 @@ export interface IntegrationData {
   installations: number;
 }
 
+export const AnalyticsPages = ["installations", "test"];
+
 export const fetchData = () =>
   fetch("https://analytics-api.home-assistant.io/v1");
 
