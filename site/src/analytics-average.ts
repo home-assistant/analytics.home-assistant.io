@@ -1,34 +1,31 @@
 import { css, customElement, html, LitElement, property } from "lit-element";
-import { AnalyticsData } from "./data";
+import { Analytics } from "./data";
 
 @customElement("analytics-average")
 export class AnalyticsAverage extends LitElement {
-  @property({ attribute: false }) public data?: AnalyticsData;
+  @property({ attribute: false }) public lastDataEntry?: Analytics;
 
   render() {
-    if (this.data === undefined) {
+    if (this.lastDataEntry === undefined) {
       return html``;
     }
-
-    const dataKeys = Object.keys(this.data);
-    const lastEntry = this.data[dataKeys[dataKeys.length - 1]];
 
     return html`<div class="grid">
       <div class="metric">
         <span>Average integrations</span>
-        <span>${Math.round(lastEntry.avg_integrations)}</span>
+        <span>${Math.round(this.lastDataEntry.avg_integrations)}</span>
       </div>
       <div class="metric">
         <span>Average entities</span>
-        <span>${Math.round(lastEntry.avg_states)}</span>
+        <span>${Math.round(this.lastDataEntry.avg_states)}</span>
       </div>
       <div class="metric">
         <span>Average automations</span>
-        <span>${Math.round(lastEntry.avg_automations)}</span>
+        <span>${Math.round(this.lastDataEntry.avg_automations)}</span>
       </div>
       <div class="metric">
         <span>Average users</span>
-        <span>${Math.round(lastEntry.avg_users)}</span>
+        <span>${Math.round(this.lastDataEntry.avg_users)}</span>
       </div>
     </div>`;
   }

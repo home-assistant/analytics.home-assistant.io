@@ -33,6 +33,9 @@ export class AnalyticsElement extends LitElement {
       return html`Loading…`;
     }
 
+    const dataKeys = Object.keys(this._data);
+    const lastDataEntry = this._data[dataKeys[dataKeys.length - 1]];
+
     const lastUpdated = new Date(
       Number(Object.keys(this._data).reverse().slice(0, 1)[0])
     );
@@ -43,11 +46,14 @@ export class AnalyticsElement extends LitElement {
         <analytics-active-installations .data=${this._data}>
         </analytics-active-installations>
         <div class="half">
-          <analytics-versions .data=${this._data}></analytics-versions>
-          <analytics-average .data=${this._data}></analytics-average>
+          <analytics-versions .lastDataEntry=${lastDataEntry}>
+          </analytics-versions>
+          <analytics-average .lastDataEntry=${lastDataEntry}>
+          </analytics-average>
         </div>
 
-        <analytics-integrations .data=${this._data}></analytics-integrations>
+        <analytics-integrations .lastDataEntry=${lastDataEntry}>
+        </analytics-integrations>
       </div>
       <div class="footer">
         <a
