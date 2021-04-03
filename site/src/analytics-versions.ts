@@ -1,36 +1,34 @@
 import "@google-web-components/google-chart";
 import { css, customElement, html, LitElement, property } from "lit-element";
-import { AnalyticsData } from "./data";
+import { Analytics } from "./data";
 
 const isDarkMode = matchMedia("(prefers-color-scheme: dark)").matches;
 const isMobile = matchMedia("(max-width: 600px)").matches;
 
 @customElement("analytics-versions")
 export class AnalyticsVersions extends LitElement {
-  @property({ attribute: false }) public data?: AnalyticsData;
+  @property({ attribute: false }) public lastDataEntry?: Analytics;
 
   render() {
-    if (this.data === undefined) {
+    if (this.lastDataEntry === undefined) {
       return html``;
     }
 
-    const dataKeys = Object.keys(this.data);
-    const lastEntry = this.data[dataKeys[dataKeys.length - 1]];
-
-    const sortedVersions = Object.keys(lastEntry.versions).sort(
-      (a, b) => lastEntry.versions[b] - lastEntry.versions[a]
+    const sortedVersions = Object.keys(this.lastDataEntry.versions).sort(
+      (a, b) =>
+        this.lastDataEntry!.versions[b] - this.lastDataEntry!.versions[a]
     );
 
     const rows = sortedVersions
       .slice(0, 4)
-      .map((version) => [version, lastEntry.versions[version]]);
+      .map((version) => [version, this.lastDataEntry!.versions[version]]);
     rows.push([
       "Other",
       sortedVersions
         .slice(4)
         .reduce(
           (accumulator, currentValue) =>
-            accumulator + lastEntry.versions[currentValue],
+            accumulator + this.lastDataEntry!.versions[currentValue],
           0
         ),
     ]);

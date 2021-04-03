@@ -1,27 +1,24 @@
 import "@google-web-components/google-chart";
 import { css, customElement, html, LitElement, property } from "lit-element";
-import { AnalyticsData } from "./data";
+import { Analytics } from "./data";
 
 const isDarkMode = matchMedia("(prefers-color-scheme: dark)").matches;
 const isMobile = matchMedia("(max-width: 600px)").matches;
 
 @customElement("analytics-installation-types")
 export class AnalyticsInstallationTypes extends LitElement {
-  @property({ attribute: false }) public data?: AnalyticsData;
+  @property({ attribute: false }) public lastDataEntry?: Analytics;
 
   render() {
-    if (this.data === undefined) {
+    if (this.lastDataEntry === undefined) {
       return html``;
     }
 
-    const dataKeys = Object.keys(this.data);
-    const lastEntry = this.data[dataKeys[dataKeys.length - 1]];
-
     const rows = [
-      ["Operating System", lastEntry.installation_types.os],
-      ["Container", lastEntry.installation_types.container],
-      ["Supervised", lastEntry.installation_types.supervised],
-      ["Core", lastEntry.installation_types.core],
+      ["Operating System", this.lastDataEntry.installation_types.os],
+      ["Container", this.lastDataEntry.installation_types.container],
+      ["Supervised", this.lastDataEntry.installation_types.supervised],
+      ["Core", this.lastDataEntry.installation_types.core],
     ];
 
     return html`
