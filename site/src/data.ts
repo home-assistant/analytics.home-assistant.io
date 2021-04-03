@@ -29,6 +29,7 @@ export interface CurrentAnalytics extends Analytics {
 
 export interface IntegrationDetails {
   title: string;
+  quality_scale: string;
 }
 
 export interface IntegrationData {
