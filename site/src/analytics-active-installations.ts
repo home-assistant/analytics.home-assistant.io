@@ -22,8 +22,8 @@ export class AnalyticsActiveInstallations extends LitElement {
       this.data![timestamp].active_installations,
       this.data![timestamp].installation_types.os,
       this.data![timestamp].installation_types.container,
-      this.data![timestamp].installation_types.core,
       this.data![timestamp].installation_types.supervised,
+      this.data![timestamp].installation_types.core,
     ]);
 
     return html`
@@ -34,8 +34,8 @@ export class AnalyticsActiveInstallations extends LitElement {
           { label: "Total", type: "number" },
           { label: "Operating System", type: "number" },
           { label: "Container", type: "number" },
-          { label: "Core", type: "number" },
           { label: "Supervised", type: "number" },
+          { label: "Core", type: "number" },
         ]}
         .options=${{
           title: `${lastEntry.active_installations} Active Home Assistant Installations`,

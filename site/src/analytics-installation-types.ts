@@ -17,6 +17,13 @@ export class AnalyticsInstallationTypes extends LitElement {
     const dataKeys = Object.keys(this.data);
     const lastEntry = this.data[dataKeys[dataKeys.length - 1]];
 
+    const rows = [
+      ["Operating System", lastEntry.installation_types.os],
+      ["Container", lastEntry.installation_types.container],
+      ["Supervised", lastEntry.installation_types.supervised],
+      ["Core", lastEntry.installation_types.core],
+    ];
+
     return html`
       <google-chart
         type="pie"
@@ -26,7 +33,10 @@ export class AnalyticsInstallationTypes extends LitElement {
         ]}
         .options=${{
           title: "Installation types",
-          chartArea: { width: "70%", height: "70%" },
+          chartArea: {
+            width: isMobile ? "100%" : "70%",
+            height: isMobile ? "80%" : "70%",
+          },
           backgroundColor: isDarkMode ? "#111111" : "#fafafa",
           titleTextStyle: {
             color: isDarkMode ? "#e1e1e1" : "#212121",
@@ -39,12 +49,7 @@ export class AnalyticsInstallationTypes extends LitElement {
             },
           },
         }}
-        .rows=${[
-          ["Operating System", lastEntry.installation_types.os],
-          ["Container", lastEntry.installation_types.container],
-          ["Core", lastEntry.installation_types.core],
-          ["Supervised", lastEntry.installation_types.supervised],
-        ]}
+        .rows=${rows}
       >
       </google-chart>
     `;
