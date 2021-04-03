@@ -54,9 +54,6 @@ export class AnalyticsElement extends LitElement {
         <analytics-average .lastDataEntry=${lastDataEntry}></analytics-average>
         <analytics-integrations .lastDataEntry=${lastDataEntry}></analytics-integrations>
         </div>
-
-        <analytics-integrations .lastDataEntry=${lastDataEntry}>
-        </analytics-integrations>
       </div>
       <div class="footer">
         <a
