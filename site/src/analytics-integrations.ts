@@ -55,14 +55,14 @@ export class AnalyticsIntegrations extends LitElement {
         (a, b) =>
           b.installations - a.installations || a.title.localeCompare(b.title)
       )
+      .map((entry, idx) => {
+        return { ...entry, idx };
+      })
       .filter(
         (entry) =>
           this._integrationDetails[entry.domain].quality_scale !== "internal" ||
           this._showInternal
       )
-      .map((entry, idx) => {
-        return { ...entry, idx };
-      })
       .filter((entry) =>
         this._filter
           ? entry.title.toLowerCase().includes(this._filter.toLowerCase()) ||
