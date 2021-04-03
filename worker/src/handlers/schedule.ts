@@ -93,7 +93,7 @@ const generateCurrentDataset = (
       count_users.push(huuid.user_count);
     }
 
-    if (reported_integrations.length === 0) {
+    if (reported_integrations.length) {
       reports_integrations++;
       for (const integration of reported_integrations) {
         if (!integrations[integration]) {
