@@ -31,7 +31,6 @@ export class AnalyticsElement extends LitElement {
   }
 
   render() {
-    console.log("render");
     if (this._error) {
       return html`<p>Could not load data.</p>`;
     }
@@ -48,16 +47,21 @@ export class AnalyticsElement extends LitElement {
       <analytics-header
         @page-changed=${this._pageChanged}
         .currentPage=${this._currentPage}
-      ></analytics-header>
+      >
+      </analytics-header>
       <div class="content">
-        <analytics-active-installations .data=${this._data}>
-        </analytics-active-installations>
-        <div class="half">
-          <analytics-versions .data=${this._data}></analytics-versions>
-          <analytics-average .data=${this._data}></analytics-average>
-        </div>
-
-        <analytics-integrations .data=${this._data}></analytics-integrations>
+        ${this._currentPage === "installations"
+          ? html` <analytics-active-installations .data=${this._data}>
+              </analytics-active-installations>
+              <div class="half">
+                <analytics-versions .data=${this._data}></analytics-versions>
+                <analytics-average .data=${this._data}></analytics-average>
+              </div>`
+          : ""}
+        ${this._currentPage === "integrations"
+          ? html`<analytics-integrations .data=${this._data}>
+            </analytics-integrations>`
+          : ""}
       </div>
       <div class="footer">
         <a
@@ -86,9 +90,7 @@ export class AnalyticsElement extends LitElement {
   }
 
   private _pageChanged(ev: CustomEvent) {
-    const selectedPage = ev.detail;
-    this._currentPage = selectedPage;
-    window.location.hash = selectedPage;
+    this._currentPage = ev.detail;
   }
 
   static styles = css`

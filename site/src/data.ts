@@ -38,13 +38,13 @@ export interface IntegrationData {
   installations: number;
 }
 
-export const AnalyticsPages = ["installations", "test"];
+export const AnalyticsPages = ["installations", "integrations"];
 
 export const fetchData = () =>
   fetch("https://analytics-api.home-assistant.io/v1");
 
 export const fetchIntegrationDetails = () =>
-  fetch("https://www.home-assistant.io/integrations.json", { mode: "no-cors" });
+  fetch("https://www.home-assistant.io/integrations.json");
 
 export const relativeTime = (targetTimestamp: number): string => {
   const now = new Date();

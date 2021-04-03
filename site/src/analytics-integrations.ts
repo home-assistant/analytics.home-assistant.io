@@ -189,8 +189,7 @@ export class AnalyticsIntegrations extends LitElement {
     const dataKeys = Object.keys(this.data!);
     const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
     try {
-      const response = await ((window as any).integrationsPromise ||
-        fetchIntegrationDetails());
+      const response = await fetchIntegrationDetails();
       if (!response.ok) {
         return;
       }

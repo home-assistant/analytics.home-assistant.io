@@ -33,6 +33,7 @@ export class AnalyticsHeader extends LitElement {
     this.dispatchEvent(
       new CustomEvent("page-changed", { detail: selectedPage })
     );
+    window.location.hash = selectedPage;
   }
 
   static styles = css`
@@ -64,6 +65,16 @@ export class AnalyticsHeader extends LitElement {
     .page:hover {
       font-weight: 600;
       border-bottom: 4px solid var(--primary-color);
+    }
+
+    @media only screen and (max-width: 600px) {
+      :host {
+        flex-direction: column;
+        height: 132px;
+      }
+      .pages {
+        margin-top: 0;
+      }
     }
   `;
 }
