@@ -169,8 +169,8 @@ export class AnalyticsIntegrations extends LitElement {
         </mwc-icon-button>
       </div>
       <div class="footer">
-        ${this.lastDataEntry!.reports_integrations || "Unkown"} installations is
-        currently reporting their integration usage
+        ${this.lastDataEntry!.reports_integrations || "Unkown"} installations
+        are currently reporting their integration usage
       </div>
     `;
   }

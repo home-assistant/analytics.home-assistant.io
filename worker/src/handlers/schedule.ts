@@ -68,6 +68,7 @@ const generateCurrentDataset = (
   huuidData: SanitizedPayload[]
 ): CurrentAnalytics => {
   let reports_integrations = 0;
+  let reports_statistics = 0;
   const last_updated = new Date().getTime();
   const installation_types = { os: 0, container: 0, core: 0, supervised: 0 };
   const integrations: Record<string, number> = {};
@@ -107,6 +108,7 @@ const generateCurrentDataset = (
       count_integrations.push(huuid.integration_count);
     }
     if (huuid.state_count) {
+      reports_statistics++;
       count_states.push(huuid.state_count);
     }
     if (huuid.user_count) {
@@ -159,6 +161,7 @@ const generateCurrentDataset = (
     avg_states: average(count_states),
     integrations,
     reports_integrations,
+    reports_statistics,
     addons,
     versions,
   };

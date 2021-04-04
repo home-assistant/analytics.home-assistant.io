@@ -11,23 +11,27 @@ export class AnalyticsAverage extends LitElement {
     }
 
     return html`<div class="grid">
-      <div class="metric">
-        <span>Average integrations</span>
-        <span>${Math.round(this.lastDataEntry.avg_integrations)}</span>
+        <div class="metric">
+          <span>Average integrations</span>
+          <span>${Math.round(this.lastDataEntry.avg_integrations)}</span>
+        </div>
+        <div class="metric">
+          <span>Average entities</span>
+          <span>${Math.round(this.lastDataEntry.avg_states)}</span>
+        </div>
+        <div class="metric">
+          <span>Average automations</span>
+          <span>${Math.round(this.lastDataEntry.avg_automations)}</span>
+        </div>
+        <div class="metric">
+          <span>Average users</span>
+          <span>${Math.round(this.lastDataEntry.avg_users)}</span>
+        </div>
       </div>
-      <div class="metric">
-        <span>Average entities</span>
-        <span>${Math.round(this.lastDataEntry.avg_states)}</span>
-      </div>
-      <div class="metric">
-        <span>Average automations</span>
-        <span>${Math.round(this.lastDataEntry.avg_automations)}</span>
-      </div>
-      <div class="metric">
-        <span>Average users</span>
-        <span>${Math.round(this.lastDataEntry.avg_users)}</span>
-      </div>
-    </div>`;
+      <div class="footer">
+        ${this.lastDataEntry!.reports_statistics || "Unkown"} installations are
+        currently reporting statistics
+      </div>`;
   }
 
   static styles = css`
@@ -38,7 +42,6 @@ export class AnalyticsAverage extends LitElement {
       grid-gap: 16px;
       height: 100%;
       width: 100%;
-      margin-bottom: 32px;
     }
     .metric {
       border-radius: 6px;
@@ -58,6 +61,12 @@ export class AnalyticsAverage extends LitElement {
       padding: 64px 0;
       height: 100%;
       text-align: center;
+    }
+    .footer {
+      color: var(--secondary-text-color);
+      font-style: italic;
+      margin-top: 8px;
+      margin-bottom: 32px;
     }
 
     @media only screen and (max-width: 600px) {

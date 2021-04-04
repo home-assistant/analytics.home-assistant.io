@@ -22,6 +22,7 @@ export interface Analytics {
   installation_types: InstallationTypes;
   integrations: Integrations;
   reports_integrations: number;
+  reports_statistics: number;
   versions: Versions;
 }
 
