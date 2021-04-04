@@ -71,6 +71,7 @@ const generateCurrentDataset = (
   const installation_types = { os: 0, container: 0, core: 0, supervised: 0 };
   const integrations: Record<string, number> = {};
   const addons: Record<string, number> = {};
+  const countries: Record<string, number> = {};
   const versions: Record<string, number> = {};
   const count_addons: number[] = [];
   const count_automations: number[] = [];
@@ -83,6 +84,14 @@ const generateCurrentDataset = (
       versions[huuid.version] = 1;
     } else {
       versions[huuid.version]++;
+    }
+
+    if (huuid.country) {
+      if (!countries[huuid.country]) {
+        countries[huuid.country] = 1;
+      } else {
+        countries[huuid.country]++;
+      }
     }
 
     if (huuid.addon_count) {
@@ -130,6 +139,7 @@ const generateCurrentDataset = (
 
   return {
     last_updated,
+    countries,
     installation_types,
     active_installations:
       installation_types.container +
