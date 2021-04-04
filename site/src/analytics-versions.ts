@@ -1,5 +1,14 @@
 import "@google-web-components/google-chart";
-import { css, customElement, html, LitElement, property } from "lit-element";
+import { GoogleChart } from "@google-web-components/google-chart";
+import {
+  css,
+  customElement,
+  html,
+  LitElement,
+  property,
+  PropertyValues,
+  query,
+} from "lit-element";
 import { Analytics } from "./data";
 
 const isDarkMode = matchMedia("(prefers-color-scheme: dark)").matches;
@@ -8,6 +17,15 @@ const isMobile = matchMedia("(max-width: 600px)").matches;
 @customElement("analytics-versions")
 export class AnalyticsVersions extends LitElement {
   @property({ attribute: false }) public lastDataEntry?: Analytics;
+
+  @query("google-chart") private _chart?: GoogleChart;
+
+  protected firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+    window.addEventListener("resize", () => {
+      this._chart?.redraw();
+    });
+  }
 
   render() {
     if (this.lastDataEntry === undefined) {
