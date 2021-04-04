@@ -33,11 +33,12 @@ export class AnalyticsAverage extends LitElement {
   static styles = css`
     .grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, 1fr);
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: 1;
       grid-gap: 16px;
       height: 100%;
       width: 100%;
+      margin-bottom: 32px;
     }
     .metric {
       border-radius: 6px;
@@ -60,6 +61,9 @@ export class AnalyticsAverage extends LitElement {
     }
 
     @media only screen and (max-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(1, 1fr);
+      }
       span:first-of-type {
         min-height: 84px;
         margin: auto;
