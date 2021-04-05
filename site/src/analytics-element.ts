@@ -12,6 +12,7 @@ import "./analytics-average";
 import "./analytics-integrations";
 import "./analytics-versions";
 import "./analytics-installation-types";
+import "./analytics-map";
 import { AnalyticsData, fetchData, relativeTime } from "./data";
 
 @customElement("analytics-element")
@@ -44,6 +45,7 @@ export class AnalyticsElement extends LitElement {
     return html`
       <h1>Home Assistant Analytics</h1>
       <div class="content">
+        <analytics-map .lastDataEntry=${lastDataEntry}></analytics-map>
         <analytics-active-installations .data=${this._data}>
         </analytics-active-installations>
         <div class="half">
@@ -89,7 +91,6 @@ export class AnalyticsElement extends LitElement {
       height: 100vh;
       width: 100%;
       margin: auto;
-      max-width: 1440px;
     }
     h1 {
       padding: 0 16px;
@@ -105,6 +106,9 @@ export class AnalyticsElement extends LitElement {
     }
     .half {
       display: flex;
+    }
+    .content {
+      margin-top: 720px;
     }
     .content > * {
       margin-bottom: 16px;
@@ -124,6 +128,9 @@ export class AnalyticsElement extends LitElement {
     @media only screen and (max-width: 600px) {
       .half {
         flex-direction: column-reverse;
+      }
+      .content {
+        margin-top: 0;
       }
     }
   `;

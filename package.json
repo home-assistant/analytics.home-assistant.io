@@ -8,7 +8,8 @@
     "@material/mwc-select": "^0.20.0",
     "@mdi/font": "^5.9.55",
     "@mdi/js": "^5.9.55",
-    "lit-element": "^2.4.0"
+    "lit-element": "^2.4.0",
+    "svgmap": "^2.1.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^2.2.1",
