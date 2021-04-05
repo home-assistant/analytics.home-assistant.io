@@ -30,9 +30,6 @@ export class AnalyticsHeader extends LitElement {
   private _pageSelected(ev: CustomEvent) {
     const selectedPage = (ev.currentTarget as any).page;
     this.currentPage = selectedPage;
-    this.dispatchEvent(
-      new CustomEvent("page-changed", { detail: selectedPage })
-    );
     window.location.hash = selectedPage;
   }
 

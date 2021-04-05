@@ -29,6 +29,7 @@ export class AnalyticsElement extends LitElement {
       this._currentPage = window.location.hash.replace("#", "");
     }
     this.getData();
+    window.addEventListener("hashchange", () => this._pageChanged(), false);
   }
 
   render() {
@@ -48,11 +49,7 @@ export class AnalyticsElement extends LitElement {
     );
 
     return html`
-      <analytics-header
-        @page-changed=${this._pageChanged}
-        .currentPage=${this._currentPage}
-      >
-      </analytics-header>
+      <analytics-header .currentPage=${this._currentPage}> </analytics-header>
       <div class="content">
         ${this._currentPage === "installations"
           ? html` <analytics-active-installations .data=${this._data}>
@@ -98,8 +95,11 @@ export class AnalyticsElement extends LitElement {
     }
   }
 
-  private _pageChanged(ev: CustomEvent) {
-    this._currentPage = ev.detail;
+  private _pageChanged() {
+    this._currentPage = this._currentPage = window.location.hash.replace(
+      "#",
+      ""
+    );
   }
 
   static styles = css`
