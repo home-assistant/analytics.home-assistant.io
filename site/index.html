@@ -64,10 +64,14 @@
         margin-bottom: 64px;
       }
       .svgMap-map-wrapper {
-        background-color: "#d9ecff";
+        background-color: #d9ecff !important;
       }
+
       .svgMap-tooltip {
-        background-color: "#fafafa";
+        background-color: #fafafa !important;
+      }
+      .svgMap-tooltip .svgMap-tooltip-content table td span {
+        color: var(--primary-text-color) !important;
       }
 
       @media (prefers-color-scheme: dark) {
@@ -79,11 +83,9 @@
           --divider-color: rgba(225, 225, 225, 0.12);
         }
 
-        .svgMap-map-wrapper {
-          background-color: "#1c1c1c";
-        }
+        .svgMap-map-wrapper,
         .svgMap-tooltip {
-          background-color: "#1c1c1c";
+          background: #1c1c1c !important;
         }
       }
     </style>

@@ -143,7 +143,7 @@ export class AnalyticsElement extends LitElement {
       box-sizing: border-box;
     }
     .footer.with-map {
-      margin-top: 650px;
+      margin-top: 680px;
     }
 
     analytics-versions,
