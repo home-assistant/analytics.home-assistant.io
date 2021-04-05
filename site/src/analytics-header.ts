@@ -74,6 +74,11 @@ export class AnalyticsHeader extends LitElement {
       }
       .pages {
         margin-top: 0;
+        justify-content: space-evenly;
+      }
+      .page {
+        padding: 0;
+        margin: 0;
       }
     }
   `;
