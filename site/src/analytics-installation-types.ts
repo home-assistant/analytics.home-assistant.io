@@ -14,8 +14,8 @@ import { Analytics } from "./data";
 const isDarkMode = matchMedia("(prefers-color-scheme: dark)").matches;
 const isMobile = matchMedia("(max-width: 600px)").matches;
 
-@customElement("analytics-versions")
-export class AnalyticsVersions extends LitElement {
+@customElement("analytics-installation-types")
+export class AnalyticsInstallationTypes extends LitElement {
   @property({ attribute: false }) public lastDataEntry?: Analytics;
 
   @query("google-chart") private _chart?: GoogleChart;
@@ -32,37 +32,31 @@ export class AnalyticsVersions extends LitElement {
       return html``;
     }
 
-    const sortedVersions = Object.keys(this.lastDataEntry.versions).sort(
-      (a, b) =>
-        this.lastDataEntry!.versions[b] - this.lastDataEntry!.versions[a]
-    );
-
-    const rows = sortedVersions
-      .slice(0, 4)
-      .map((version) => [version, this.lastDataEntry!.versions[version]]);
-    rows.push([
-      "Other",
-      sortedVersions
-        .slice(4)
-        .reduce(
-          (accumulator, currentValue) =>
-            accumulator + this.lastDataEntry!.versions[currentValue],
-          0
-        ),
-    ]);
+    const rows = [
+      ["Operating System", this.lastDataEntry.installation_types.os],
+      ["Container", this.lastDataEntry.installation_types.container],
+      ["Supervised", this.lastDataEntry.installation_types.supervised],
+      ["Core", this.lastDataEntry.installation_types.core],
+    ];
 
     return html`
       <google-chart
         type="pie"
         .cols=${[
-          { label: "Version", type: "string" },
+          { label: "Installation type", type: "string" },
           { label: "Count", type: "number" },
         ]}
         .options=${{
-          title: "Top 5 used versions",
+          title: "Installation types",
           chartArea: {
             width: isMobile ? "100%" : "70%",
             height: isMobile ? "80%" : "70%",
+          },
+          slices: {
+            0: { color: "#dc3912" },
+            1: { color: "#ff9900" },
+            2: { color: "#109618" },
+            3: { color: "#990099" },
           },
           backgroundColor: isDarkMode ? "#111111" : "#fafafa",
           titleTextStyle: {
@@ -98,6 +92,6 @@ export class AnalyticsVersions extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "analytics-versions": AnalyticsVersions;
+    "analytics-installation-types": AnalyticsInstallationTypes;
   }
 }

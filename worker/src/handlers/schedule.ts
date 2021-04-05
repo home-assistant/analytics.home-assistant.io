@@ -5,6 +5,7 @@ import { average } from "../utils/average";
 import { formatDate } from "../utils/date";
 
 export async function handleSchedule(event: ScheduledEvent): Promise<void> {
+  const core_analytics: Record<string, any> = {};
   const storedAnalytics =
     (await KV.get<{ [key: string]: CurrentAnalytics }>(
       "core_analytics",
@@ -22,9 +23,19 @@ export async function handleSchedule(event: ScheduledEvent): Promise<void> {
     currentDate.hour
   );
   const timestampString = String(currentDateObj.getTime());
-  storedAnalytics[timestampString] = currentDataset;
+  const storeKey = `history:${timestampString}`;
 
-  await KV.put("core_analytics", JSON.stringify(storedAnalytics));
+  for (const key of Object.keys(storedAnalytics)) {
+    core_analytics[key] = {
+      active_installations: storedAnalytics[key].active_installations,
+      installation_types: storedAnalytics[key].installation_types,
+    };
+  }
+
+  core_analytics[timestampString] = currentDataset;
+
+  await KV.put(storeKey, JSON.stringify(currentDataset));
+  await KV.put("core_analytics", JSON.stringify(core_analytics));
 }
 
 async function listStoredData(): Promise<SanitizedPayload[]> {
@@ -60,6 +71,7 @@ const generateCurrentDataset = (
   const installation_types = { os: 0, container: 0, core: 0, supervised: 0 };
   const integrations: Record<string, number> = {};
   const addons: Record<string, number> = {};
+  const countries: Record<string, number> = {};
   const versions: Record<string, number> = {};
   const count_addons: number[] = [];
   const count_automations: number[] = [];
@@ -72,6 +84,14 @@ const generateCurrentDataset = (
       versions[huuid.version] = 1;
     } else {
       versions[huuid.version]++;
+    }
+
+    if (huuid.country) {
+      if (!countries[huuid.country]) {
+        countries[huuid.country] = 1;
+      } else {
+        countries[huuid.country]++;
+      }
     }
 
     if (huuid.addon_count) {
@@ -119,6 +139,7 @@ const generateCurrentDataset = (
 
   return {
     last_updated,
+    countries,
     installation_types,
     active_installations:
       installation_types.container +

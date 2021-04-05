@@ -1,5 +1,14 @@
 import "@google-web-components/google-chart";
-import { css, customElement, html, LitElement, property } from "lit-element";
+import type { GoogleChart } from "@google-web-components/google-chart";
+import {
+  css,
+  customElement,
+  html,
+  LitElement,
+  property,
+  PropertyValues,
+  query,
+} from "lit-element";
 import { AnalyticsData } from "./data";
 
 const isDarkMode = matchMedia("(prefers-color-scheme: dark)").matches;
@@ -8,6 +17,15 @@ const isMobile = matchMedia("(max-width: 600px)").matches;
 @customElement("analytics-active-installations")
 export class AnalyticsActiveInstallations extends LitElement {
   @property({ attribute: false }) public data?: AnalyticsData;
+
+  @query("google-chart") private _chart?: GoogleChart;
+
+  protected firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+    window.addEventListener("resize", () => {
+      this._chart?.redraw();
+    });
+  }
 
   render() {
     if (this.data === undefined) {
@@ -22,8 +40,8 @@ export class AnalyticsActiveInstallations extends LitElement {
       this.data![timestamp].active_installations,
       this.data![timestamp].installation_types.os,
       this.data![timestamp].installation_types.container,
-      this.data![timestamp].installation_types.core,
       this.data![timestamp].installation_types.supervised,
+      this.data![timestamp].installation_types.core,
     ]);
 
     return html`
@@ -34,13 +52,20 @@ export class AnalyticsActiveInstallations extends LitElement {
           { label: "Total", type: "number" },
           { label: "Operating System", type: "number" },
           { label: "Container", type: "number" },
-          { label: "Core", type: "number" },
           { label: "Supervised", type: "number" },
+          { label: "Core", type: "number" },
         ]}
         .options=${{
           title: `${lastEntry.active_installations} Active Home Assistant Installations`,
           chartArea: { width: "70%", height: "80%" },
           backgroundColor: isDarkMode ? "#111111" : "#fafafa",
+          series: {
+            0: { color: "#3366cc" },
+            1: { color: "#dc3912" },
+            2: { color: "#ff9900" },
+            3: { color: "#109618" },
+            4: { color: "#990099" },
+          },
           titleTextStyle: {
             color: isDarkMode ? "#e1e1e1" : "#212121",
           },
