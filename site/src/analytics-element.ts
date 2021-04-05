@@ -25,11 +25,10 @@ export class AnalyticsElement extends LitElement {
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
-    if (window.location.hash) {
-      this._currentPage = window.location.hash.replace("#", "");
-    }
     this.getData();
+    this._pageChanged();
     window.addEventListener("hashchange", () => this._pageChanged(), false);
+    window.addEventListener("backbutton", () => this._pageChanged(), false);
   }
 
   render() {
@@ -96,10 +95,8 @@ export class AnalyticsElement extends LitElement {
   }
 
   private _pageChanged() {
-    this._currentPage = this._currentPage = window.location.hash.replace(
-      "#",
-      ""
-    );
+    this._currentPage = this._currentPage =
+      window.location.hash.replace("#", "") || "installations";
   }
 
   static styles = css`
