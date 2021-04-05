@@ -7,23 +7,32 @@ import {
   internalProperty,
   PropertyValues,
 } from "lit-element";
+import { classMap } from "lit-html/directives/class-map";
 import "./analytics-active-installations";
 import "./analytics-average";
 import "./analytics-integrations";
 import "./analytics-versions";
+import "./analytics-header";
 import "./analytics-installation-types";
 import "./analytics-map";
 import { AnalyticsData, fetchData, relativeTime } from "./data";
 
+const isMobile = matchMedia("(max-width: 600px)").matches;
+
 @customElement("analytics-element")
 export class AnalyticsElement extends LitElement {
   @internalProperty() private _data?: AnalyticsData;
+
+  @internalProperty() private _currentPage = "installations";
 
   @internalProperty() private _error: boolean = false;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
     this.getData();
+    this._pageChanged();
+    window.addEventListener("hashchange", () => this._pageChanged(), false);
+    window.addEventListener("backbutton", () => this._pageChanged(), false);
   }
 
   render() {
@@ -42,32 +51,43 @@ export class AnalyticsElement extends LitElement {
       Number(Object.keys(this._data).reverse().slice(0, 1)[0])
     );
 
+    const showMap = !isMobile && this._currentPage === "installations";
+
     return html`
-      <h1>Home Assistant Analytics</h1>
+      <analytics-header .currentPage=${this._currentPage}> </analytics-header>
       <div class="content">
-        <analytics-map .lastDataEntry=${lastDataEntry}></analytics-map>
-        <analytics-active-installations .data=${this._data}>
-        </analytics-active-installations>
-        <div class="half">
-          <analytics-versions .lastDataEntry=${lastDataEntry}>
-          </analytics-versions>
-          <analytics-installation-types .lastDataEntry=${lastDataEntry}>
-          </analytics-installation-types>
-        </div>
-        <analytics-average .lastDataEntry=${lastDataEntry}></analytics-average>
-        <analytics-integrations
-          .lastDataEntry=${lastDataEntry}
-        ></analytics-integrations>
+        ${this._currentPage === "installations"
+          ? html`
+              <analytics-active-installations .data=${this._data}>
+              </analytics-active-installations>
+              <div class="half">
+                <analytics-versions .lastDataEntry=${lastDataEntry}>
+                </analytics-versions>
+                <analytics-installation-types .lastDataEntry=${lastDataEntry}>
+                </analytics-installation-types>
+              </div>
+            `
+          : this._currentPage === "statistics"
+          ? html`<analytics-average
+              .lastDataEntry=${lastDataEntry}
+            ></analytics-average>`
+          : this._currentPage === "integrations"
+          ? html`<analytics-integrations .lastDataEntry=${lastDataEntry}>
+            </analytics-integrations>`
+          : ""}
       </div>
-      <div class="footer">
+      <analytics-map .lastDataEntry=${lastDataEntry} .showMap=${showMap}>
+      </analytics-map>
+      <div class="footer ${classMap({ "with-map": showMap })}">
         <a
           title="Documentation"
           href="https://rc.home-assistant.io/integrations/analytics"
           target="_blank"
           rel="noreferrer"
         >
-          Learn more about how this data is gathered</a
-        >Last updated: ${relativeTime(lastUpdated.getTime())}
+          Learn more about how this data is gathered
+        </a>
+        Last updated: ${relativeTime(lastUpdated.getTime())}
       </div>
     `;
   }
@@ -85,12 +105,18 @@ export class AnalyticsElement extends LitElement {
     }
   }
 
+  private _pageChanged() {
+    this._currentPage = this._currentPage =
+      window.location.hash.replace("#", "") || "installations";
+  }
+
   static styles = css`
     :host {
       display: block;
       height: 100vh;
       width: 100%;
       margin: auto;
+      margin-bottom: -200px;
     }
     h1 {
       padding: 0 16px;
@@ -107,9 +133,6 @@ export class AnalyticsElement extends LitElement {
     .half {
       display: flex;
     }
-    .content {
-      margin-top: 720px;
-    }
     .content > * {
       margin-bottom: 16px;
     }
@@ -118,6 +141,9 @@ export class AnalyticsElement extends LitElement {
       justify-content: space-between;
       padding: 16px;
       box-sizing: border-box;
+    }
+    .footer.with-map {
+      margin-top: 650px;
     }
 
     analytics-versions,
@@ -129,8 +155,11 @@ export class AnalyticsElement extends LitElement {
       .half {
         flex-direction: column-reverse;
       }
-      .content {
+      .footer {
         margin-top: 0;
+      }
+      :host {
+        margin-bottom: 0;
       }
     }
   `;

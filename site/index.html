@@ -58,6 +58,17 @@
         max-width: 1440px;
         margin: auto;
       }
+      #svgMap {
+        width: 1440px;
+        height: 720px;
+        margin-bottom: 64px;
+      }
+      .svgMap-map-wrapper {
+        background-color: "#d9ecff";
+      }
+      .svgMap-tooltip {
+        background-color: "#fafafa";
+      }
 
       @media (prefers-color-scheme: dark) {
         :root {
@@ -67,16 +78,21 @@
           --secondary-background-color: #202020;
           --divider-color: rgba(225, 225, 225, 0.12);
         }
+
+        .svgMap-map-wrapper {
+          background-color: "#1c1c1c";
+        }
+        .svgMap-tooltip {
+          background-color: "#1c1c1c";
+        }
       }
     </style>
   </head>
   <body>
     <script>
       window.dataPromise = fetch("https://analytics-api.home-assistant.io/v1");
-      window.integrationsPromise = fetch(
-        "https://www.home-assistant.io/integrations.json"
-      );
     </script>
     <analytics-element></analytics-element>
+    <div id="svgMap"></div>
   </body>
 </html>
