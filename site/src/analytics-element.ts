@@ -28,7 +28,6 @@ export class AnalyticsElement extends LitElement {
     this.getData();
     this._pageChanged();
     window.addEventListener("hashchange", () => this._pageChanged(), false);
-    window.addEventListener("backbutton", () => this._pageChanged(), false);
   }
 
   render() {
@@ -95,7 +94,7 @@ export class AnalyticsElement extends LitElement {
   }
 
   private _pageChanged() {
-    this._currentPage = this._currentPage =
+    this._currentPage =
       window.location.hash.replace("#", "") || "installations";
   }
 
