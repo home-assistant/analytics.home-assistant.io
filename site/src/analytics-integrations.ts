@@ -151,24 +151,25 @@ export class AnalyticsIntegrations extends LitElement {
               </mwc-list-item> `
           )}
         </mwc-select>
-
-        <mwc-icon-button
-          .disabled=${this._currentTablePage === 0}
-          @click=${this._prevPage}
-        >
-          <svg>
-            <path d=${mdiChevronLeft} />
-          </svg>
-        </mwc-icon-button>
-        <div>${tableStart + 1}-${tableEnd} of ${sortedTableData.length}</div>
-        <mwc-icon-button
-          .disabled=${tableData.length < this._currentTableSize}
-          @click=${this._nextPage}
-        >
-          <svg>
-            <path d=${mdiChevronRight} />
-          </svg>
-        </mwc-icon-button>
+        <div class="footer-controls">
+          <mwc-icon-button
+            .disabled=${this._currentTablePage === 0}
+            @click=${this._prevPage}
+          >
+            <svg>
+              <path d=${mdiChevronLeft} />
+            </svg>
+          </mwc-icon-button>
+          <div>${tableStart + 1}-${tableEnd} of ${sortedTableData.length}</div>
+          <mwc-icon-button
+            .disabled=${tableData.length < this._currentTableSize}
+            @click=${this._nextPage}
+          >
+            <svg>
+              <path d=${mdiChevronRight} />
+            </svg>
+          </mwc-icon-button>
+        </div>
       </div>
       <div class="footer">
         ${this.lastDataEntry!.reports_integrations || "Unkown"} installations
@@ -267,9 +268,23 @@ export class AnalyticsIntegrations extends LitElement {
       border-top: 1px solid var(--divider-color);
       font-size: 12px;
       font-weight: normal;
-      padding: 16px 0 0 16px;
+      padding-top: 16px;
       display: flex;
-      width: calc(100% - 32px);
+    }
+    @media only screen and (max-width: 600px) {
+      td,
+      th {
+        padding: 16px 8px;
+      }
+      .table-footer {
+        flex-direction: column;
+      }
+      .footer-controls {
+        justify-content: space-between;
+      }
+    }
+    .footer-controls {
+      display: flex;
       align-items: center;
     }
     .idx {
