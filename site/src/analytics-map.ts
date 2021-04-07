@@ -1,17 +1,17 @@
 import svgMap from "svgmap";
 import "svgmap/dist/svgMap.min.css";
-import { customElement, LitElement, property } from "lit-element";
+import { customElement, UpdatingElement, property } from "lit-element";
 import { Analytics } from "./data";
 
 const isDarkMode = matchMedia("(prefers-color-scheme: dark)").matches;
 
 @customElement("analytics-map")
-export class AnalyticsMap extends LitElement {
+export class AnalyticsMap extends UpdatingElement {
   @property({ type: Boolean }) public showMap = true;
 
   @property({ attribute: false }) public lastDataEntry?: Analytics;
 
-  protected updated() {
+  protected update() {
     const oldMap = window.document.body.querySelector<HTMLDivElement>(
       "#svgMap"
     );
