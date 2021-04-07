@@ -39,33 +39,33 @@ export async function handleSchedule(event: ScheduledEvent): Promise<void> {
 }
 
 async function listStoredData(): Promise<SanitizedPayload[]> {
-  const huuidList: Set<string> = new Set();
-  const huuidData: SanitizedPayload[] = [];
+  const uuidList: Set<string> = new Set();
+  const uuidData: SanitizedPayload[] = [];
 
   let lastResponse;
   while (lastResponse === undefined || !lastResponse.list_complete) {
     lastResponse = await KV.list({
-      prefix: "huuid",
+      prefix: "uuid",
       cursor: lastResponse !== undefined ? lastResponse.cursor : undefined,
     });
 
     for (const key of lastResponse.keys) {
-      huuidList.add(key.name);
+      uuidList.add(key.name);
     }
   }
 
-  for (const huuid of huuidList) {
-    const payload = await KV.get<SanitizedPayload>(huuid, "json");
+  for (const storageKey of uuidList) {
+    const payload = await KV.get<SanitizedPayload>(storageKey, "json");
     if (payload) {
-      huuidData.push(payload);
+      uuidData.push(payload);
     }
   }
 
-  return huuidData;
+  return uuidData;
 }
 
 const generateCurrentDataset = (
-  huuidData: SanitizedPayload[]
+  uuidData: SanitizedPayload[]
 ): CurrentAnalytics => {
   let reports_integrations = 0;
   let reports_statistics = 0;
@@ -81,38 +81,38 @@ const generateCurrentDataset = (
   const count_states: number[] = [];
   const count_users: number[] = [];
 
-  for (const huuid of huuidData) {
-    const reported_integrations = huuid.integrations || [];
+  for (const uuid of uuidData) {
+    const reported_integrations = uuid.integrations || [];
 
-    if (!versions[huuid.version]) {
-      versions[huuid.version] = 1;
+    if (!versions[uuid.version]) {
+      versions[uuid.version] = 1;
     } else {
-      versions[huuid.version]++;
+      versions[uuid.version]++;
     }
 
-    if (huuid.country) {
-      if (!countries[huuid.country]) {
-        countries[huuid.country] = 1;
+    if (uuid.country) {
+      if (!countries[uuid.country]) {
+        countries[uuid.country] = 1;
       } else {
-        countries[huuid.country]++;
+        countries[uuid.country]++;
       }
     }
 
-    if (huuid.addon_count) {
-      count_addons.push(huuid.addon_count);
+    if (uuid.addon_count) {
+      count_addons.push(uuid.addon_count);
     }
-    if (huuid.automation_count) {
-      count_automations.push(huuid.automation_count);
+    if (uuid.automation_count) {
+      count_automations.push(uuid.automation_count);
     }
-    if (huuid.integration_count) {
-      count_integrations.push(huuid.integration_count);
+    if (uuid.integration_count) {
+      count_integrations.push(uuid.integration_count);
     }
-    if (huuid.state_count) {
+    if (uuid.state_count) {
       reports_statistics++;
-      count_states.push(huuid.state_count);
+      count_states.push(uuid.state_count);
     }
-    if (huuid.user_count) {
-      count_users.push(huuid.user_count);
+    if (uuid.user_count) {
+      count_users.push(uuid.user_count);
     }
 
     if (reported_integrations.length) {
@@ -126,7 +126,7 @@ const generateCurrentDataset = (
       }
     }
 
-    for (const addon of huuid.addons || []) {
+    for (const addon of uuid.addons || []) {
       if (!addons[addon.slug]) {
         addons[addon.slug] = 1;
       } else {
@@ -134,13 +134,13 @@ const generateCurrentDataset = (
       }
     }
 
-    if (huuid.installation_type === "Home Assistant OS") {
+    if (uuid.installation_type === "Home Assistant OS") {
       installation_types.os++;
-    } else if (huuid.installation_type === "Home Assistant Container") {
+    } else if (uuid.installation_type === "Home Assistant Container") {
       installation_types.container++;
-    } else if (huuid.installation_type === "Home Assistant Core") {
+    } else if (uuid.installation_type === "Home Assistant Core") {
       installation_types.core++;
-    } else if (huuid.installation_type === "Home Assistant Supervised") {
+    } else if (uuid.installation_type === "Home Assistant Supervised") {
       installation_types.supervised++;
     }
   }
