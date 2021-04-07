@@ -52,6 +52,8 @@ export class AnalyticsHeader extends LitElement {
       text-transform: uppercase;
       display: flex;
       align-items: center;
+      align-items: flex-end;
+      line-height: 28px;
       height: 100%;
       padding: 0 4px;
       margin: 0 16px;
@@ -66,7 +68,6 @@ export class AnalyticsHeader extends LitElement {
     @media only screen and (max-width: 600px) {
       :host {
         flex-direction: column;
-        height: 132px;
       }
       .pages {
         margin-top: 0;
