@@ -11,12 +11,13 @@ import {
 } from "lit-element";
 import { Analytics } from "./data";
 
-const isDarkMode = matchMedia("(prefers-color-scheme: dark)").matches;
-const isMobile = matchMedia("(max-width: 600px)").matches;
-
 @customElement("analytics-versions")
 export class AnalyticsVersions extends LitElement {
   @property({ attribute: false }) public lastDataEntry?: Analytics;
+
+  @property({ type: Boolean }) public isMobile = false;
+
+  @property({ type: Boolean }) public isDarkMode = false;
 
   @query("google-chart") private _chart?: GoogleChart;
 
@@ -38,12 +39,12 @@ export class AnalyticsVersions extends LitElement {
     );
 
     const rows = sortedVersions
-      .slice(0, 4)
+      .slice(0, 5)
       .map((version) => [version, this.lastDataEntry!.versions[version]]);
     rows.push([
       "Other",
       sortedVersions
-        .slice(4)
+        .slice(5)
         .reduce(
           (accumulator, currentValue) =>
             accumulator + this.lastDataEntry!.versions[currentValue],
@@ -61,18 +62,18 @@ export class AnalyticsVersions extends LitElement {
         .options=${{
           title: "Top 5 used versions",
           chartArea: {
-            width: isMobile ? "100%" : "70%",
-            height: isMobile ? "80%" : "70%",
+            width: this.isMobile ? "100%" : "70%",
+            height: this.isMobile ? "80%" : "70%",
           },
-          backgroundColor: isDarkMode ? "#111111" : "#fafafa",
+          backgroundColor: this.isDarkMode ? "#111111" : "#fafafa",
           titleTextStyle: {
-            color: isDarkMode ? "#e1e1e1" : "#212121",
+            color: this.isDarkMode ? "#e1e1e1" : "#212121",
           },
           legend: {
-            position: isMobile ? "top" : "right",
+            position: this.isMobile ? "top" : "right",
             alignment: "start",
             textStyle: {
-              color: isDarkMode ? "#e1e1e1" : "#212121",
+              color: this.isDarkMode ? "#e1e1e1" : "#212121",
             },
           },
         }}
@@ -85,13 +86,15 @@ export class AnalyticsVersions extends LitElement {
   static styles = css`
     :host {
       display: block;
-      width: calc(100% - 32px);
-      margin: 16px;
     }
-
     google-chart {
       height: 500px;
       width: 100%;
+    }
+    @media only screen and (max-width: 1000px) and (min-width: 600px) {
+      google-chart {
+        height: 300px;
+      }
     }
   `;
 }
