@@ -12,6 +12,7 @@ export type AnalyticsData = Record<string, Analytics>;
 
 export interface Analytics {
   active_installations: number;
+  countries: Record<string, number>;
   addons: Addons;
   avg_addons: number;
   avg_automations: number;
@@ -20,6 +21,8 @@ export interface Analytics {
   avg_users: number;
   installation_types: InstallationTypes;
   integrations: Integrations;
+  reports_integrations: number;
+  reports_statistics: number;
   versions: Versions;
 }
 
@@ -29,6 +32,7 @@ export interface CurrentAnalytics extends Analytics {
 
 export interface IntegrationDetails {
   title: string;
+  quality_scale: string;
 }
 
 export interface IntegrationData {
@@ -37,11 +41,13 @@ export interface IntegrationData {
   installations: number;
 }
 
+export const AnalyticsPages = ["installations", "statistics", "integrations"];
+
 export const fetchData = () =>
   fetch("https://analytics-api.home-assistant.io/v1");
 
 export const fetchIntegrationDetails = () =>
-  fetch("https://www.home-assistant.io/integrations.json", { mode: "no-cors" });
+  fetch("https://www.home-assistant.io/integrations.json");
 
 export const relativeTime = (targetTimestamp: number): string => {
   const now = new Date();

@@ -7,36 +7,38 @@ import {
 import { daysToSeconds } from "../utils/date";
 import { deepEqual } from "../utils/deep-equal";
 
-const updateThreshold = daysToSeconds(30); // 7 days in seconds
-const expirationTtl = daysToSeconds(60); // 8 days in seconds
+const updateThreshold = daysToSeconds(30);
+const expirationTtl = daysToSeconds(60);
 
 export async function handlePost(request: Request): Promise<Response> {
   const payload = await request.json();
-  if (!payload.huuid) {
+  if (!payload.uuid) {
     return new Response(null, { status: 400 });
   }
 
-  const storageKey = `huuid:${payload.huuid}`;
+  const storageKey = `uuid:${payload.uuid}`;
+  const country = request.headers.get("cf-ipcountry");
 
-  const sanitizedPayload = sanitizePayload(payload);
+  let sanitizedPayload: SanitizedPayload;
 
-  if (sanitizedPayload instanceof Response) {
-    // Sanitize failed, return the prepared response
-    return sanitizedPayload;
+  try {
+    sanitizedPayload = sanitizePayload(payload, country);
+  } catch (err) {
+    return new Response(err.message, { status: 400 });
   }
 
   const currentTimestamp = new Date().getTime();
 
   // Get the current stored data for the storageKey if any
-  const stored = JSON.parse(await KV.get(storageKey));
+  const stored = await KV.get<SanitizedPayload>(storageKey, "json");
 
   if (!stored) {
-    // First contact for HUUID, store payload
+    // First contact for UUID, store payload
     await storePayload(storageKey, sanitizedPayload, currentTimestamp);
     return new Response();
   }
 
-  const lastWrite = stored.last_write;
+  const lastWrite = stored.last_write!;
   delete stored.last_write;
 
   if (deepEqual(stored, sanitizedPayload)) {
@@ -51,28 +53,28 @@ export async function handlePost(request: Request): Promise<Response> {
 }
 
 async function storePayload(
-  huuid: string,
+  storageKey: string,
   payload: SanitizedPayload,
   currentTimestamp: number
 ) {
   await KV.put(
-    huuid,
+    storageKey,
     JSON.stringify({ ...payload, last_write: currentTimestamp }),
     { expirationTtl }
   );
 }
 
-const sanitizePayload = (payload: any): SanitizedPayload | Response => {
+const sanitizePayload = (
+  payload: any,
+  country: string | null
+): SanitizedPayload => {
   if (!payload.installation_type || !payload.version) {
-    return new Response("Missing required keys in the payload", {
-      status: 400,
-    });
+    throw new Error("Missing required keys in the payload");
   }
 
   if (!InstallationTypes.includes(payload.installation_type)) {
-    return new Response(
-      `${String(payload.installation_type)} is not a valid instalaltion type`,
-      { status: 400 }
+    throw new Error(
+      `${String(payload.installation_type)} is not a valid instalaltion type`
     );
   }
 
@@ -87,16 +89,12 @@ const sanitizePayload = (payload: any): SanitizedPayload | Response => {
         if (typeof integration === "string" || integration instanceof String) {
           continue;
         } else {
-          return new Response(
-            `${String(integration)} is not a valid integration`,
-            {
-              status: 400,
-            }
-          );
+          throw new Error(`${String(integration)} is not a valid integration`);
         }
       }
     }
   }
 
+  payload.country = country;
   return payload;
 };

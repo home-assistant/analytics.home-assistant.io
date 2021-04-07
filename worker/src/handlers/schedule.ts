@@ -5,7 +5,12 @@ import { average } from "../utils/average";
 import { formatDate } from "../utils/date";
 
 export async function handleSchedule(event: ScheduledEvent): Promise<void> {
-  const storedAnalytics = JSON.parse(await KV.get("core_analytics")) || {};
+  const core_analytics: Record<string, any> = {};
+  const storedAnalytics =
+    (await KV.get<{ [key: string]: CurrentAnalytics }>(
+      "core_analytics",
+      "json"
+    )) || {};
   const storedData = await listStoredData();
   console.log(JSON.stringify(storedData));
   const currentDataset: CurrentAnalytics = generateCurrentDataset(storedData);
@@ -18,42 +23,57 @@ export async function handleSchedule(event: ScheduledEvent): Promise<void> {
     currentDate.hour
   );
   const timestampString = String(currentDateObj.getTime());
-  storedAnalytics[timestampString] = currentDataset;
+  const storeKey = `history:${timestampString}`;
 
-  await KV.put("core_analytics", JSON.stringify(storedAnalytics));
+  for (const key of Object.keys(storedAnalytics)) {
+    core_analytics[key] = {
+      active_installations: storedAnalytics[key].active_installations,
+      installation_types: storedAnalytics[key].installation_types,
+    };
+  }
+
+  core_analytics[timestampString] = currentDataset;
+
+  await KV.put(storeKey, JSON.stringify(currentDataset));
+  await KV.put("core_analytics", JSON.stringify(core_analytics));
 }
 
 async function listStoredData(): Promise<SanitizedPayload[]> {
-  const huuidList: string[] = [];
-  const huuidData: SanitizedPayload[] = [];
+  const uuidList: Set<string> = new Set();
+  const uuidData: SanitizedPayload[] = [];
 
   let lastResponse;
-  while (lastResponse == undefined || !lastResponse.list_complete) {
-    // @ts-expect-error - Wrong type on list function
+  while (lastResponse === undefined || !lastResponse.list_complete) {
     lastResponse = await KV.list({
-      prefix: lastResponse === undefined ? "huuid" : null,
-      cusor: lastResponse !== undefined ? lastResponse.cursor : null,
+      prefix: "uuid",
+      cursor: lastResponse !== undefined ? lastResponse.cursor : undefined,
     });
 
     for (const key of lastResponse.keys) {
-      huuidList.push(key.name);
+      uuidList.add(key.name);
     }
   }
 
-  for (const huuid of huuidList) {
-    huuidData.push(JSON.parse(await KV.get(huuid)));
+  for (const storageKey of uuidList) {
+    const payload = await KV.get<SanitizedPayload>(storageKey, "json");
+    if (payload) {
+      uuidData.push(payload);
+    }
   }
 
-  return huuidData;
+  return uuidData;
 }
 
 const generateCurrentDataset = (
-  huuidData: SanitizedPayload[]
+  uuidData: SanitizedPayload[]
 ): CurrentAnalytics => {
+  let reports_integrations = 0;
+  let reports_statistics = 0;
   const last_updated = new Date().getTime();
   const installation_types = { os: 0, container: 0, core: 0, supervised: 0 };
   const integrations: Record<string, number> = {};
   const addons: Record<string, number> = {};
+  const countries: Record<string, number> = {};
   const versions: Record<string, number> = {};
   const count_addons: number[] = [];
   const count_automations: number[] = [];
@@ -61,38 +81,52 @@ const generateCurrentDataset = (
   const count_states: number[] = [];
   const count_users: number[] = [];
 
-  for (const huuid of huuidData) {
-    if (!versions[huuid.version]) {
-      versions[huuid.version] = 1;
+  for (const uuid of uuidData) {
+    const reported_integrations = uuid.integrations || [];
+
+    if (!versions[uuid.version]) {
+      versions[uuid.version] = 1;
     } else {
-      versions[huuid.version]++;
+      versions[uuid.version]++;
     }
 
-    if (huuid.addon_count) {
-      count_addons.push(huuid.addon_count);
-    }
-    if (huuid.automation_count) {
-      count_automations.push(huuid.automation_count);
-    }
-    if (huuid.integration_count) {
-      count_integrations.push(huuid.integration_count);
-    }
-    if (huuid.state_count) {
-      count_states.push(huuid.state_count);
-    }
-    if (huuid.user_count) {
-      count_users.push(huuid.user_count);
-    }
-
-    for (const integration of huuid.integrations || []) {
-      if (!integrations[integration]) {
-        integrations[integration] = 1;
+    if (uuid.country) {
+      if (!countries[uuid.country]) {
+        countries[uuid.country] = 1;
       } else {
-        integrations[integration]++;
+        countries[uuid.country]++;
       }
     }
 
-    for (const addon of huuid.addons || []) {
+    if (uuid.addon_count) {
+      count_addons.push(uuid.addon_count);
+    }
+    if (uuid.automation_count) {
+      count_automations.push(uuid.automation_count);
+    }
+    if (uuid.integration_count) {
+      count_integrations.push(uuid.integration_count);
+    }
+    if (uuid.state_count) {
+      reports_statistics++;
+      count_states.push(uuid.state_count);
+    }
+    if (uuid.user_count) {
+      count_users.push(uuid.user_count);
+    }
+
+    if (reported_integrations.length) {
+      reports_integrations++;
+      for (const integration of reported_integrations) {
+        if (!integrations[integration]) {
+          integrations[integration] = 1;
+        } else {
+          integrations[integration]++;
+        }
+      }
+    }
+
+    for (const addon of uuid.addons || []) {
       if (!addons[addon.slug]) {
         addons[addon.slug] = 1;
       } else {
@@ -100,19 +134,20 @@ const generateCurrentDataset = (
       }
     }
 
-    if (huuid.installation_type === "Home Assistant OS") {
+    if (uuid.installation_type === "Home Assistant OS") {
       installation_types.os++;
-    } else if (huuid.installation_type === "Home Assistant Container") {
+    } else if (uuid.installation_type === "Home Assistant Container") {
       installation_types.container++;
-    } else if (huuid.installation_type === "Home Assistant Core") {
+    } else if (uuid.installation_type === "Home Assistant Core") {
       installation_types.core++;
-    } else if (huuid.installation_type === "Home Assistant Supervised") {
+    } else if (uuid.installation_type === "Home Assistant Supervised") {
       installation_types.supervised++;
     }
   }
 
   return {
     last_updated,
+    countries,
     installation_types,
     active_installations:
       installation_types.container +
@@ -125,6 +160,8 @@ const generateCurrentDataset = (
     avg_addons: average(count_addons),
     avg_states: average(count_states),
     integrations,
+    reports_integrations,
+    reports_statistics,
     addons,
     versions,
   };

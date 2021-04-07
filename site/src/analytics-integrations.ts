@@ -1,3 +1,5 @@
+import "@material/mwc-checkbox";
+import "@material/mwc-formfield";
 import "@material/mwc-icon-button";
 import "@material/mwc-list/mwc-list-item";
 import "@material/mwc-select";
@@ -12,7 +14,7 @@ import {
   PropertyValues,
 } from "lit-element";
 import {
-  AnalyticsData,
+  Analytics,
   fetchIntegrationDetails,
   IntegrationData,
   IntegrationDetails,
@@ -22,7 +24,7 @@ const isMobile = matchMedia("(max-width: 600px)").matches;
 
 @customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {
-  @property({ attribute: false }) public data?: AnalyticsData;
+  @property({ attribute: false }) public lastDataEntry?: Analytics;
 
   @internalProperty() private _filter: string = "";
 
@@ -35,6 +37,7 @@ export class AnalyticsIntegrations extends LitElement {
 
   @internalProperty() private _currentTableSize = 30;
   @internalProperty() private _currentTablePage = 0;
+  @internalProperty() private _showInternal = false;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
@@ -55,6 +58,11 @@ export class AnalyticsIntegrations extends LitElement {
       .map((entry, idx) => {
         return { ...entry, idx };
       })
+      .filter(
+        (entry) =>
+          this._integrationDetails[entry.domain].quality_scale !== "internal" ||
+          this._showInternal
+      )
       .filter((entry) =>
         this._filter
           ? entry.title.toLowerCase().includes(this._filter.toLowerCase()) ||
@@ -94,6 +102,12 @@ export class AnalyticsIntegrations extends LitElement {
             </div>`
           : ""}
       </div>
+      <mwc-formfield label="Show internal integrations">
+        <mwc-checkbox
+          id="internal"
+          @change=${this._toggleInternal}
+        ></mwc-checkbox>
+      </mwc-formfield>
 
       <table>
         <tr class="table-header">
@@ -154,6 +168,10 @@ export class AnalyticsIntegrations extends LitElement {
           </svg>
         </mwc-icon-button>
       </div>
+      <div class="footer">
+        ${this.lastDataEntry!.reports_integrations || "Unkown"} installations
+        are currently reporting their integration usage
+      </div>
     `;
   }
 
@@ -167,31 +185,28 @@ export class AnalyticsIntegrations extends LitElement {
     this._filter = "";
   }
 
+  private _toggleInternal(ev: CustomEvent) {
+    this._showInternal = (ev.currentTarget as any).checked;
+  }
+
   async getData() {
-    const dataKeys = Object.keys(this.data!);
-    const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
     try {
-      const response = await ((window as any).integrationsPromise ||
-        fetchIntegrationDetails());
+      const response = await fetchIntegrationDetails();
       if (!response.ok) {
         return;
       }
 
       this._integrationDetails = await response.json();
 
-      const domains: Set<string> = new Set(
-        Object.keys(lastEntry.integrations).concat(
-          Object.keys(this._integrationDetails)
-        )
+      this._integrations = Object.keys(this._integrationDetails).map(
+        (domain) => {
+          return {
+            domain,
+            title: this._integrationDetails[domain].title || domain,
+            installations: this.lastDataEntry?.integrations[domain] || 0,
+          };
+        }
       );
-
-      this._integrations = Array.from(domains).map((domain) => {
-        return {
-          domain,
-          title: this._integrationDetails[domain]?.title || domain,
-          installations: lastEntry.integrations[domain] || 0,
-        };
-      });
     } catch (err) {
       console.log(err);
     }
@@ -285,6 +300,11 @@ export class AnalyticsIntegrations extends LitElement {
       display: flex;
       justify-content: space-between;
     }
+    .footer {
+      color: var(--secondary-text-color);
+      font-style: italic;
+      margin-top: 8px;
+    }
     mwc-icon-button {
       --mdc-theme-text-disabled-on-light: var(--secondary-text-color);
       --mdc-icon-size: 24px;
@@ -310,6 +330,11 @@ export class AnalyticsIntegrations extends LitElement {
       margin-right: 4px;
       display: flex;
       align-items: center;
+    }
+
+    mwc-checkbox {
+      --mdc-theme-secondary: var(--primary-color);
+      --mdc-checkbox-unchecked-color: var(--secondary-text-color);
     }
 
     @media only screen and (max-width: 600px) {

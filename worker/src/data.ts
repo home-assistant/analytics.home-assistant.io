@@ -1,9 +1,11 @@
 export interface SanitizedPayload {
   version: string;
+  country?: string;
   installation_type: string;
   integrations?: string[];
+  custom_integrations?: { domain: string; version: string | null }[];
   addons?: { slug: string }[];
-  last_write: number;
+  last_write?: number;
   state_count?: number;
   addon_count?: number;
   automation_count?: number;
@@ -15,6 +17,7 @@ export const AllowedPayloadKeys = [
   "addon_count",
   "addons",
   "automation_count",
+  "custom_integrations",
   "installation_type",
   "integration_count",
   "integrations",
