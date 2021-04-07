@@ -172,8 +172,9 @@ export class AnalyticsIntegrations extends LitElement {
         </div>
       </div>
       <div class="footer">
-        ${this.lastDataEntry!.reports_integrations || "Unkown"} installations
-        are currently reporting their integration usage
+        ${this.lastDataEntry!.reports_integrations || "Unkown"} of
+        ${this.lastDataEntry!.active_installations} installations have chosen to
+        share their used integrations
       </div>
     `;
   }
