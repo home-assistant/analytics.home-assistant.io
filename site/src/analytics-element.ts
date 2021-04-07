@@ -7,7 +7,6 @@ import {
   internalProperty,
   PropertyValues,
 } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
 import "./analytics-active-installations";
 import "./analytics-average";
 import "./analytics-integrations";
@@ -15,9 +14,9 @@ import "./analytics-versions";
 import "./analytics-header";
 import "./analytics-installation-types";
 import "./analytics-map";
-import { AnalyticsData, fetchData, relativeTime } from "./data";
+import { AnalyticsData, fetchData } from "./data";
 
-const isMobile = matchMedia("(max-width: 600px)").matches;
+const mql = matchMedia("(max-width: 600px)");
 
 @customElement("analytics-element")
 export class AnalyticsElement extends LitElement {
@@ -27,11 +26,14 @@ export class AnalyticsElement extends LitElement {
 
   @internalProperty() private _error: boolean = false;
 
+  @internalProperty() private _isMobile: boolean = mql.matches;
+
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
     this.getData();
     this._pageChanged();
     window.addEventListener("hashchange", () => this._pageChanged(), false);
+    mql.addListener((ev) => (this._isMobile = ev.matches));
   }
 
   render() {
@@ -46,20 +48,20 @@ export class AnalyticsElement extends LitElement {
     const dataKeys = Object.keys(this._data);
     const lastDataEntry = this._data[dataKeys[dataKeys.length - 1]];
 
-    const showMap = !isMobile && this._currentPage === "installations";
-
     return html`
       <analytics-header .currentPage=${this._currentPage}> </analytics-header>
       <div class="content">
         ${this._currentPage === "installations"
-          ? html` <analytics-active-installations .data=${this._data}>
+          ? html`
+              <analytics-active-installations .data=${this._data}>
               </analytics-active-installations>
               <div class="half">
                 <analytics-versions .lastDataEntry=${lastDataEntry}>
                 </analytics-versions>
                 <analytics-installation-types .lastDataEntry=${lastDataEntry}>
                 </analytics-installation-types>
-              </div>`
+              </div>
+            `
           : this._currentPage === "statistics"
           ? html`<analytics-average
               .lastDataEntry=${lastDataEntry}
@@ -69,7 +71,10 @@ export class AnalyticsElement extends LitElement {
             </analytics-integrations>`
           : ""}
       </div>
-      <analytics-map .lastDataEntry=${lastDataEntry} .showMap=${showMap}>
+      <analytics-map
+        .lastDataEntry=${lastDataEntry}
+        .showMap=${!this._isMobile && this._currentPage === "installations"}
+      >
       </analytics-map>
     `;
   }

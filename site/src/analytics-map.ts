@@ -11,47 +11,52 @@ export class AnalyticsMap extends UpdatingElement {
 
   @property({ attribute: false }) public lastDataEntry?: Analytics;
 
-  protected update() {
+  private _svgMap?;
+
+  public constructor() {
+    super();
     window.addEventListener("hashchange", () => this._setMap(), false);
     window.addEventListener("resize", () => this._setMap(), false);
+  }
+
+  protected update(changedProps) {
+    super.update(changedProps);
     this._setMap();
   }
 
   private _setMap() {
-    const oldMap = window.document.body.querySelector<HTMLDivElement>(
-      "#svgMap"
-    );
-
-    console.log(this.showMap);
     if (this.showMap) {
-      const map = document.createElement("div");
-      map.id = "svgMap";
-      window.document.body.replaceChild(map, oldMap!);
       const countries: Record<string, Record<string, number>> = {};
       for (const country of Object.keys(this.lastDataEntry?.countries || {})) {
         countries[country] = {
           installations: this.lastDataEntry?.countries[country] || 0,
         };
       }
-      new svgMap({
+      const data = {
+        data: {
+          installations: {
+            format: "{0} Installations",
+          },
+        },
+        applyData: "installations",
+        values: countries,
+      };
+      if (this._svgMap) {
+        this._svgMap.applyData(data);
+        return;
+      }
+      this._svgMap = new svgMap({
         targetElementID: "svgMap",
         colorMin: "#80CBC4",
         colorMax: "#004D40",
         colorNoData: isDarkMode ? "#202020" : "#d9d9d9",
         hideFlag: true,
         initialZoom: 1.0,
-        data: {
-          data: {
-            installations: {
-              format: "{0} Installations",
-            },
-          },
-          applyData: "installations",
-          values: countries,
-        },
+        data,
       });
-    } else {
-      oldMap!.hidden = true;
+    } else if (this._svgMap) {
+      this._svgMap.mapWrapper.remove();
+      this._svgMap = undefined;
     }
   }
 }
