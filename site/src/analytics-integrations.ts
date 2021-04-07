@@ -281,6 +281,17 @@ export class AnalyticsIntegrations extends LitElement {
       height: 48px;
       position: relative;
     }
+    .searchbar {
+      width: 256px;
+      border: none;
+      color: var(--primary-text-color);
+      border-bottom: 1px solid var(--primary-text-color);
+      background-color: var(--secondary-background-color);
+    }
+    .searchbar:focus {
+      outline: none;
+      border-bottom: 2px solid var(--primary-color);
+    }
     .clear-search {
       margin-left: -42px;
       color: #d50000;
