@@ -191,8 +191,7 @@ export class AnalyticsIntegrations extends LitElement {
 
   async getData() {
     try {
-      const response = await ((window as any).integrationsPromise ||
-        fetchIntegrationDetails());
+      const response = await fetchIntegrationDetails();
       if (!response.ok) {
         return;
       }

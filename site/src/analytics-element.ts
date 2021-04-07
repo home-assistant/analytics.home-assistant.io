@@ -11,6 +11,7 @@ import "./analytics-active-installations";
 import "./analytics-average";
 import "./analytics-integrations";
 import "./analytics-versions";
+import "./analytics-header";
 import "./analytics-installation-types";
 import { AnalyticsData, fetchData, relativeTime } from "./data";
 
@@ -18,11 +19,15 @@ import { AnalyticsData, fetchData, relativeTime } from "./data";
 export class AnalyticsElement extends LitElement {
   @internalProperty() private _data?: AnalyticsData;
 
+  @internalProperty() private _currentPage = "installations";
+
   @internalProperty() private _error: boolean = false;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
     this.getData();
+    this._pageChanged();
+    window.addEventListener("hashchange", () => this._pageChanged(), false);
   }
 
   render() {
@@ -42,20 +47,25 @@ export class AnalyticsElement extends LitElement {
     );
 
     return html`
-      <h1>Home Assistant Analytics</h1>
+      <analytics-header .currentPage=${this._currentPage}> </analytics-header>
       <div class="content">
-        <analytics-active-installations .data=${this._data}>
-        </analytics-active-installations>
-        <div class="half">
-          <analytics-versions .lastDataEntry=${lastDataEntry}>
-          </analytics-versions>
-          <analytics-installation-types .lastDataEntry=${lastDataEntry}>
-          </analytics-installation-types>
-        </div>
-        <analytics-average .lastDataEntry=${lastDataEntry}></analytics-average>
-        <analytics-integrations
-          .lastDataEntry=${lastDataEntry}
-        ></analytics-integrations>
+        ${this._currentPage === "installations"
+          ? html` <analytics-active-installations .data=${this._data}>
+              </analytics-active-installations>
+              <div class="half">
+                <analytics-versions .lastDataEntry=${lastDataEntry}>
+                </analytics-versions>
+                <analytics-installation-types .lastDataEntry=${lastDataEntry}>
+                </analytics-installation-types>
+              </div>`
+          : this._currentPage === "statistics"
+          ? html`<analytics-average
+              .lastDataEntry=${lastDataEntry}
+            ></analytics-average>`
+          : this._currentPage === "integrations"
+          ? html`<analytics-integrations .lastDataEntry=${lastDataEntry}>
+            </analytics-integrations>`
+          : ""}
       </div>
       <div class="footer">
         <a
@@ -81,6 +91,11 @@ export class AnalyticsElement extends LitElement {
     } catch (_) {
       this._error = true;
     }
+  }
+
+  private _pageChanged() {
+    this._currentPage =
+      window.location.hash.replace("#", "") || "installations";
   }
 
   static styles = css`
