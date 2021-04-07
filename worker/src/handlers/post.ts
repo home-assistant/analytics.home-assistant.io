@@ -12,11 +12,11 @@ const expirationTtl = daysToSeconds(60);
 
 export async function handlePost(request: Request): Promise<Response> {
   const payload = await request.json();
-  if (!payload.huuid) {
+  if (!payload.uuid) {
     return new Response(null, { status: 400 });
   }
 
-  const storageKey = `huuid:${payload.huuid}`;
+  const storageKey = `uuid:${payload.uuid}`;
   const country = request.headers.get("cf-ipcountry");
 
   let sanitizedPayload: SanitizedPayload;
@@ -33,7 +33,7 @@ export async function handlePost(request: Request): Promise<Response> {
   const stored = await KV.get<SanitizedPayload>(storageKey, "json");
 
   if (!stored) {
-    // First contact for HUUID, store payload
+    // First contact for UUID, store payload
     await storePayload(storageKey, sanitizedPayload, currentTimestamp);
     return new Response();
   }
@@ -53,12 +53,12 @@ export async function handlePost(request: Request): Promise<Response> {
 }
 
 async function storePayload(
-  huuid: string,
+  storageKey: string,
   payload: SanitizedPayload,
   currentTimestamp: number
 ) {
   await KV.put(
-    huuid,
+    storageKey,
     JSON.stringify({ ...payload, last_write: currentTimestamp }),
     { expirationTtl }
   );
