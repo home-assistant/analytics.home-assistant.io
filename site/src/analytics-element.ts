@@ -13,7 +13,11 @@ import "./analytics-integrations";
 import "./analytics-versions";
 import "./analytics-header";
 import "./analytics-installation-types";
-import { AnalyticsData, fetchData, relativeTime } from "./data";
+import "./analytics-map";
+import { AnalyticsData, fetchData } from "./data";
+
+const mqlMobile = matchMedia("(max-width: 600px)");
+const mqlDarkMode = matchMedia("(prefers-color-scheme: dark)");
 
 @customElement("analytics-element")
 export class AnalyticsElement extends LitElement {
@@ -23,11 +27,17 @@ export class AnalyticsElement extends LitElement {
 
   @internalProperty() private _error: boolean = false;
 
+  @internalProperty() private _isMobile: boolean = mqlMobile.matches;
+
+  @internalProperty() private _isDarkMode: boolean = mqlDarkMode.matches;
+
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
     this.getData();
     this._pageChanged();
     window.addEventListener("hashchange", () => this._pageChanged(), false);
+    mqlMobile.addListener((ev) => (this._isMobile = ev.matches));
+    mqlDarkMode.addListener((ev) => (this._isDarkMode = ev.matches));
   }
 
   render() {
@@ -42,41 +52,50 @@ export class AnalyticsElement extends LitElement {
     const dataKeys = Object.keys(this._data);
     const lastDataEntry = this._data[dataKeys[dataKeys.length - 1]];
 
-    const lastUpdated = new Date(
-      Number(Object.keys(this._data).reverse().slice(0, 1)[0])
-    );
-
     return html`
       <analytics-header .currentPage=${this._currentPage}> </analytics-header>
       <div class="content">
         ${this._currentPage === "installations"
-          ? html` <analytics-active-installations .data=${this._data}>
+          ? html`
+              <analytics-active-installations
+                .data=${this._data}
+                .isMobile=${this._isMobile}
+                .isDarkMode=${this._isDarkMode}
+              >
               </analytics-active-installations>
               <div class="half">
-                <analytics-versions .lastDataEntry=${lastDataEntry}>
+                <analytics-versions
+                  .lastDataEntry=${lastDataEntry}
+                  .isMobile=${this._isMobile}
+                  .isDarkMode=${this._isDarkMode}
+                >
                 </analytics-versions>
-                <analytics-installation-types .lastDataEntry=${lastDataEntry}>
+                <analytics-installation-types
+                  .lastDataEntry=${lastDataEntry}
+                  .isMobile=${this._isMobile}
+                  .isDarkMode=${this._isDarkMode}
+                >
                 </analytics-installation-types>
-              </div>`
+              </div>
+            `
           : this._currentPage === "statistics"
           ? html`<analytics-average
               .lastDataEntry=${lastDataEntry}
             ></analytics-average>`
           : this._currentPage === "integrations"
-          ? html`<analytics-integrations .lastDataEntry=${lastDataEntry}>
+          ? html`<analytics-integrations
+              .lastDataEntry=${lastDataEntry}
+              .isMobile=${this._isMobile}
+            >
             </analytics-integrations>`
           : ""}
       </div>
-      <div class="footer">
-        <a
-          title="Documentation"
-          href="https://www.home-assistant.io/integrations/analytics"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Learn more about how this data is gathered</a
-        >Last updated: ${relativeTime(lastUpdated.getTime())}
-      </div>
+      <analytics-map
+        .lastDataEntry=${lastDataEntry}
+        .isDarkMode=${this._isDarkMode}
+        .showMap=${!this._isMobile && this._currentPage === "installations"}
+      >
+      </analytics-map>
     `;
   }
 
@@ -101,19 +120,14 @@ export class AnalyticsElement extends LitElement {
   static styles = css`
     :host {
       display: block;
-      height: 100vh;
+      height: 100%;
       width: 100%;
       margin: auto;
-      max-width: 1440px;
     }
     h1 {
       padding: 0 16px;
     }
-    a {
-      color: var(--primary-color);
-    }
-    .content,
-    .footer {
+    .content {
       width: 100%;
       padding: 16px;
       box-sizing: border-box;
@@ -124,12 +138,6 @@ export class AnalyticsElement extends LitElement {
     .content > * {
       margin-bottom: 16px;
     }
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      padding: 16px;
-      box-sizing: border-box;
-    }
 
     analytics-versions,
     analytics-installation-types {
@@ -139,6 +147,12 @@ export class AnalyticsElement extends LitElement {
     @media only screen and (max-width: 600px) {
       .half {
         flex-direction: column-reverse;
+      }
+      .footer {
+        margin-top: 0;
+      }
+      :host {
+        margin-bottom: 0;
       }
     }
   `;

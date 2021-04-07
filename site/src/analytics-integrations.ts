@@ -1,6 +1,7 @@
 import "@material/mwc-checkbox";
 import "@material/mwc-formfield";
 import "@material/mwc-icon-button";
+import "@material/mwc-textfield";
 import "@material/mwc-list/mwc-list-item";
 import "@material/mwc-select";
 import { mdiChevronLeft, mdiChevronRight, mdiClose } from "@mdi/js";
@@ -20,11 +21,11 @@ import {
   IntegrationDetails,
 } from "./data";
 
-const isMobile = matchMedia("(max-width: 600px)").matches;
-
 @customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {
   @property({ attribute: false }) public lastDataEntry?: Analytics;
+
+  @property({ type: Boolean }) public isMobile = false;
 
   @internalProperty() private _filter: string = "";
 
@@ -46,7 +47,7 @@ export class AnalyticsIntegrations extends LitElement {
   }
 
   render() {
-    if (this._integrations === undefined) {
+    if (this._integrations === undefined || this.lastDataEntry === undefined) {
       return html``;
     }
 
@@ -81,25 +82,24 @@ export class AnalyticsIntegrations extends LitElement {
     return html`
       <div class="header">
         <h3>Integration usage</h3>
-        ${!isMobile
-          ? html` <div class="search">
-              <input
-                class="searchbar"
+        ${!this.isMobile
+          ? html`
+              <mwc-textfield
                 .value=${this._filter}
                 @input=${this._filterChange}
                 placeholder="Search"
-              />
-              ${this._filter
-                ? html` <mwc-icon-button
-                    class="clear-search"
-                    @click=${this._clearFilter}
-                  >
-                    <svg>
-                      <path d=${mdiClose} />
-                    </svg>
-                  </mwc-icon-button>`
-                : ""}
-            </div>`
+                .suffix=${this._filter
+                  ? html`<mwc-icon-button
+                      style="position: relative; top: -16px; right: -12px;"
+                      @click=${() => this._clearFilter()}
+                    >
+                      <svg>
+                        <path d=${mdiClose} />
+                      </svg>
+                    </mwc-icon-button>`
+                  : undefined}
+              ></mwc-textfield>
+            `
           : ""}
       </div>
       <mwc-formfield label="Show internal integrations">
@@ -111,15 +111,17 @@ export class AnalyticsIntegrations extends LitElement {
 
       <table>
         <tr class="table-header">
-          ${!isMobile ? html`<th></th>` : ""}
+          ${!this.isMobile ? html`<th class="idx"></th>` : ""}
           <th>Integration</th>
-          <th>Installations</th>
+          <th class="installations">Installations</th>
         </tr>
         ${tableData.map(
           (entry) => html`
             <tr>
-              ${!isMobile ? html`<td class="idx">${entry.idx + 1}</td>` : ""}
-              <td class="integration">
+              ${!this.isMobile
+                ? html`<td class="idx">${entry.idx + 1}</td>`
+                : ""}
+              <td>
                 <a
                   title="Documentation"
                   href="https://www.home-assistant.io/integrations/${entry.domain}"
@@ -132,7 +134,7 @@ export class AnalyticsIntegrations extends LitElement {
                   <span>${entry.title}</span>
                 </a>
               </td>
-              <td>${entry.installations}</td>
+              <td class="installations">${entry.installations}</td>
             </tr>
           `
         )}
@@ -149,28 +151,30 @@ export class AnalyticsIntegrations extends LitElement {
               </mwc-list-item> `
           )}
         </mwc-select>
-
-        <mwc-icon-button
-          .disabled=${this._currentTablePage === 0}
-          @click=${this._prevPage}
-        >
-          <svg>
-            <path d=${mdiChevronLeft} />
-          </svg>
-        </mwc-icon-button>
-        <div>${tableStart + 1}-${tableEnd} of ${sortedTableData.length}</div>
-        <mwc-icon-button
-          .disabled=${tableData.length < this._currentTableSize}
-          @click=${this._nextPage}
-        >
-          <svg>
-            <path d=${mdiChevronRight} />
-          </svg>
-        </mwc-icon-button>
+        <div class="footer-controls">
+          <mwc-icon-button
+            .disabled=${this._currentTablePage === 0}
+            @click=${this._prevPage}
+          >
+            <svg>
+              <path d=${mdiChevronLeft} />
+            </svg>
+          </mwc-icon-button>
+          <div>${tableStart + 1}-${tableEnd} of ${sortedTableData.length}</div>
+          <mwc-icon-button
+            .disabled=${tableData.length < this._currentTableSize}
+            @click=${this._nextPage}
+          >
+            <svg>
+              <path d=${mdiChevronRight} />
+            </svg>
+          </mwc-icon-button>
+        </div>
       </div>
       <div class="footer">
-        ${this.lastDataEntry!.reports_integrations || "Unkown"} installations
-        are currently reporting their integration usage
+        ${this.lastDataEntry.reports_integrations || "Unkown"} of
+        ${this.lastDataEntry.active_installations} installations have chosen to
+        share their used integrations
       </div>
     `;
   }
@@ -265,36 +269,33 @@ export class AnalyticsIntegrations extends LitElement {
       border-top: 1px solid var(--divider-color);
       font-size: 12px;
       font-weight: normal;
-      padding: 16px 0 0 16px;
+      padding-top: 16px;
       display: flex;
-      width: calc(100% - 32px);
-      align-items: center;
     }
-    .integration {
-      width: 40%;
+    @media only screen and (max-width: 600px) {
+      td,
+      th {
+        padding: 16px 8px;
+      }
+      .table-footer {
+        flex-direction: column;
+      }
+      .footer-controls {
+        justify-content: space-between;
+      }
+    }
+    .footer-controls {
+      display: flex;
+      align-items: center;
     }
     .idx {
       width: 12px;
     }
-    .search {
-      display: flex;
-      height: 48px;
-      position: relative;
+    .installations {
+      text-align: right;
     }
-    .searchbar {
-      width: 256px;
-      border: none;
-      color: var(--primary-text-color);
-      border-bottom: 1px solid var(--primary-text-color);
-      background-color: var(--secondary-background-color);
-    }
-    .searchbar:focus {
-      outline: none;
-      border-bottom: 2px solid var(--primary-color);
-    }
-    .clear-search {
-      margin-left: -42px;
-      color: #d50000;
+    mwc-textfield {
+      width: 235px;
     }
     .header {
       display: flex;
@@ -335,12 +336,6 @@ export class AnalyticsIntegrations extends LitElement {
     mwc-checkbox {
       --mdc-theme-secondary: var(--primary-color);
       --mdc-checkbox-unchecked-color: var(--secondary-text-color);
-    }
-
-    @media only screen and (max-width: 600px) {
-      .integration {
-        width: 80%;
-      }
     }
   `;
 }

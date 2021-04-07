@@ -54,9 +54,29 @@
         background-color: var(--primary-background-color);
         font-family: Roboto, Helvetica, Verdana, Arial, Sans-Serif;
         color: var(--primary-text-color);
+        height: 100%;
+        max-width: 1440px;
+        margin: auto;
+      }
+
+      .svgMap-map-wrapper {
+        background-color: #d9ecff !important;
+      }
+
+      .svgMap-tooltip {
+        background-color: #fafafa !important;
+      }
+      .svgMap-tooltip .svgMap-tooltip-content table td span {
+        color: var(--primary-text-color) !important;
+      }
+      .main-footer {
+        padding: 16px;
+        box-sizing: border-box;
         width: 100%;
-        height: 100vh;
-        margin: 0;
+      }
+
+      a {
+        color: var(--primary-color);
       }
 
       @media (prefers-color-scheme: dark) {
@@ -67,6 +87,11 @@
           --secondary-background-color: #202020;
           --divider-color: rgba(225, 225, 225, 0.12);
         }
+
+        .svgMap-map-wrapper,
+        .svgMap-tooltip {
+          background: #1c1c1c !important;
+        }
       }
     </style>
   </head>
@@ -75,5 +100,16 @@
       window.dataPromise = fetch("https://analytics-api.home-assistant.io/v1");
     </script>
     <analytics-element></analytics-element>
+    <div id="svgMap"></div>
+    <div class="main-footer">
+      <a
+        title="Documentation"
+        href="https://www.home-assistant.io/integrations/analytics"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Learn more about how this data is gathered
+      </a>
+    </div>
   </body>
 </html>
