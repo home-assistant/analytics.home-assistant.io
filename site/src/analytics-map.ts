@@ -3,11 +3,11 @@ import "svgmap/dist/svgMap.min.css";
 import { customElement, UpdatingElement, property } from "lit-element";
 import { Analytics } from "./data";
 
-const isDarkMode = matchMedia("(prefers-color-scheme: dark)").matches;
-
 @customElement("analytics-map")
 export class AnalyticsMap extends UpdatingElement {
   @property({ type: Boolean }) public showMap = true;
+
+  @property({ type: Boolean }) public isDarkMode = false;
 
   @property({ attribute: false }) public lastDataEntry?: Analytics;
 
@@ -42,7 +42,7 @@ export class AnalyticsMap extends UpdatingElement {
         targetElementID: "svgMap",
         colorMin: "#80CBC4",
         colorMax: "#004D40",
-        colorNoData: isDarkMode ? "#202020" : "#d9d9d9",
+        colorNoData: this.isDarkMode ? "#202020" : "#d9d9d9",
         hideFlag: true,
         initialZoom: 1.0,
         data: {

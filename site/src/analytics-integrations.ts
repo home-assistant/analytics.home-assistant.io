@@ -20,11 +20,11 @@ import {
   IntegrationDetails,
 } from "./data";
 
-const isMobile = matchMedia("(max-width: 600px)").matches;
-
 @customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {
   @property({ attribute: false }) public lastDataEntry?: Analytics;
+
+  @property({ type: Boolean }) public isMobile = false;
 
   @internalProperty() private _filter: string = "";
 
@@ -81,7 +81,7 @@ export class AnalyticsIntegrations extends LitElement {
     return html`
       <div class="header">
         <h3>Integration usage</h3>
-        ${!isMobile
+        ${!this.isMobile
           ? html`<div class="search">
               <input
                 class="searchbar"
@@ -111,14 +111,16 @@ export class AnalyticsIntegrations extends LitElement {
 
       <table>
         <tr class="table-header">
-          ${!isMobile ? html`<th class="idx"></th>` : ""}
+          ${!this.isMobile ? html`<th class="idx"></th>` : ""}
           <th>Integration</th>
           <th class="installations">Installations</th>
         </tr>
         ${tableData.map(
           (entry) => html`
             <tr>
-              ${!isMobile ? html`<td class="idx">${entry.idx + 1}</td>` : ""}
+              ${!this.isMobile
+                ? html`<td class="idx">${entry.idx + 1}</td>`
+                : ""}
               <td>
                 <a
                   title="Documentation"

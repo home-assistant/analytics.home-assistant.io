@@ -83,12 +83,16 @@ export class AnalyticsElement extends LitElement {
               .lastDataEntry=${lastDataEntry}
             ></analytics-average>`
           : this._currentPage === "integrations"
-          ? html`<analytics-integrations .lastDataEntry=${lastDataEntry}>
+          ? html`<analytics-integrations
+              .lastDataEntry=${lastDataEntry}
+              .isMobile=${this._isMobile}
+            >
             </analytics-integrations>`
           : ""}
       </div>
       <analytics-map
         .lastDataEntry=${lastDataEntry}
+        .isDarkMode=${this._isDarkMode}
         .showMap=${!this._isMobile && this._currentPage === "installations"}
       >
       </analytics-map>
