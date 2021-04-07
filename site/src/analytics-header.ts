@@ -36,14 +36,14 @@ export class AnalyticsHeader extends LitElement {
     :host {
       display: flex;
       justify-content: space-between;
-      height: 64px;
       width: 100%;
+      margin-top: 16px;
     }
     h1 {
       padding: 0 16px;
+      margin: 0;
     }
     .pages {
-      margin-top: 16px;
       display: flex;
     }
     .page {
@@ -55,12 +55,12 @@ export class AnalyticsHeader extends LitElement {
       height: 100%;
       padding: 0 4px;
       margin: 0 16px;
+      border-bottom: 2px solid transparent;
     }
 
     .page[selected],
     .page:hover {
-      font-weight: 600;
-      border-bottom: 4px solid var(--primary-color);
+      border-color: var(--primary-color);
     }
 
     @media only screen and (max-width: 600px) {
