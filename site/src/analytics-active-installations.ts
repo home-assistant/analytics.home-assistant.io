@@ -11,12 +11,13 @@ import {
 } from "lit-element";
 import { AnalyticsData } from "./data";
 
-const isDarkMode = matchMedia("(prefers-color-scheme: dark)").matches;
-const isMobile = matchMedia("(max-width: 600px)").matches;
-
 @customElement("analytics-active-installations")
 export class AnalyticsActiveInstallations extends LitElement {
   @property({ attribute: false }) public data?: AnalyticsData;
+
+  @property({ type: Boolean }) public isMobile = false;
+
+  @property({ type: Boolean }) public isDarkMode = false;
 
   @query("google-chart") private _chart?: GoogleChart;
 
@@ -58,7 +59,7 @@ export class AnalyticsActiveInstallations extends LitElement {
         .options=${{
           title: `${lastEntry.active_installations} Active Home Assistant Installations`,
           chartArea: { width: "70%", height: "80%" },
-          backgroundColor: isDarkMode ? "#111111" : "#fafafa",
+          backgroundColor: this.isDarkMode ? "#111111" : "#fafafa",
           series: {
             0: { color: "#3366cc" },
             1: { color: "#dc3912" },
@@ -67,26 +68,26 @@ export class AnalyticsActiveInstallations extends LitElement {
             4: { color: "#990099" },
           },
           titleTextStyle: {
-            color: isDarkMode ? "#e1e1e1" : "#212121",
+            color: this.isDarkMode ? "#e1e1e1" : "#212121",
           },
           legend: {
-            position: isMobile ? "top" : "right",
+            position: this.isMobile ? "top" : "right",
             alignment: "start",
             textStyle: {
-              color: isDarkMode ? "#e1e1e1" : "#212121",
+              color: this.isDarkMode ? "#e1e1e1" : "#212121",
             },
           },
           hAxis: {
             title: "Date",
             titleTextStyle: {
-              color: isDarkMode ? "#e1e1e1" : "#212121",
+              color: this.isDarkMode ? "#e1e1e1" : "#212121",
             },
           },
           vAxis: {
             title: "Active installations",
             logScale: true,
             titleTextStyle: {
-              color: isDarkMode ? "#e1e1e1" : "#212121",
+              color: this.isDarkMode ? "#e1e1e1" : "#212121",
             },
           },
         }}

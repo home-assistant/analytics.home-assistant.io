@@ -16,7 +16,8 @@ import "./analytics-installation-types";
 import "./analytics-map";
 import { AnalyticsData, fetchData } from "./data";
 
-const mql = matchMedia("(max-width: 600px)");
+const mqlMobile = matchMedia("(max-width: 600px)");
+const mqlDarkMode = matchMedia("(prefers-color-scheme: dark)");
 
 @customElement("analytics-element")
 export class AnalyticsElement extends LitElement {
@@ -26,14 +27,17 @@ export class AnalyticsElement extends LitElement {
 
   @internalProperty() private _error: boolean = false;
 
-  @internalProperty() private _isMobile: boolean = mql.matches;
+  @internalProperty() private _isMobile: boolean = mqlMobile.matches;
+
+  @internalProperty() private _isDarkMode: boolean = mqlDarkMode.matches;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
     this.getData();
     this._pageChanged();
     window.addEventListener("hashchange", () => this._pageChanged(), false);
-    mql.addListener((ev) => (this._isMobile = ev.matches));
+    mqlMobile.addListener((ev) => (this._isMobile = ev.matches));
+    mqlDarkMode.addListener((ev) => (this._isDarkMode = ev.matches));
   }
 
   render() {
@@ -53,12 +57,24 @@ export class AnalyticsElement extends LitElement {
       <div class="content">
         ${this._currentPage === "installations"
           ? html`
-              <analytics-active-installations .data=${this._data}>
+              <analytics-active-installations
+                .data=${this._data}
+                .isMobile=${this._isMobile}
+                .isDarkMode=${this._isDarkMode}
+              >
               </analytics-active-installations>
               <div class="half">
-                <analytics-versions .lastDataEntry=${lastDataEntry}>
+                <analytics-versions
+                  .lastDataEntry=${lastDataEntry}
+                  .isMobile=${this._isMobile}
+                  .isDarkMode=${this._isDarkMode}
+                >
                 </analytics-versions>
-                <analytics-installation-types .lastDataEntry=${lastDataEntry}>
+                <analytics-installation-types
+                  .lastDataEntry=${lastDataEntry}
+                  .isMobile=${this._isMobile}
+                  .isDarkMode=${this._isDarkMode}
+                >
                 </analytics-installation-types>
               </div>
             `
