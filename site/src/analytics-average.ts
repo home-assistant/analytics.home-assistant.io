@@ -69,13 +69,14 @@ export class AnalyticsAverage extends LitElement {
       margin-bottom: 32px;
     }
 
+    @media only screen and (max-width: 1000px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
     @media only screen and (max-width: 600px) {
       .grid {
         grid-template-columns: repeat(1, 1fr);
-      }
-      span:first-of-type {
-        min-height: 84px;
-        margin: auto;
       }
     }
   `;
