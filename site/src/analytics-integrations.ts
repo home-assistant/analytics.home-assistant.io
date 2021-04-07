@@ -90,7 +90,7 @@ export class AnalyticsIntegrations extends LitElement {
                 placeholder="Search"
                 .suffix=${this._filter
                   ? html`<mwc-icon-button
-                      style="position: relative; top: -16px; right: -12px;"
+                      style="position: relative; top: -16px; right: -12px; color: var(--secondary-text-color);"
                       @click=${() => this._clearFilter()}
                     >
                       <svg>
