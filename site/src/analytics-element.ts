@@ -32,7 +32,6 @@ export class AnalyticsElement extends LitElement {
     this.getData();
     this._pageChanged();
     window.addEventListener("hashchange", () => this._pageChanged(), false);
-    window.addEventListener("backbutton", () => this._pageChanged(), false);
   }
 
   render() {
@@ -57,16 +56,14 @@ export class AnalyticsElement extends LitElement {
       <analytics-header .currentPage=${this._currentPage}> </analytics-header>
       <div class="content">
         ${this._currentPage === "installations"
-          ? html`
-              <analytics-active-installations .data=${this._data}>
+          ? html` <analytics-active-installations .data=${this._data}>
               </analytics-active-installations>
               <div class="half">
                 <analytics-versions .lastDataEntry=${lastDataEntry}>
                 </analytics-versions>
                 <analytics-installation-types .lastDataEntry=${lastDataEntry}>
                 </analytics-installation-types>
-              </div>
-            `
+              </div>`
           : this._currentPage === "statistics"
           ? html`<analytics-average
               .lastDataEntry=${lastDataEntry}
@@ -106,7 +103,7 @@ export class AnalyticsElement extends LitElement {
   }
 
   private _pageChanged() {
-    this._currentPage = this._currentPage =
+    this._currentPage =
       window.location.hash.replace("#", "") || "installations";
   }
 

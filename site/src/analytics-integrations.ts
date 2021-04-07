@@ -168,6 +168,10 @@ export class AnalyticsIntegrations extends LitElement {
           </svg>
         </mwc-icon-button>
       </div>
+      <div class="footer">
+        ${this.lastDataEntry!.reports_integrations || "Unkown"} installations
+        are currently reporting their integration usage
+      </div>
     `;
   }
 
@@ -295,6 +299,11 @@ export class AnalyticsIntegrations extends LitElement {
     .header {
       display: flex;
       justify-content: space-between;
+    }
+    .footer {
+      color: var(--secondary-text-color);
+      font-style: italic;
+      margin-top: 8px;
     }
     mwc-icon-button {
       --mdc-theme-text-disabled-on-light: var(--secondary-text-color);
