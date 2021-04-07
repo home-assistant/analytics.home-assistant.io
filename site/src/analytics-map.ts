@@ -12,6 +12,11 @@ export class AnalyticsMap extends UpdatingElement {
   @property({ attribute: false }) public lastDataEntry?: Analytics;
 
   protected update() {
+    window.addEventListener("hashchange", () => this._setMap(), false);
+    this._setMap();
+  }
+
+  private _setMap() {
     const oldMap = window.document.body.querySelector<HTMLDivElement>(
       "#svgMap"
     );
