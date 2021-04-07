@@ -298,8 +298,9 @@ export class AnalyticsIntegrations extends LitElement {
       width: 235px;
       --mdc-text-field-fill-color: var(--secondary-background-color);
       --mdc-text-field-ink-color: var(--primary-text-color);
-      --mdc-text-field-label-ink-color: var(--primary-text-color);
-      --mdc-text-field-idle-line-color: var(--divider-color);
+      --mdc-text-field-label-ink-color: var(--secondary-text-color);
+      --mdc-text-field-idle-line-color: var(--secondary-text-color);
+      --mdc-text-field-hover-line-color: var(--primary-text-color);
     }
     .header {
       display: flex;
