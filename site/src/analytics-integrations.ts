@@ -296,6 +296,10 @@ export class AnalyticsIntegrations extends LitElement {
     }
     mwc-textfield {
       width: 235px;
+      --mdc-text-field-fill-color: var(--secondary-background-color);
+      --mdc-text-field-ink-color: var(--primary-text-color);
+      --mdc-text-field-label-ink-color: var(--primary-text-color);
+      --mdc-text-field-idle-line-color: var(--divider-color);
     }
     .header {
       display: flex;
