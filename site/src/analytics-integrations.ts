@@ -1,6 +1,7 @@
 import "@material/mwc-checkbox";
 import "@material/mwc-formfield";
 import "@material/mwc-icon-button";
+import "@material/mwc-textfield";
 import "@material/mwc-list/mwc-list-item";
 import "@material/mwc-select";
 import { mdiChevronLeft, mdiChevronRight, mdiClose } from "@mdi/js";
@@ -82,24 +83,23 @@ export class AnalyticsIntegrations extends LitElement {
       <div class="header">
         <h3>Integration usage</h3>
         ${!this.isMobile
-          ? html`<div class="search">
-              <input
-                class="searchbar"
+          ? html`
+              <mwc-textfield
                 .value=${this._filter}
                 @input=${this._filterChange}
                 placeholder="Search"
-              />
-              ${this._filter
-                ? html` <mwc-icon-button
-                    class="clear-search"
-                    @click=${this._clearFilter}
-                  >
-                    <svg>
-                      <path d=${mdiClose} />
-                    </svg>
-                  </mwc-icon-button>`
-                : ""}
-            </div>`
+                .suffix=${this._filter
+                  ? html`<mwc-icon-button
+                      style="position: relative; top: -16px; right: -12px;"
+                      @click=${() => this._clearFilter()}
+                    >
+                      <svg>
+                        <path d=${mdiClose} />
+                      </svg>
+                    </mwc-icon-button>`
+                  : undefined}
+              ></mwc-textfield>
+            `
           : ""}
       </div>
       <mwc-formfield label="Show internal integrations">
@@ -278,25 +278,8 @@ export class AnalyticsIntegrations extends LitElement {
     .installations {
       text-align: right;
     }
-    .search {
-      display: flex;
-      height: 48px;
-      position: relative;
-    }
-    .searchbar {
-      width: 256px;
-      border: none;
-      color: var(--primary-text-color);
-      border-bottom: 1px solid var(--primary-text-color);
-      background-color: var(--secondary-background-color);
-    }
-    .searchbar:focus {
-      outline: none;
-      border-bottom: 2px solid var(--primary-color);
-    }
-    .clear-search {
-      margin-left: -42px;
-      color: #d50000;
+    mwc-textfield {
+      width: 235px;
     }
     .header {
       display: flex;
