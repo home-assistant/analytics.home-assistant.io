@@ -13,6 +13,7 @@ export class AnalyticsMap extends UpdatingElement {
 
   protected update() {
     window.addEventListener("hashchange", () => this._setMap(), false);
+    window.addEventListener("resize", () => this._setMap(), false);
     this._setMap();
   }
 
@@ -20,6 +21,8 @@ export class AnalyticsMap extends UpdatingElement {
     const oldMap = window.document.body.querySelector<HTMLDivElement>(
       "#svgMap"
     );
+
+    console.log(this.showMap);
     if (this.showMap) {
       const map = document.createElement("div");
       map.id = "svgMap";
