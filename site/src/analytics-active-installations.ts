@@ -84,7 +84,6 @@ export class AnalyticsActiveInstallations extends LitElement {
           },
           vAxis: {
             title: "Active installations",
-            logScale: true,
             titleTextStyle: {
               color: isDarkMode ? "#e1e1e1" : "#212121",
             },
