@@ -82,7 +82,7 @@ export class AnalyticsIntegrations extends LitElement {
       <div class="header">
         <h3>Integration usage</h3>
         ${!isMobile
-          ? html` <div class="search">
+          ? html`<div class="search">
               <input
                 class="searchbar"
                 .value=${this._filter}
@@ -111,15 +111,15 @@ export class AnalyticsIntegrations extends LitElement {
 
       <table>
         <tr class="table-header">
-          ${!isMobile ? html`<th></th>` : ""}
+          ${!isMobile ? html`<th class="idx"></th>` : ""}
           <th>Integration</th>
-          <th>Installations</th>
+          <th class="installations">Installations</th>
         </tr>
         ${tableData.map(
           (entry) => html`
             <tr>
               ${!isMobile ? html`<td class="idx">${entry.idx + 1}</td>` : ""}
-              <td class="integration">
+              <td>
                 <a
                   title="Documentation"
                   href="https://www.home-assistant.io/integrations/${entry.domain}"
@@ -132,7 +132,7 @@ export class AnalyticsIntegrations extends LitElement {
                   <span>${entry.title}</span>
                 </a>
               </td>
-              <td>${entry.installations}</td>
+              <td class="installations">${entry.installations}</td>
             </tr>
           `
         )}
@@ -270,11 +270,11 @@ export class AnalyticsIntegrations extends LitElement {
       width: calc(100% - 32px);
       align-items: center;
     }
-    .integration {
-      width: 40%;
-    }
     .idx {
       width: 12px;
+    }
+    .installations {
+      text-align: right;
     }
     .search {
       display: flex;
@@ -335,12 +335,6 @@ export class AnalyticsIntegrations extends LitElement {
     mwc-checkbox {
       --mdc-theme-secondary: var(--primary-color);
       --mdc-checkbox-unchecked-color: var(--secondary-text-color);
-    }
-
-    @media only screen and (max-width: 600px) {
-      .integration {
-        width: 80%;
-      }
     }
   `;
 }
