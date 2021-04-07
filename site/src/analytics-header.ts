@@ -51,7 +51,8 @@ export class AnalyticsHeader extends LitElement {
       color: var(--primary-color);
       text-transform: uppercase;
       display: flex;
-      align-items: center;
+      align-items: flex-end;
+      line-height: 40px;
       height: 100%;
       padding: 0 4px;
       margin: 0 16px;
@@ -63,18 +64,21 @@ export class AnalyticsHeader extends LitElement {
       border-color: var(--primary-color);
     }
 
-    @media only screen and (max-width: 600px) {
+    @media only screen and (max-width: 800px) {
       :host {
         flex-direction: column;
-        height: 132px;
       }
       .pages {
-        margin-top: 0;
+        margin-top: 16px;
         justify-content: space-evenly;
       }
       .page {
-        padding: 0;
         margin: 0;
+      }
+    }
+    @media only screen and (max-width: 400px) {
+      .pages {
+        font-size: smaller;
       }
     }
   `;
