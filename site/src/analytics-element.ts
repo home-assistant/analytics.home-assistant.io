@@ -13,7 +13,10 @@ import "./analytics-integrations";
 import "./analytics-versions";
 import "./analytics-header";
 import "./analytics-installation-types";
-import { AnalyticsData, fetchData, relativeTime } from "./data";
+import "./analytics-map";
+import { AnalyticsData, fetchData } from "./data";
+
+const mql = matchMedia("(max-width: 600px)");
 
 @customElement("analytics-element")
 export class AnalyticsElement extends LitElement {
@@ -23,11 +26,14 @@ export class AnalyticsElement extends LitElement {
 
   @internalProperty() private _error: boolean = false;
 
+  @internalProperty() private _isMobile: boolean = mql.matches;
+
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
     this.getData();
     this._pageChanged();
     window.addEventListener("hashchange", () => this._pageChanged(), false);
+    mql.addListener((ev) => (this._isMobile = ev.matches));
   }
 
   render() {
@@ -42,22 +48,20 @@ export class AnalyticsElement extends LitElement {
     const dataKeys = Object.keys(this._data);
     const lastDataEntry = this._data[dataKeys[dataKeys.length - 1]];
 
-    const lastUpdated = new Date(
-      Number(Object.keys(this._data).reverse().slice(0, 1)[0])
-    );
-
     return html`
       <analytics-header .currentPage=${this._currentPage}> </analytics-header>
       <div class="content">
         ${this._currentPage === "installations"
-          ? html` <analytics-active-installations .data=${this._data}>
+          ? html`
+              <analytics-active-installations .data=${this._data}>
               </analytics-active-installations>
               <div class="half">
                 <analytics-versions .lastDataEntry=${lastDataEntry}>
                 </analytics-versions>
                 <analytics-installation-types .lastDataEntry=${lastDataEntry}>
                 </analytics-installation-types>
-              </div>`
+              </div>
+            `
           : this._currentPage === "statistics"
           ? html`<analytics-average
               .lastDataEntry=${lastDataEntry}
@@ -67,16 +71,11 @@ export class AnalyticsElement extends LitElement {
             </analytics-integrations>`
           : ""}
       </div>
-      <div class="footer">
-        <a
-          title="Documentation"
-          href="https://rc.home-assistant.io/integrations/analytics"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Learn more about how this data is gathered</a
-        >Last updated: ${relativeTime(lastUpdated.getTime())}
-      </div>
+      <analytics-map
+        .lastDataEntry=${lastDataEntry}
+        .showMap=${!this._isMobile && this._currentPage === "installations"}
+      >
+      </analytics-map>
     `;
   }
 
@@ -101,19 +100,14 @@ export class AnalyticsElement extends LitElement {
   static styles = css`
     :host {
       display: block;
-      height: 100vh;
+      height: 100%;
       width: 100%;
       margin: auto;
-      max-width: 1440px;
     }
     h1 {
       padding: 0 16px;
     }
-    a {
-      color: var(--primary-color);
-    }
-    .content,
-    .footer {
+    .content {
       width: 100%;
       padding: 16px;
       box-sizing: border-box;
@@ -124,12 +118,6 @@ export class AnalyticsElement extends LitElement {
     .content > * {
       margin-bottom: 16px;
     }
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      padding: 16px;
-      box-sizing: border-box;
-    }
 
     analytics-versions,
     analytics-installation-types {
@@ -139,6 +127,12 @@ export class AnalyticsElement extends LitElement {
     @media only screen and (max-width: 600px) {
       .half {
         flex-direction: column-reverse;
+      }
+      .footer {
+        margin-top: 0;
+      }
+      :host {
+        margin-bottom: 0;
       }
     }
   `;
