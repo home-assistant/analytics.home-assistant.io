@@ -15,8 +15,7 @@ export class AnalyticsMap extends UpdatingElement {
 
   public constructor() {
     super();
-    window.addEventListener("hashchange", () => this._setMap(), false);
-    window.addEventListener("resize", () => this._setMap(), false);
+    window.addEventListener("resize", () => this._resizeMap(), false);
   }
 
   protected update(changedProps) {
@@ -58,6 +57,15 @@ export class AnalyticsMap extends UpdatingElement {
       this._svgMap.mapWrapper.remove();
       this._svgMap = undefined;
     }
+  }
+
+  private _resizeMap() {
+    if (!this._svgMap) {
+      return;
+    }
+    this._svgMap.mapPanZoom.resize();
+    this._svgMap.mapPanZoom.fit();
+    this._svgMap.mapPanZoom.center();
   }
 }
 
