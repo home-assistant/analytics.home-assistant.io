@@ -47,7 +47,7 @@ export class AnalyticsIntegrations extends LitElement {
   }
 
   render() {
-    if (this._integrations === undefined) {
+    if (this._integrations === undefined || this.lastDataEntry === undefined) {
       return html``;
     }
 
@@ -172,8 +172,9 @@ export class AnalyticsIntegrations extends LitElement {
         </div>
       </div>
       <div class="footer">
-        ${this.lastDataEntry!.reports_integrations || "Unkown"} installations
-        are currently reporting their integration usage
+        ${this.lastDataEntry.reports_integrations || "Unkown"} of
+        ${this.lastDataEntry.active_installations} installations have chosen to
+        share their used integrations
       </div>
     `;
   }

@@ -29,8 +29,9 @@ export class AnalyticsAverage extends LitElement {
         </div>
       </div>
       <div class="footer">
-        ${this.lastDataEntry!.reports_statistics || "Unkown"} installations are
-        currently reporting statistics
+        ${this.lastDataEntry.reports_statistics || "Unkown"} of
+        ${this.lastDataEntry.active_installations} installations have chosen to
+        share usage statistics
       </div>`;
   }
 
