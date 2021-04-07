@@ -324,7 +324,7 @@ export class AnalyticsIntegrations extends LitElement {
       --mdc-select-label-ink-color: var(--primary-text-color);
       --mdc-select-dropdown-icon-color: var(--secondary-text-color);
       --mdc-select-idle-line-color: var(--secondary-text-color);
-      --mdc-theme-surface: var(--secondary-background-color);
+      --mdc-select-hover-line-color: var(--primary-text-color);
 
       /* inherits the styles of mwc-list internally */
       --mdc-list-vertical-padding: 0px;
