@@ -31,17 +31,11 @@ export class AnalyticsMap extends UpdatingElement {
           installations: this.lastDataEntry?.countries[country] || 0,
         };
       }
-      const data = {
-        data: {
-          installations: {
-            format: "{0} Installations",
-          },
-        },
-        applyData: "installations",
-        values: countries,
-      };
       if (this._svgMap) {
-        this._svgMap.applyData(data);
+        this._svgMap.applyData({
+          ...this._svgMap.options.data,
+          values: countries,
+        });
         return;
       }
       this._svgMap = new svgMap({
@@ -51,7 +45,15 @@ export class AnalyticsMap extends UpdatingElement {
         colorNoData: isDarkMode ? "#202020" : "#d9d9d9",
         hideFlag: true,
         initialZoom: 1.0,
-        data,
+        data: {
+          data: {
+            installations: {
+              format: "{0} Installations",
+            },
+          },
+          applyData: "installations",
+          values: countries,
+        },
       });
     } else if (this._svgMap) {
       this._svgMap.mapWrapper.remove();
