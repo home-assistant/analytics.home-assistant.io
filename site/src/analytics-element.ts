@@ -46,10 +46,6 @@ export class AnalyticsElement extends LitElement {
     const dataKeys = Object.keys(this._data);
     const lastDataEntry = this._data[dataKeys[dataKeys.length - 1]];
 
-    const lastUpdated = new Date(
-      Number(Object.keys(this._data).reverse().slice(0, 1)[0])
-    );
-
     const showMap = !isMobile && this._currentPage === "installations";
 
     return html`
@@ -75,17 +71,6 @@ export class AnalyticsElement extends LitElement {
       </div>
       <analytics-map .lastDataEntry=${lastDataEntry} .showMap=${showMap}>
       </analytics-map>
-      <div class="footer ${classMap({ "with-map": showMap })}">
-        <a
-          title="Documentation"
-          href="https://rc.home-assistant.io/integrations/analytics"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Learn more about how this data is gathered
-        </a>
-        Last updated: ${relativeTime(lastUpdated.getTime())}
-      </div>
     `;
   }
 
@@ -110,19 +95,14 @@ export class AnalyticsElement extends LitElement {
   static styles = css`
     :host {
       display: block;
-      height: 100vh;
+      height: 100%;
       width: 100%;
       margin: auto;
-      margin-bottom: -200px;
     }
     h1 {
       padding: 0 16px;
     }
-    a {
-      color: var(--primary-color);
-    }
-    .content,
-    .footer {
+    .content {
       width: 100%;
       padding: 16px;
       box-sizing: border-box;
@@ -132,15 +112,6 @@ export class AnalyticsElement extends LitElement {
     }
     .content > * {
       margin-bottom: 16px;
-    }
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      padding: 16px;
-      box-sizing: border-box;
-    }
-    .footer.with-map {
-      margin-top: 680px;
     }
 
     analytics-versions,
