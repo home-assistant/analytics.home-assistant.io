@@ -6,8 +6,8 @@ zone_id = "0ba583492080d3db28c103574f1d19cf"
 route = "https://analytics-api.home-assistant.io/v1"
 
 kv_namespaces = [
-         { binding = "KV", id = "8b2f9c3e5f6b4c62b3782498dc05e895"}
+         { binding = "KV", id = "8b2f9c3e5f6b4c62b3782498dc05e895", preview_id = "7892aa96dc6540d9b7e685c92bee384c"}
 ]
 
 [triggers]
-crons = ["05 * * * *"]
+crons = ["*/10 * * * *"]

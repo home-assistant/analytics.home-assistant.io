@@ -1,3 +1,22 @@
+export interface QueueData {
+  reports_integrations: number;
+  reports_statistics: number;
+  versions: Record<string, number>;
+  countries: Record<string, number>;
+  installation_types: { os: 0; container: 0; core: 0; supervised: 0 };
+  integrations: Record<string, number>;
+  count_addons: number[];
+  count_automations: number[];
+  count_integrations: number[];
+  count_states: number[];
+  count_users: number[];
+}
+
+export interface Queue {
+  entries: string[];
+  data: QueueData;
+}
+
 export interface SanitizedPayload {
   version: string;
   country?: string;
