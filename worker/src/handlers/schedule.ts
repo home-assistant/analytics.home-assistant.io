@@ -30,7 +30,7 @@ export async function prosessQueue(): Promise<void> {
   }
 
   // Prosess the first 850 entries in the array
-  for (const entryKey of queue.entries.slice(0, 4)) {
+  for (const entryKey of queue.entries.slice(0, 850)) {
     let entryData;
     try {
       entryData = await KV.get<SanitizedPayload>(entryKey, "json");
