@@ -127,13 +127,6 @@ export class AnalyticsElement extends LitElement {
     h1 {
       padding: 0 16px;
     }
-    .error {
-      background: #db4437;
-      color: white;
-      padding: 8px;
-      border-radius: 4px;
-      text-align: center;
-    }
     .content {
       width: 100%;
       padding: 16px;
