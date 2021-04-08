@@ -39,7 +39,7 @@ async function prosessQueue(): Promise<void> {
     // No more entries, store and reset queue data
     console.log("No more entries, store and reset queue data");
     const core_analytics: Record<string, any> = {};
-    const timestampString = new Date().getTime();
+    const timestampString = String(new Date().getTime());
 
     const queue_data = prosessQueueData(queue.data as QueueData);
     const storedAnalytics =
