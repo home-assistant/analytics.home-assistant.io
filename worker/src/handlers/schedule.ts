@@ -60,7 +60,7 @@ async function processQueue(): Promise<void> {
     const queue_data = processQueueData(queue.data);
     const storedAnalytics =
       (await KV.get<{ [key: string]: CurrentAnalytics }>(
-        "core_analytics",
+        KV_KEY_CORE_ANALYTICS,
         "json"
       )) || {};
 
