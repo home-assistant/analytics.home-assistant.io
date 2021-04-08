@@ -7,7 +7,7 @@ import {
   QueueData,
   SanitizedPayload,
   KV_PREFIX_UUID,
-  KV_MAX_PROSESS_ENTRIES,
+  KV_MAX_PROCESS_ENTRIES,
   KV_KEY_QUEUE,
   KV_KEY_CORE_ANALYTICS,
   KV_PREFIX_HISTORY,
@@ -30,7 +30,9 @@ async function processQueue(): Promise<void> {
     queue.entries = await listKV(KV_PREFIX_UUID);
   }
 
-  for (const entryKey of queue.entries.splice(0, KV_MAX_PROSESS_ENTRIES)) {
+  async function handleEntry(entryKey: string) {
+    console.log("getting ", entryKey);
+
     let entryData;
     try {
       entryData = await KV.get<SanitizedPayload>(entryKey, "json");
@@ -42,6 +44,12 @@ async function processQueue(): Promise<void> {
       queue.data = combineEntryData(queue.data, entryData);
     }
   }
+
+  await Promise.all(
+    queue.entries
+      .splice(0, KV_MAX_PROCESS_ENTRIES)
+      .map((entryKey) => handleEntry(entryKey))
+  );
 
   if (queue.entries.length === 0) {
     // No more entries, store and reset queue data

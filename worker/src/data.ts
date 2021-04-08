@@ -2,7 +2,7 @@ export const KV_KEY_QUEUE = "queue";
 export const KV_KEY_CORE_ANALYTICS = "core_analytics";
 export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
-export const KV_MAX_PROSESS_ENTRIES = 850;
+export const KV_MAX_PROCESS_ENTRIES = 850;
 
 export interface QueueData {
   reports_integrations: number;
