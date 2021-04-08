@@ -1,11 +1,16 @@
 // Scheduled taks handler to manage the KV store
 import { CurrentAnalytics } from "../../../site/src/data";
 import {
-  baseQueueData,
+  createQueueData,
   bumpValue,
   Queue,
   QueueData,
   SanitizedPayload,
+  KV_PREFIX_UUID,
+  KV_MAX_PROSESS_ENTRIES,
+  KV_KEY_QUEUE,
+  KV_KEY_CORE_ANALYTICS,
+  KV_PREFIX_HISTORY,
 } from "../data";
 import { average } from "../utils/average";
 
@@ -14,23 +19,18 @@ export async function handleSchedule(event: ScheduledEvent): Promise<void> {
 }
 
 async function processQueue(): Promise<void> {
-  const queue = (await KV.get<Queue>("queue", "json")) || {
+  const queue = (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || {
     entries: [],
-    data: baseQueueData,
+    data: createQueueData(),
   };
-
-  if (!queue.data || Object.keys(queue.data).length === 0) {
-    queue.data = baseQueueData;
-  }
 
   if (queue.entries.length === 0) {
     // No entries, get list
     console.log("No entries, get list");
-    queue.entries = await listKV("uuid");
+    queue.entries = await listKV(KV_PREFIX_UUID);
   }
 
-  // Prosess the first 850 entries in the array
-  for (const entryKey of queue.entries.splice(0, 850)) {
+  for (const entryKey of queue.entries.splice(0, KV_MAX_PROSESS_ENTRIES)) {
     let entryData;
     try {
       entryData = await KV.get<SanitizedPayload>(entryKey, "json");
@@ -65,12 +65,15 @@ async function processQueue(): Promise<void> {
 
     core_analytics[timestampString] = queue_data;
 
-    await KV.put(`history:${timestampString}`, JSON.stringify(queue_data));
-    await KV.put("core_analytics", JSON.stringify(core_analytics));
-    queue.data = baseQueueData;
+    await KV.put(
+      `${KV_PREFIX_HISTORY}:${timestampString}`,
+      JSON.stringify(queue_data)
+    );
+    await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(core_analytics));
+    queue.data = createQueueData();
   }
 
-  await KV.put("queue", JSON.stringify(queue));
+  await KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
 }
 
 async function listKV(prefix: string): Promise<string[]> {

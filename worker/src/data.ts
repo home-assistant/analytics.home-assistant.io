@@ -1,3 +1,9 @@
+export const KV_KEY_QUEUE = "queue";
+export const KV_KEY_CORE_ANALYTICS = "core_analytics";
+export const KV_PREFIX_HISTORY = "history";
+export const KV_PREFIX_UUID = "uuid";
+export const KV_MAX_PROSESS_ENTRIES = 850;
+
 export interface QueueData {
   reports_integrations: number;
   reports_statistics: number;
@@ -68,4 +74,5 @@ export const createQueueData = (): QueueData => ({
   count_users: [],
 });
 
-export const bumpValue = (current?: number): number => !current ? 1 : current+1;
+export const bumpValue = (current?: number): number =>
+  !current ? 1 : current + 1;
