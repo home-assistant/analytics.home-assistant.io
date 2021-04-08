@@ -68,9 +68,4 @@ export const baseQueueData: QueueData = {
   count_users: [],
 };
 
-export const bumpValue = (current?: number): number => {
-  if (!current) {
-    return 1;
-  }
-  return current++;
-};
+export const bumpValue = (current?: number): number => !current ? 1 : current++;
