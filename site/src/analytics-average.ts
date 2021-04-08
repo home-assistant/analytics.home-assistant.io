@@ -13,19 +13,31 @@ export class AnalyticsAverage extends LitElement {
     return html`<div class="grid">
         <div class="metric">
           <span>Average integrations</span>
-          <span>${Math.round(this.lastDataEntry.avg_integrations)}</span>
+          <span
+            title="${Math.round(this.lastDataEntry.avg_integrations * 100) /
+            100}"
+            >${Math.round(this.lastDataEntry.avg_integrations)}</span
+          >
         </div>
         <div class="metric">
           <span>Average entities</span>
-          <span>${Math.round(this.lastDataEntry.avg_states)}</span>
+          <span title="${Math.round(this.lastDataEntry.avg_states * 100) / 100}"
+            >${Math.round(this.lastDataEntry.avg_states)}</span
+          >
         </div>
         <div class="metric">
           <span>Average automations</span>
-          <span>${Math.round(this.lastDataEntry.avg_automations)}</span>
+          <span
+            title="${Math.round(this.lastDataEntry.avg_automations * 100) /
+            100}"
+            >${Math.round(this.lastDataEntry.avg_automations)}</span
+          >
         </div>
         <div class="metric">
           <span>Average users</span>
-          <span>${Math.round(this.lastDataEntry.avg_users)}</span>
+          <span title="${Math.round(this.lastDataEntry.avg_users * 100) / 100}"
+            >${Math.round(this.lastDataEntry.avg_users)}</span
+          >
         </div>
       </div>
       <div class="footer">
