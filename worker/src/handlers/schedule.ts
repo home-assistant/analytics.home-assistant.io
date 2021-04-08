@@ -1,6 +1,12 @@
 // Scheduled taks handler to manage the KV store
 import { CurrentAnalytics } from "../../../site/src/data";
-import { baseQueueData, Queue, QueueData, SanitizedPayload } from "../data";
+import {
+  baseQueueData,
+  bumpValue,
+  Queue,
+  QueueData,
+  SanitizedPayload,
+} from "../data";
 import { average } from "../utils/average";
 
 export async function handleSchedule(event: ScheduledEvent): Promise<void> {
@@ -24,7 +30,7 @@ export async function prosessQueue(): Promise<void> {
   }
 
   // Prosess the first 850 entries in the array
-  for (const entryKey of queue.entries.slice(0, 850)) {
+  for (const entryKey of queue.entries.slice(0, 4)) {
     let entryData;
     try {
       entryData = await KV.get<SanitizedPayload>(entryKey, "json");
@@ -92,18 +98,14 @@ function combineEntryData(
 ): QueueData {
   const reported_integrations = entrydata.integrations || [];
 
-  if (!data.versions[entrydata.version]) {
-    data.versions[entrydata.version] = 1;
-  } else {
-    data.versions[entrydata.version]++;
-  }
+  data.versions[entrydata.version] = bumpValue(
+    data.versions[entrydata.version]
+  );
 
   if (entrydata.country) {
-    if (!data.countries[entrydata.country]) {
-      data.countries[entrydata.country] = 1;
-    } else {
-      data.countries[entrydata.country]++;
-    }
+    data.countries[entrydata.country] = bumpValue(
+      data.countries[entrydata.country]
+    );
   }
 
   if (entrydata.addon_count) {
@@ -126,11 +128,9 @@ function combineEntryData(
   if (reported_integrations.length) {
     data.reports_integrations++;
     for (const integration of reported_integrations) {
-      if (!data.integrations[integration]) {
-        data.integrations[integration] = 1;
-      } else {
-        data.integrations[integration]++;
-      }
+      data.integrations[integration] = bumpValue(
+        data.integrations[integration]
+      );
     }
   }
 
