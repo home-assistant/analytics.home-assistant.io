@@ -1,18 +1,21 @@
 // Scheduled taks handler to manage the KV store
 import { CurrentAnalytics } from "../../../site/src/data";
-import { Queue, QueueData, SanitizedPayload } from "../data";
+import { baseQueueData, Queue, QueueData, SanitizedPayload } from "../data";
 import { average } from "../utils/average";
-import { formatDate } from "../utils/date";
 
 export async function handleSchedule(event: ScheduledEvent): Promise<void> {
   await prosessQueue();
 }
 
-async function prosessQueue(): Promise<void> {
+export async function prosessQueue(): Promise<void> {
   const queue = (await KV.get<Queue>("queue", "json")) || {
     entries: [],
-    data: {},
+    data: baseQueueData,
   };
+
+  if (!queue.data || Object.keys(queue.data).length === 0) {
+    queue.data = baseQueueData;
+  }
 
   if (queue.entries.length === 0) {
     // No entries, get list
@@ -41,7 +44,7 @@ async function prosessQueue(): Promise<void> {
     const core_analytics: Record<string, any> = {};
     const timestampString = String(new Date().getTime());
 
-    const queue_data = processQueueData(queue.data as QueueData);
+    const queue_data = processQueueData(queue.data);
     const storedAnalytics =
       (await KV.get<{ [key: string]: CurrentAnalytics }>(
         "core_analytics",
@@ -59,7 +62,7 @@ async function prosessQueue(): Promise<void> {
 
     await KV.put(`history:${timestampString}`, JSON.stringify(queue_data));
     await KV.put("core_analytics", JSON.stringify(core_analytics));
-    queue.data = {};
+    queue.data = baseQueueData;
   }
 
   await KV.put("queue", JSON.stringify(queue));
@@ -84,48 +87,9 @@ async function listKV(prefix: string): Promise<string[]> {
 }
 
 function combineEntryData(
-  data: Partial<QueueData>,
+  data: QueueData,
   entrydata: SanitizedPayload
-): Partial<QueueData> {
-  // Start data init
-  if (data.reports_integrations === undefined) {
-    data.reports_integrations = 0;
-  }
-  if (data.reports_statistics === undefined) {
-    data.reports_statistics = 0;
-  }
-
-  if (data.versions === undefined) {
-    data.versions = {};
-  }
-  if (data.countries === undefined) {
-    data.countries = {};
-  }
-  if (data.integrations === undefined) {
-    data.integrations = {};
-  }
-  if (data.installation_types === undefined) {
-    data.installation_types = { os: 0, container: 0, core: 0, supervised: 0 };
-  }
-
-  if (data.count_addons === undefined) {
-    data.count_addons = [];
-  }
-  if (data.count_automations === undefined) {
-    data.count_automations = [];
-  }
-  if (data.count_integrations === undefined) {
-    data.count_integrations = [];
-  }
-  if (data.count_states === undefined) {
-    data.count_states = [];
-  }
-  if (data.count_users === undefined) {
-    data.count_users = [];
-  }
-  // End data init
-
-  // Start prosessing the entry
+): QueueData {
   const reported_integrations = entrydata.integrations || [];
 
   if (!data.versions[entrydata.version]) {

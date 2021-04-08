@@ -53,3 +53,17 @@ export const InstallationTypes = [
   "Home Assistant Core",
   "Home Assistant Supervised",
 ];
+
+export const baseQueueData: QueueData = {
+  reports_integrations: 0,
+  reports_statistics: 0,
+  versions: {},
+  countries: {},
+  installation_types: { os: 0, container: 0, core: 0, supervised: 0 },
+  integrations: {},
+  count_addons: [],
+  count_automations: [],
+  count_integrations: [],
+  count_states: [],
+  count_users: [],
+};
