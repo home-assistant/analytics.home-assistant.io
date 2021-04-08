@@ -70,9 +70,7 @@ export const baseQueueData: QueueData = {
 
 export const bumpValue = (current?: number): number => {
   if (!current) {
-    current = 1;
-  } else {
-    current++;
+    return 1;
   }
-  return current;
+  return current++;
 };
