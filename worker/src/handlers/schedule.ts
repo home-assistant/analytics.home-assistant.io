@@ -10,10 +10,10 @@ import {
 import { average } from "../utils/average";
 
 export async function handleSchedule(event: ScheduledEvent): Promise<void> {
-  await prosessQueue();
+  await processQueue();
 }
 
-export async function prosessQueue(): Promise<void> {
+async function processQueue(): Promise<void> {
   const queue = (await KV.get<Queue>("queue", "json")) || {
     entries: [],
     data: baseQueueData,
