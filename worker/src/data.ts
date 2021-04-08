@@ -54,7 +54,7 @@ export const InstallationTypes = [
   "Home Assistant Supervised",
 ];
 
-export const baseQueueData: QueueData = {
+export const createQueueData = (): QueueData => ({
   reports_integrations: 0,
   reports_statistics: 0,
   versions: {},
@@ -66,6 +66,6 @@ export const baseQueueData: QueueData = {
   count_integrations: [],
   count_states: [],
   count_users: [],
-};
+});
 
-export const bumpValue = (current?: number): number => !current ? 1 : current++;
+export const bumpValue = (current?: number): number => !current ? 1 : current+1;
