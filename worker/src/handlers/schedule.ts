@@ -13,7 +13,7 @@ export async function handleSchedule(event: ScheduledEvent): Promise<void> {
     )) || {};
   const storedData = await listStoredData();
   console.log(JSON.stringify(storedData));
-  const currentDataset: CurrentAnalytics = generateCurrentDataset(storedData);
+  //const currentDataset: CurrentAnalytics = generateCurrentDataset(storedData);
 
   const currentDate = formatDate(new Date());
   const currentDateObj = new Date(
@@ -23,24 +23,31 @@ export async function handleSchedule(event: ScheduledEvent): Promise<void> {
     currentDate.hour
   );
   const timestampString = String(currentDateObj.getTime());
-  const storeKey = `history:${timestampString}`;
+  //const storeKey = `history:${timestampString}`;
 
-  for (const key of Object.keys(storedAnalytics)) {
+  const dataKeys = Object.keys(storedAnalytics);
+  const lastDataEntry = storedAnalytics[dataKeys[dataKeys.length - 1]];
+
+  for (const key of dataKeys) {
     core_analytics[key] = {
       active_installations: storedAnalytics[key].active_installations,
       installation_types: storedAnalytics[key].installation_types,
     };
   }
 
-  core_analytics[timestampString] = currentDataset;
+  core_analytics[timestampString] = {
+    ...lastDataEntry,
+    active_installations: storedData,
+  };
 
-  await KV.put(storeKey, JSON.stringify(currentDataset));
+  //await KV.put(storeKey, JSON.stringify(currentDataset));
   await KV.put("core_analytics", JSON.stringify(core_analytics));
 }
 
-async function listStoredData(): Promise<SanitizedPayload[]> {
+export async function listStoredData(): Promise<number> {
   const uuidList: Set<string> = new Set();
   const uuidData: SanitizedPayload[] = [];
+  let entries = 0;
 
   let lastResponse;
   while (lastResponse === undefined || !lastResponse.list_complete) {
@@ -49,19 +56,25 @@ async function listStoredData(): Promise<SanitizedPayload[]> {
       cursor: lastResponse !== undefined ? lastResponse.cursor : undefined,
     });
 
+    entries = entries + lastResponse.keys.length;
+
+    /*
     for (const key of lastResponse.keys) {
       uuidList.add(key.name);
     }
+    */
   }
 
-  for (const storageKey of uuidList) {
+  return entries;
+
+  /*  for (const storageKey of uuidList) {
     const payload = await KV.get<SanitizedPayload>(storageKey, "json");
     if (payload) {
       uuidData.push(payload);
     }
   }
 
-  return uuidData;
+  return uuidData;*/
 }
 
 const generateCurrentDataset = (
