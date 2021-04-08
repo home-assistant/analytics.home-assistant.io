@@ -30,7 +30,7 @@ export async function prosessQueue(): Promise<void> {
   }
 
   // Prosess the first 850 entries in the array
-  for (const entryKey of queue.entries.slice(0, 850)) {
+  for (const entryKey of queue.entries.splice(0, 850)) {
     let entryData;
     try {
       entryData = await KV.get<SanitizedPayload>(entryKey, "json");
@@ -42,7 +42,6 @@ export async function prosessQueue(): Promise<void> {
       queue.data = combineEntryData(queue.data, entryData);
     }
   }
-  queue.entries = queue.entries.slice(850);
 
   if (queue.entries.length === 0) {
     // No more entries, store and reset queue data
