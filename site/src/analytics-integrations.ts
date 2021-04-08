@@ -90,7 +90,7 @@ export class AnalyticsIntegrations extends LitElement {
                 placeholder="Search"
                 .suffix=${this._filter
                   ? html`<mwc-icon-button
-                      style="position: relative; top: -16px; right: -12px;"
+                      style="position: relative; top: -16px; right: -12px; color: var(--secondary-text-color);"
                       @click=${() => this._clearFilter()}
                     >
                       <svg>
@@ -298,8 +298,9 @@ export class AnalyticsIntegrations extends LitElement {
       width: 235px;
       --mdc-text-field-fill-color: var(--secondary-background-color);
       --mdc-text-field-ink-color: var(--primary-text-color);
-      --mdc-text-field-label-ink-color: var(--primary-text-color);
-      --mdc-text-field-idle-line-color: var(--divider-color);
+      --mdc-text-field-label-ink-color: var(--secondary-text-color);
+      --mdc-text-field-idle-line-color: var(--secondary-text-color);
+      --mdc-text-field-hover-line-color: var(--primary-text-color);
     }
     .header {
       display: flex;
@@ -323,7 +324,7 @@ export class AnalyticsIntegrations extends LitElement {
       --mdc-select-label-ink-color: var(--primary-text-color);
       --mdc-select-dropdown-icon-color: var(--secondary-text-color);
       --mdc-select-idle-line-color: var(--secondary-text-color);
-      --mdc-theme-surface: var(--secondary-background-color);
+      --mdc-select-hover-line-color: var(--primary-text-color);
 
       /* inherits the styles of mwc-list internally */
       --mdc-list-vertical-padding: 0px;
