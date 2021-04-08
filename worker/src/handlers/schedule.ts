@@ -183,7 +183,7 @@ function combineEntryData(
   return data;
 }
 
-const prosessQueueData = (data: QueueData): CurrentAnalytics => {
+const processQueueData = (data: QueueData): CurrentAnalytics => {
   const last_updated = new Date().getTime();
 
   return {
