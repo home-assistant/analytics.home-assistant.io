@@ -41,7 +41,7 @@ async function prosessQueue(): Promise<void> {
     const core_analytics: Record<string, any> = {};
     const timestampString = String(new Date().getTime());
 
-    const queue_data = prosessQueueData(queue.data as QueueData);
+    const queue_data = processQueueData(queue.data as QueueData);
     const storedAnalytics =
       (await KV.get<{ [key: string]: CurrentAnalytics }>(
         "core_analytics",
