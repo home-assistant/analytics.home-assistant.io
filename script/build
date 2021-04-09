@@ -6,6 +6,7 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+mkdir -p ./site/public
 
 if [ -n "$CF_KV_TOKEN" ]; then
   curl -sSLf "$CF_KV_URL" \
