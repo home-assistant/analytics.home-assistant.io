@@ -9,6 +9,10 @@ cd "$(dirname "$0")/.."
 mkdir -p ./site/public
 
 if [ -n "$CF_KV_TOKEN" ]; then
+  if [ -n "$INCOMING_HOOK_URL" ]; then
+    sleep 61 # Wait for KV writes to reach all nodes
+  fi
+
   curl -sSLf "$CF_KV_URL" \
      -H "Authorization: Bearer $CF_KV_TOKEN" \
      -H "Content-Type:application/json" | jq . > ./site/public/data.json
