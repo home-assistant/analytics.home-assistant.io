@@ -10,22 +10,29 @@ export class AnalyticsAverage extends LitElement {
       return html``;
     }
 
+    const integrations = this.lastDataEntry.avg_integrations.toFixed(2);
+    const entities = this.lastDataEntry.avg_states.toFixed(2);
+    const automations = this.lastDataEntry.avg_automations.toFixed(2);
+    const users = this.lastDataEntry.avg_users.toFixed(2);
+
     return html`<div class="grid">
         <div class="metric">
           <span>Average integrations</span>
-          <span>${Math.round(this.lastDataEntry.avg_integrations)}</span>
+          <span .title=${integrations}
+            >${Math.round(Number(integrations))}</span
+          >
         </div>
         <div class="metric">
           <span>Average entities</span>
-          <span>${Math.round(this.lastDataEntry.avg_states)}</span>
+          <span .title=${entities}>${Math.round(Number(entities))}</span>
         </div>
         <div class="metric">
           <span>Average automations</span>
-          <span>${Math.round(this.lastDataEntry.avg_automations)}</span>
+          <span .title=${automations}>${Math.round(Number(automations))}</span>
         </div>
         <div class="metric">
           <span>Average users</span>
-          <span>${Math.round(this.lastDataEntry.avg_users)}</span>
+          <span .title=${users}>${Math.round(Number(users))}</span>
         </div>
       </div>
       <div class="footer">
