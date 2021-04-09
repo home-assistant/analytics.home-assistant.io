@@ -281,9 +281,6 @@ export class AnalyticsIntegrations extends LitElement {
       display: flex;
       align-items: center;
     }
-    .idx {
-      width: 12px;
-    }
     .installations {
       text-align: right;
     }
