@@ -1,3 +1,28 @@
+export const KV_KEY_QUEUE = "queue";
+export const KV_KEY_CORE_ANALYTICS = "core_analytics";
+export const KV_PREFIX_HISTORY = "history";
+export const KV_PREFIX_UUID = "uuid";
+export const KV_MAX_PROCESS_ENTRIES = 850;
+
+export interface QueueData {
+  reports_integrations: number;
+  reports_statistics: number;
+  versions: Record<string, number>;
+  countries: Record<string, number>;
+  installation_types: { os: 0; container: 0; core: 0; supervised: 0 };
+  integrations: Record<string, number>;
+  count_addons: number[];
+  count_automations: number[];
+  count_integrations: number[];
+  count_states: number[];
+  count_users: number[];
+}
+
+export interface Queue {
+  entries: string[];
+  data: QueueData;
+}
+
 export interface SanitizedPayload {
   version: string;
   country?: string;
@@ -34,3 +59,20 @@ export const InstallationTypes = [
   "Home Assistant Core",
   "Home Assistant Supervised",
 ];
+
+export const createQueueData = (): QueueData => ({
+  reports_integrations: 0,
+  reports_statistics: 0,
+  versions: {},
+  countries: {},
+  installation_types: { os: 0, container: 0, core: 0, supervised: 0 },
+  integrations: {},
+  count_addons: [],
+  count_automations: [],
+  count_integrations: [],
+  count_states: [],
+  count_users: [],
+});
+
+export const bumpValue = (current?: number): number =>
+  !current ? 1 : current + 1;

@@ -1,4 +1,3 @@
-import { handleGet } from "./handlers/get";
 import { handlePost } from "./handlers/post";
 import { handleSchedule } from "./handlers/schedule";
 
@@ -9,8 +8,8 @@ declare global {
 addEventListener("fetch", (event: FetchEvent) => {
   if (event.request.method === "POST") {
     event.respondWith(handlePost(event.request));
-  } else if (event.request.method === "GET") {
-    event.respondWith(handleGet(event.request));
+  } else {
+    event.respondWith(new Response(null, { status: 405 }));
   }
 });
 

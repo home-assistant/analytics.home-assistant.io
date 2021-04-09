@@ -7,7 +7,6 @@ This repository contains the source of the https://analytics.home-assistant.io w
 This recieves the payload from the [`analytics` integration](https://www.home-assistant.io/integrations/analytics/) and stores that data in a KV store.
 
 - Entries are kept for a maximum of 60 days since last update.
-- 5 minutes over each full hour, a new data set is generated from the values in the KV store and stored in a special key that the website can easily get.
 
 The worker source are located in the worker directory.
 
@@ -15,7 +14,7 @@ The worker source are located in the worker directory.
 
 The source of the https://analytics.home-assistant.io website.
 
-The website is bundled with [Vite](https://vitejs.dev/) and served with [CloudFlare pages](https://pages.cloudflare.com/).
+The website is bundled with [Vite](https://vitejs.dev/) and served with [Netlify](https://www.netlify.com/).
 
 The website source are located in the site directory.
 

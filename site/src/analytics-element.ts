@@ -55,10 +55,6 @@ export class AnalyticsElement extends LitElement {
     return html`
       <analytics-header .currentPage=${this._currentPage}> </analytics-header>
       <div class="content">
-        <p>
-          We are currently experiencing issues handing the amount of data,
-          because of that only the active installations graph is being updated.
-        </p>
         ${this._currentPage === "installations"
           ? html`
               <analytics-active-installations

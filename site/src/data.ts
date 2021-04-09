@@ -13,7 +13,7 @@ export type AnalyticsData = Record<string, Analytics>;
 export interface Analytics {
   active_installations: number;
   countries: Record<string, number>;
-  addons: Addons;
+  addons?: Addons;
   avg_addons: number;
   avg_automations: number;
   avg_integrations: number;
@@ -43,8 +43,7 @@ export interface IntegrationData {
 
 export const AnalyticsPages = ["installations", "statistics", "integrations"];
 
-export const fetchData = () =>
-  fetch("https://analytics-api.home-assistant.io/v1");
+export const fetchData = () => fetch("/data.json");
 
 export const fetchIntegrationDetails = () =>
   fetch("https://www.home-assistant.io/integrations.json");

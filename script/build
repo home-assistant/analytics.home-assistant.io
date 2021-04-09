@@ -6,6 +6,17 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+mkdir -p ./site/public
+
+if [ -n "$CF_KV_TOKEN" ]; then
+  curl -sSLf "$CF_KV_URL" \
+     -H "Authorization: Bearer $CF_KV_TOKEN" \
+     -H "Content-Type:application/json" | jq . > ./site/public/data.json
+else
+  curl -sSLf https://analytics.home-assistant.io/data.json | jq . > ./site/public/data.json
+fi
+
+
 if [ ! -d node_modules ]; then
   script/bootstrap
 fi
