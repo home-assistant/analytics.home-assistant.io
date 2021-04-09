@@ -8,6 +8,8 @@ declare global {
 addEventListener("fetch", (event: FetchEvent) => {
   if (event.request.method === "POST") {
     event.respondWith(handlePost(event.request));
+  } else {
+    event.respondWith(new Response(null, { status: 405 }));
   }
 });
 
