@@ -56,14 +56,14 @@ export class AnalyticsIntegrations extends LitElement {
         (a, b) =>
           b.installations - a.installations || a.title.localeCompare(b.title)
       )
-      .map((entry, idx) => {
-        return { ...entry, idx };
-      })
       .filter(
         (entry) =>
           this._integrationDetails[entry.domain].quality_scale !== "internal" ||
           this._showInternal
       )
+      .map((entry, idx) => {
+        return { ...entry, idx };
+      })
       .filter((entry) =>
         this._filter
           ? entry.title.toLowerCase().includes(this._filter.toLowerCase()) ||
@@ -134,7 +134,13 @@ export class AnalyticsIntegrations extends LitElement {
                   <span>${entry.title}</span>
                 </a>
               </td>
-              <td class="installations">${entry.installations}</td>
+              <td class="installations">
+                ${entry.installations}
+                (${Math.round(
+                  (100 * entry.installations) /
+                    this.lastDataEntry!.reports_integrations
+                )}%)
+              </td>
             </tr>
           `
         )}
