@@ -56,9 +56,6 @@ export class AnalyticsIntegrations extends LitElement {
         (a, b) =>
           b.installations - a.installations || a.title.localeCompare(b.title)
       )
-      .map((entry, idx) => {
-        return { ...entry, idx };
-      })
       .filter(
         (entry) =>
           this._integrationDetails[entry.domain].quality_scale !== "internal" ||
@@ -111,16 +108,12 @@ export class AnalyticsIntegrations extends LitElement {
 
       <table>
         <tr class="table-header">
-          ${!this.isMobile ? html`<th class="idx"></th>` : ""}
           <th>Integration</th>
           <th class="installations">Installations</th>
         </tr>
         ${tableData.map(
           (entry) => html`
             <tr>
-              ${!this.isMobile
-                ? html`<td class="idx">${entry.idx + 1}</td>`
-                : ""}
               <td>
                 <a
                   title="Documentation"
