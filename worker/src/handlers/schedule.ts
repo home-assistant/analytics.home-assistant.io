@@ -74,7 +74,10 @@ async function processQueue(): Promise<void> {
     core_analytics[timestampString] = queue_data;
 
     // Trigger Netlify build
-    await fetch(NETLIFY_BUILD_HOOK, { method: "POST" });
+    const resp = await fetch(NETLIFY_BUILD_HOOK, { method: "POST" });
+    if (!resp.ok) {
+      throw new Error("Failed to call Netlify build hook");
+    }
 
     await KV.put(
       `${KV_PREFIX_HISTORY}:${timestampString}`,
