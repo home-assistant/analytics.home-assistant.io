@@ -41,6 +41,7 @@ export class AnalyticsVersions extends LitElement {
     const rows = sortedVersions
       .slice(0, 5)
       .map((version) => [version, this.lastDataEntry!.versions[version]]);
+
     rows.push([
       "Other",
       sortedVersions
@@ -65,6 +66,7 @@ export class AnalyticsVersions extends LitElement {
             width: this.isMobile ? "100%" : "70%",
             height: this.isMobile ? "80%" : "70%",
           },
+          sliceVisibilityThreshold: 0,
           backgroundColor: this.isDarkMode ? "#111111" : "#fafafa",
           titleTextStyle: {
             color: this.isDarkMode ? "#e1e1e1" : "#212121",
