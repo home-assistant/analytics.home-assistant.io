@@ -14,7 +14,7 @@ The worker source are located in the worker directory.
 
 The source of the https://analytics.home-assistant.io website.
 
-The website is bundled with [Vite](https://vitejs.dev/) and served with [CloudFlare pages](https://pages.cloudflare.com/).
+The website is bundled with [Vite](https://vitejs.dev/) and served with [Netlify](https://www.netlify.com/).
 
 The website source are located in the site directory.
 

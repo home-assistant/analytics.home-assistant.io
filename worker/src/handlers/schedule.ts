@@ -79,6 +79,9 @@ async function processQueue(): Promise<void> {
     );
     await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(core_analytics));
     queue.data = createQueueData();
+
+    // Trigger Netlify build
+    await fetch(process.env.NETLIFY_BUILD_HOOK, { method: "POST" });
   }
 
   await KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
