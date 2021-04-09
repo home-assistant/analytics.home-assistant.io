@@ -3,6 +3,7 @@ import { handleSchedule } from "./handlers/schedule";
 
 declare global {
   const KV: KVNamespace;
+  const NETLIFY_BUILD_HOOK: string;
 }
 
 addEventListener("fetch", (event: FetchEvent) => {
