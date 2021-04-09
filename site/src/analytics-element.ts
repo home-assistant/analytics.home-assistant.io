@@ -55,10 +55,6 @@ export class AnalyticsElement extends LitElement {
     return html`
       <analytics-header .currentPage=${this._currentPage}> </analytics-header>
       <div class="content">
-        <p class="error">
-          We are currently experiencing issues handling the amount of data,
-          because of that only the active installations graph is being updated.
-        </p>
         ${this._currentPage === "installations"
           ? html`
               <analytics-active-installations
@@ -130,13 +126,6 @@ export class AnalyticsElement extends LitElement {
     }
     h1 {
       padding: 0 16px;
-    }
-    .error {
-      background: #db4437;
-      color: white;
-      padding: 8px;
-      border-radius: 4px;
-      text-align: center;
     }
     .content {
       width: 100%;

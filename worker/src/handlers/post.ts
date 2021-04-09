@@ -2,6 +2,7 @@
 import {
   AllowedPayloadKeys,
   InstallationTypes,
+  KV_PREFIX_UUID,
   SanitizedPayload,
 } from "../data";
 import { daysToSeconds } from "../utils/date";
@@ -16,7 +17,7 @@ export async function handlePost(request: Request): Promise<Response> {
     return new Response(null, { status: 400 });
   }
 
-  const storageKey = `uuid:${payload.uuid}`;
+  const storageKey = `${KV_PREFIX_UUID}:${payload.uuid}`;
   const country = request.headers.get("cf-ipcountry");
 
   let sanitizedPayload: SanitizedPayload;
