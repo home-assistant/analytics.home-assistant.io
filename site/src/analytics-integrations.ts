@@ -134,7 +134,13 @@ export class AnalyticsIntegrations extends LitElement {
                   <span>${entry.title}</span>
                 </a>
               </td>
-              <td class="installations">${entry.installations}</td>
+              <td class="installations">
+                ${entry.installations}
+                (${Math.round(
+                  (100 * entry.installations) /
+                    this.lastDataEntry!.reports_integrations
+                )}%)
+              </td>
             </tr>
           `
         )}
