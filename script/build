@@ -9,7 +9,7 @@ cd "$(dirname "$0")/.."
 mkdir -p ./site/public
 
 if [ -n "$CF_KV_TOKEN" ]; then
-  if [ -n "$INCOMING_HOOK_URL" ]; then
+  if [ -n "$INCOMING_HOOK_URL" ] || [ -n "$INCOMING_HOOK_TITLE" ] || [ -n "$INCOMING_HOOK_BODY" ]; then
     sleep 61 # Wait for KV writes to reach all nodes
   fi
 
