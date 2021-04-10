@@ -22,7 +22,7 @@ export interface Queue {
   entries: string[];
   data: QueueData;
   last_publish?: number;
-  processing: boolean;
+  processing_complete: boolean;
 }
 
 export interface SanitizedPayload {

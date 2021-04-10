@@ -18,15 +18,10 @@ export async function handleSchedule(event: ScheduledEvent): Promise<void> {
   const queue = (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || {
     entries: [],
     data: createQueueData(),
-    processing: false,
+    processing_complete: false,
   };
 
-  if (
-    queue.entries.length !== 0 ||
-    queue.last_publish === undefined ||
-    !queue.processing ||
-    new Date(queue.last_publish!).getUTCHours() !== new Date().getUTCHours()
-  ) {
+  if (!queue.processing_complete || queue.last_publish === undefined) {
     await processQueue(queue);
   } else {
     await publishResults(queue);
@@ -66,16 +61,22 @@ async function publishResults(queue: Queue): Promise<void> {
     JSON.stringify(queue_data)
   );
   await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(core_analytics));
+
   queue.data = createQueueData();
   queue.last_publish = new Date().getTime();
-  queue.processing = false;
+  queue.processing_complete = false;
 }
 
 async function processQueue(queue: Queue): Promise<void> {
-  queue.last_publish = undefined;
-  queue.processing = true;
   if (queue.entries.length === 0) {
     // No entries, get list
+    if (
+      queue.last_publish !== undefined &&
+      new Date(queue.last_publish).getUTCHours() !== new Date().getUTCHours()
+    ) {
+      // Wait for the next hour before starting to process
+      return;
+    }
     console.log("No entries, get list");
     queue.entries = await listKV(KV_PREFIX_UUID);
   }
@@ -100,6 +101,10 @@ async function processQueue(queue: Queue): Promise<void> {
       .splice(0, KV_MAX_PROCESS_ENTRIES)
       .map((entryKey) => handleEntry(entryKey))
   );
+
+  if (queue.entries.length === 0) {
+    queue.processing_complete = true;
+  }
 }
 
 async function listKV(prefix: string): Promise<string[]> {
