@@ -18,13 +18,15 @@ export async function handleSchedule(event: ScheduledEvent): Promise<void> {
   const queue = (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || {
     entries: [],
     data: createQueueData(),
+    processing: false,
   };
 
-  const process =
+  if (
+    queue.entries.length !== 0 ||
     queue.last_publish === undefined ||
-    new Date(queue.last_publish!).getUTCHours() !== new Date().getUTCHours();
-
-  if (queue.entries.length !== 0 || process) {
+    new Date(queue.last_publish!).getUTCHours() !== new Date().getUTCHours() ||
+    !queue.processing
+  ) {
     await processQueue(queue);
   } else {
     await publishResults(queue);
@@ -66,10 +68,12 @@ async function publishResults(queue: Queue): Promise<void> {
   await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(core_analytics));
   queue.data = createQueueData();
   queue.last_publish = new Date().getTime();
+  queue.processing = false;
 }
 
 async function processQueue(queue: Queue): Promise<void> {
   queue.last_publish = undefined;
+  queue.processing = true;
   if (queue.entries.length === 0) {
     // No entries, get list
     console.log("No entries, get list");
