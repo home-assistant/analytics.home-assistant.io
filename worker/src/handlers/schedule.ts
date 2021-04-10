@@ -24,8 +24,8 @@ export async function handleSchedule(event: ScheduledEvent): Promise<void> {
   if (
     queue.entries.length !== 0 ||
     queue.last_publish === undefined ||
-    new Date(queue.last_publish!).getUTCHours() !== new Date().getUTCHours() ||
-    !queue.processing
+    !queue.processing ||
+    new Date(queue.last_publish!).getUTCHours() !== new Date().getUTCHours()
   ) {
     await processQueue(queue);
   } else {
