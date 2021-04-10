@@ -15,15 +15,61 @@ import {
 import { average } from "../utils/average";
 
 export async function handleSchedule(event: ScheduledEvent): Promise<void> {
-  await processQueue();
-}
-
-async function processQueue(): Promise<void> {
   const queue = (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || {
     entries: [],
     data: createQueueData(),
   };
 
+  const process =
+    queue.last_publish === undefined ||
+    new Date(queue.last_publish!).getUTCHours() !== new Date().getUTCHours();
+
+  if (queue.entries.length !== 0 || process) {
+    await processQueue(queue);
+  } else {
+    await publishResults(queue);
+  }
+
+  await KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
+}
+
+async function publishResults(queue: Queue): Promise<void> {
+  const core_analytics: Record<string, any> = {};
+  const timestampString = String(new Date().getTime());
+
+  const queue_data = processQueueData(queue.data);
+  const storedAnalytics =
+    (await KV.get<{ [key: string]: CurrentAnalytics }>(
+      KV_KEY_CORE_ANALYTICS,
+      "json"
+    )) || {};
+
+  for (const key of Object.keys(storedAnalytics)) {
+    core_analytics[key] = {
+      active_installations: storedAnalytics[key].active_installations,
+      installation_types: storedAnalytics[key].installation_types,
+    };
+  }
+
+  core_analytics[timestampString] = queue_data;
+
+  // Trigger Netlify build
+  const resp = await fetch(NETLIFY_BUILD_HOOK, { method: "POST" });
+  if (!resp.ok) {
+    throw new Error("Failed to call Netlify build hook");
+  }
+
+  await KV.put(
+    `${KV_PREFIX_HISTORY}:${timestampString}`,
+    JSON.stringify(queue_data)
+  );
+  await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(core_analytics));
+  queue.data = createQueueData();
+  queue.last_publish = new Date().getTime();
+}
+
+async function processQueue(queue: Queue): Promise<void> {
+  queue.last_publish = undefined;
   if (queue.entries.length === 0) {
     // No entries, get list
     console.log("No entries, get list");
@@ -50,44 +96,6 @@ async function processQueue(): Promise<void> {
       .splice(0, KV_MAX_PROCESS_ENTRIES)
       .map((entryKey) => handleEntry(entryKey))
   );
-
-  if (queue.entries.length === 0) {
-    // No more entries, store and reset queue data
-    console.log("No more entries, store and reset queue data");
-    const core_analytics: Record<string, any> = {};
-    const timestampString = String(new Date().getTime());
-
-    const queue_data = processQueueData(queue.data);
-    const storedAnalytics =
-      (await KV.get<{ [key: string]: CurrentAnalytics }>(
-        KV_KEY_CORE_ANALYTICS,
-        "json"
-      )) || {};
-
-    for (const key of Object.keys(storedAnalytics)) {
-      core_analytics[key] = {
-        active_installations: storedAnalytics[key].active_installations,
-        installation_types: storedAnalytics[key].installation_types,
-      };
-    }
-
-    core_analytics[timestampString] = queue_data;
-
-    // Trigger Netlify build
-    const resp = await fetch(NETLIFY_BUILD_HOOK, { method: "POST" });
-    if (!resp.ok) {
-      throw new Error("Failed to call Netlify build hook");
-    }
-
-    await KV.put(
-      `${KV_PREFIX_HISTORY}:${timestampString}`,
-      JSON.stringify(queue_data)
-    );
-    await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(core_analytics));
-    queue.data = createQueueData();
-  }
-
-  await KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
 }
 
 async function listKV(prefix: string): Promise<string[]> {
