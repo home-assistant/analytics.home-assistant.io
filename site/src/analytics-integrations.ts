@@ -136,10 +136,10 @@ export class AnalyticsIntegrations extends LitElement {
               </td>
               <td class="installations">
                 ${entry.installations}
-                (${Math.round(
+                (${+(
                   (100 * entry.installations) /
-                    this.lastDataEntry!.reports_integrations
-                )}%)
+                  this.lastDataEntry!.reports_integrations
+                ).toFixed(1)}%)
               </td>
             </tr>
           `
