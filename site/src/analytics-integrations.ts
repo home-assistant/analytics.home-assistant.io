@@ -136,7 +136,7 @@ export class AnalyticsIntegrations extends LitElement {
               </td>
               <td class="installations">
                 ${entry.installations}
-                (${(
+                (${+(
                   (100 * entry.installations) /
                   this.lastDataEntry!.reports_integrations
                 ).toFixed(1)}%)
