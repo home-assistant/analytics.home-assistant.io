@@ -102,7 +102,7 @@ export class AnalyticsElement extends LitElement {
       <analytics-map
         .lastDataEntry=${lastDataEntry}
         .isDarkMode=${this._isDarkMode}
-        .showMap=${!this._isMobile && this._currentPage === "installations"}
+        .showMap=${this._currentPage === "installations"}
       >
       </analytics-map>
     `;
