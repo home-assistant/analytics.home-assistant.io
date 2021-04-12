@@ -63,6 +63,15 @@ export class AnalyticsElement extends LitElement {
                 .isDarkMode=${this._isDarkMode}
               >
               </analytics-active-installations>
+              <p>
+                <a
+                  href="https://www.home-assistant.io/installation/#compare-installation-methods"
+                  target="_blank"
+                >
+                  See the differences between our installation types here
+                </a>
+              </p>
+
               <div class="half">
                 <analytics-versions
                   .lastDataEntry=${lastDataEntry}
@@ -126,6 +135,9 @@ export class AnalyticsElement extends LitElement {
     }
     h1 {
       padding: 0 16px;
+    }
+    a {
+      color: var(--primary-color);
     }
     .content {
       width: 100%;
