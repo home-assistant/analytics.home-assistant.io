@@ -89,6 +89,12 @@ export class AnalyticsElement extends LitElement {
             >
             </analytics-integrations>`
           : ""}
+        ${this._isMobile && this._currentPage === "installations"
+          ? html`<span>
+              The map is only aviable on larger screens, try rotating your
+              device to show it.
+            </span>`
+          : ""}
       </div>
       <analytics-map
         .lastDataEntry=${lastDataEntry}
