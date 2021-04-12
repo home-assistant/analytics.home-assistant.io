@@ -11,6 +11,9 @@ import {
   KV_KEY_QUEUE,
   KV_KEY_CORE_ANALYTICS,
   KV_PREFIX_HISTORY,
+  Metadata,
+  ListEntry,
+  isMetadata,
 } from "../data";
 import { average } from "../utils/average";
 
@@ -27,7 +30,20 @@ async function processQueue(): Promise<void> {
   if (queue.entries.length === 0) {
     // No entries, get list
     console.log("No entries, get list");
-    queue.entries = await listKV(KV_PREFIX_UUID);
+    const kv_list = await listKV(KV_PREFIX_UUID);
+
+    for (const entry of kv_list) {
+      if (
+        entry.metadata &&
+        isMetadata(entry.metadata) &&
+        !entry.metadata.extra
+      ) {
+        // Entry does not have any extra keys
+        queue.data = combineEntryData(queue.data, entry.metadata);
+      } else {
+        queue.entries.push(entry.name);
+      }
+    }
   }
 
   async function handleEntry(entryKey: string) {
@@ -90,8 +106,8 @@ async function processQueue(): Promise<void> {
   await KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
 }
 
-async function listKV(prefix: string): Promise<string[]> {
-  let entries: Set<string> = new Set();
+async function listKV(prefix: string): Promise<ListEntry[]> {
+  let entries: ListEntry[] = [];
 
   let lastResponse;
   while (lastResponse === undefined || !lastResponse.list_complete) {
@@ -101,19 +117,17 @@ async function listKV(prefix: string): Promise<string[]> {
     });
 
     for (const key of lastResponse.keys) {
-      entries.add(key.name);
+      entries.push(key);
     }
   }
 
-  return Array.from(entries);
+  return entries;
 }
 
 function combineEntryData(
   data: QueueData,
-  entrydata: SanitizedPayload
+  entrydata: SanitizedPayload | Metadata
 ): QueueData {
-  const reported_integrations = entrydata.integrations || [];
-
   data.versions[entrydata.version] = bumpValue(
     data.versions[entrydata.version]
   );
@@ -123,6 +137,22 @@ function combineEntryData(
       data.countries[entrydata.country]
     );
   }
+
+  if (entrydata.installation_type === "Home Assistant OS") {
+    data.installation_types.os++;
+  } else if (entrydata.installation_type === "Home Assistant Container") {
+    data.installation_types.container++;
+  } else if (entrydata.installation_type === "Home Assistant Core") {
+    data.installation_types.core++;
+  } else if (entrydata.installation_type === "Home Assistant Supervised") {
+    data.installation_types.supervised++;
+  }
+
+  if (isMetadata(entrydata)) {
+    return data;
+  }
+
+  const reported_integrations = entrydata.integrations || [];
 
   if (entrydata.addon_count) {
     data.count_addons.push(entrydata.addon_count);
@@ -148,16 +178,6 @@ function combineEntryData(
         data.integrations[integration]
       );
     }
-  }
-
-  if (entrydata.installation_type === "Home Assistant OS") {
-    data.installation_types.os++;
-  } else if (entrydata.installation_type === "Home Assistant Container") {
-    data.installation_types.container++;
-  } else if (entrydata.installation_type === "Home Assistant Core") {
-    data.installation_types.core++;
-  } else if (entrydata.installation_type === "Home Assistant Supervised") {
-    data.installation_types.supervised++;
   }
 
   return data;

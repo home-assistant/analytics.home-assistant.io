@@ -4,6 +4,21 @@ export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 850;
 
+export interface Metadata {
+  created: number;
+  updated: number;
+  version: string;
+  installation_type: string;
+  country?: string;
+  extra: boolean;
+}
+
+export interface ListEntry {
+  metadata?: Metadata | unknown;
+  name: string;
+  expiration?: number;
+}
+
 export interface QueueData {
   reports_integrations: number;
   reports_statistics: number;
@@ -38,20 +53,24 @@ export interface SanitizedPayload {
   user_count?: number;
 }
 
-export const AllowedPayloadKeys = [
+const BasePayloadKeys = [
+  "country",
+  "installation_type",
+  "supervisor",
+  "version",
+];
+
+export const AllowedPayloadKeys = BasePayloadKeys.concat([
   "addon_count",
   "addons",
   "automation_count",
   "custom_integrations",
-  "installation_type",
   "integration_count",
   "integrations",
   "last_write",
   "state_count",
-  "supervisor",
   "user_count",
-  "version",
-];
+]);
 
 export const InstallationTypes = [
   "Home Assistant OS",
@@ -74,5 +93,24 @@ export const createQueueData = (): QueueData => ({
   count_users: [],
 });
 
+export const generateMetadata = (
+  payload: SanitizedPayload,
+  timestamp: number,
+  metadata?: Metadata | null
+): Metadata => ({
+  created: metadata ? metadata.created : timestamp,
+  updated: timestamp,
+  installation_type: payload.installation_type,
+  version: payload.version,
+  country: payload.country,
+  extra:
+    Object.keys(payload).filter((key) => !BasePayloadKeys.includes(key))
+      .length !== 0,
+});
+
 export const bumpValue = (current?: number): number =>
   !current ? 1 : current + 1;
+
+export function isMetadata(metadata: unknown): metadata is Metadata {
+  return (<Metadata>metadata).extra !== undefined;
+}

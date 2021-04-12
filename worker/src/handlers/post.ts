@@ -3,7 +3,9 @@ import {
   AllowedPayloadKeys,
   InstallationTypes,
   KV_PREFIX_UUID,
+  Metadata,
   SanitizedPayload,
+  generateMetadata,
 } from "../data";
 import { daysToSeconds } from "../utils/date";
 import { deepEqual } from "../utils/deep-equal";
@@ -31,23 +33,39 @@ export async function handlePost(request: Request): Promise<Response> {
   const currentTimestamp = new Date().getTime();
 
   // Get the current stored data for the storageKey if any
-  const stored = await KV.get<SanitizedPayload>(storageKey, "json");
+  const stored: {
+    value?: SanitizedPayload | null;
+    metadata?: Metadata | null;
+  } = await KV.getWithMetadata(storageKey, "json");
 
-  if (!stored) {
+  if (!stored || !stored.value) {
     // First contact for UUID, store payload
     await storePayload(storageKey, sanitizedPayload, currentTimestamp);
     return new Response();
   }
 
-  const lastWrite = stored.last_write!;
-  delete stored.last_write;
+  const lastWrite = stored.metadata
+    ? stored.metadata.updated
+    : stored.value.last_write;
 
-  if (deepEqual(stored, sanitizedPayload)) {
+  delete stored.value.last_write;
+
+  if (!deepEqual(stored.value, sanitizedPayload)) {
     // Payload changed, update stored data
-    await storePayload(storageKey, sanitizedPayload, currentTimestamp);
-  } else if (currentTimestamp - lastWrite > updateThreshold) {
+    await storePayload(
+      storageKey,
+      sanitizedPayload,
+      currentTimestamp,
+      stored.metadata
+    );
+  } else if (!lastWrite || currentTimestamp - lastWrite > updateThreshold) {
     // Threshold has passed, update stored data
-    await storePayload(storageKey, sanitizedPayload, currentTimestamp);
+    await storePayload(
+      storageKey,
+      sanitizedPayload,
+      currentTimestamp,
+      stored.metadata
+    );
   }
 
   return new Response();
@@ -56,12 +74,16 @@ export async function handlePost(request: Request): Promise<Response> {
 async function storePayload(
   storageKey: string,
   payload: SanitizedPayload,
-  currentTimestamp: number
+  currentTimestamp: number,
+  metadata?: Metadata | null
 ) {
   await KV.put(
     storageKey,
     JSON.stringify({ ...payload, last_write: currentTimestamp }),
-    { expirationTtl }
+    {
+      expirationTtl,
+      metadata: generateMetadata(payload, currentTimestamp, metadata),
+    }
   );
 }
 
