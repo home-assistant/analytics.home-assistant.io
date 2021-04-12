@@ -103,9 +103,7 @@ export const generateMetadata = (
   installation_type: payload.installation_type,
   version: payload.version,
   country: payload.country,
-  extra:
-    Object.keys(payload).filter((key) => !BasePayloadKeys.includes(key))
-      .length !== 0,
+  extra: Object.keys(payload).some((key) => BasePayloadKeys.includes(key)),
 });
 
 export const bumpValue = (current?: number): number =>
