@@ -6,6 +6,7 @@ import {
   Metadata,
   SanitizedPayload,
   generateMetadata,
+  MetadataKey,
 } from "../data";
 import { daysToSeconds } from "../utils/date";
 import { deepEqual } from "../utils/deep-equal";
@@ -45,7 +46,7 @@ export async function handlePost(request: Request): Promise<Response> {
   }
 
   const lastWrite = stored.metadata
-    ? stored.metadata.updated
+    ? stored.metadata[MetadataKey.UPDATED]
     : stored.value.last_write;
 
   delete stored.value.last_write;
@@ -95,7 +96,7 @@ const sanitizePayload = (
     throw new Error("Missing required keys in the payload");
   }
 
-  if (!InstallationTypes.includes(payload.installation_type)) {
+  if (!Object.keys(InstallationTypes).includes(payload.installation_type)) {
     throw new Error(
       `${String(payload.installation_type)} is not a valid instalaltion type`
     );
@@ -118,6 +119,8 @@ const sanitizePayload = (
     }
   }
 
-  payload.country = country;
+  if (country && country.length == 2) {
+    payload.country = country;
+  }
   return payload;
 };

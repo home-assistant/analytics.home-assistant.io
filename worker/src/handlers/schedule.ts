@@ -13,7 +13,8 @@ import {
   KV_PREFIX_HISTORY,
   Metadata,
   ListEntry,
-  isMetadata,
+  MetadataKey,
+  ShortInstallationType,
 } from "../data";
 import { average } from "../utils/average";
 
@@ -33,13 +34,9 @@ async function processQueue(): Promise<void> {
     const kv_list = await listKV(KV_PREFIX_UUID);
 
     for (const entry of kv_list) {
-      if (
-        entry.metadata &&
-        isMetadata(entry.metadata) &&
-        !entry.metadata.extra
-      ) {
+      if (entry.metadata && entry.metadata[MetadataKey.EXTRA].length === 0) {
         // Entry does not have any extra keys
-        queue.data = combineEntryData(queue.data, entry.metadata);
+        queue.data = combineMetadataEntryData(queue.data, entry.metadata);
       } else {
         queue.entries.push(entry.name);
       }
@@ -117,17 +114,53 @@ async function listKV(prefix: string): Promise<ListEntry[]> {
     });
 
     for (const key of lastResponse.keys) {
-      entries.push(key);
+      entries.push(key as ListEntry);
     }
   }
 
   return entries;
 }
 
+function combineMetadataEntryData(
+  data: QueueData,
+  entrydata: Metadata
+): QueueData {
+  data.versions[entrydata[MetadataKey.VERSION]] = bumpValue(
+    data.versions[entrydata[MetadataKey.VERSION]]
+  );
+
+  if (entrydata[MetadataKey.COUNTRY]) {
+    data.countries[entrydata[MetadataKey.COUNTRY]!] = bumpValue(
+      data.countries[entrydata[MetadataKey.COUNTRY]!]
+    );
+  }
+
+  if (entrydata[MetadataKey.INSTALLATION_TYPE] === ShortInstallationType.OS) {
+    data.installation_types.os++;
+  } else if (
+    entrydata[MetadataKey.INSTALLATION_TYPE] === ShortInstallationType.CONTAINER
+  ) {
+    data.installation_types.container++;
+  } else if (
+    entrydata[MetadataKey.INSTALLATION_TYPE] === ShortInstallationType.CORE
+  ) {
+    data.installation_types.core++;
+  } else if (
+    entrydata[MetadataKey.INSTALLATION_TYPE] ===
+    ShortInstallationType.SUPERVISED
+  ) {
+    data.installation_types.supervised++;
+  }
+
+  return data;
+}
+
 function combineEntryData(
   data: QueueData,
-  entrydata: SanitizedPayload | Metadata
+  entrydata: SanitizedPayload
 ): QueueData {
+  const reported_integrations = entrydata.integrations || [];
+
   data.versions[entrydata.version] = bumpValue(
     data.versions[entrydata.version]
   );
@@ -147,12 +180,6 @@ function combineEntryData(
   } else if (entrydata.installation_type === "Home Assistant Supervised") {
     data.installation_types.supervised++;
   }
-
-  if (isMetadata(entrydata)) {
-    return data;
-  }
-
-  const reported_integrations = entrydata.integrations || [];
 
   if (entrydata.addon_count) {
     data.count_addons.push(entrydata.addon_count);

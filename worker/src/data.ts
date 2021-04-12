@@ -4,17 +4,39 @@ export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 850;
 
+export enum MetadataKey {
+  ADDED = "a",
+  COUNTRY = "c",
+  EXTRA = "e",
+  INSTALLATION_TYPE = "i",
+  UPDATED = "u",
+  VERSION = "v",
+}
+
+export enum ShortInstallationType {
+  CORE = "c",
+  CONTAINER = "d",
+  OS = "o",
+  SUPERVISED = "s",
+}
+
+export enum MetadataExtra {
+  INTEGRATIONS = "i",
+  STATISTICS = "s",
+  ADDONS = "a",
+}
+
 export interface Metadata {
-  created: number;
-  updated: number;
-  version: string;
-  installation_type: string;
-  country?: string;
-  extra: boolean;
+  [MetadataKey.ADDED]: number;
+  [MetadataKey.UPDATED]: number;
+  [MetadataKey.VERSION]: string;
+  [MetadataKey.INSTALLATION_TYPE]: ShortInstallationType;
+  [MetadataKey.COUNTRY]?: string;
+  [MetadataKey.EXTRA]: MetadataExtra[];
 }
 
 export interface ListEntry {
-  metadata?: Metadata | unknown;
+  metadata?: Metadata;
   name: string;
   expiration?: number;
 }
@@ -72,12 +94,12 @@ export const AllowedPayloadKeys = BasePayloadKeys.concat([
   "user_count",
 ]);
 
-export const InstallationTypes = [
-  "Home Assistant OS",
-  "Home Assistant Container",
-  "Home Assistant Core",
-  "Home Assistant Supervised",
-];
+export const InstallationTypes: Record<string, ShortInstallationType> = {
+  "Home Assistant OS": ShortInstallationType.OS,
+  "Home Assistant Container": ShortInstallationType.CONTAINER,
+  "Home Assistant Core": ShortInstallationType.CORE,
+  "Home Assistant Supervised": ShortInstallationType.SUPERVISED,
+};
 
 export const createQueueData = (): QueueData => ({
   reports_integrations: 0,
@@ -95,20 +117,31 @@ export const createQueueData = (): QueueData => ({
 
 export const generateMetadata = (
   payload: SanitizedPayload,
-  timestamp: number,
+  updated: number,
   metadata?: Metadata | null
-): Metadata => ({
-  created: metadata ? metadata.created : timestamp,
-  updated: timestamp,
-  installation_type: payload.installation_type,
-  version: payload.version,
-  country: payload.country,
-  extra: Object.keys(payload).some((key) => BasePayloadKeys.includes(key)),
-});
+): Metadata => {
+  const extra: MetadataExtra[] = [];
+
+  if (payload.integrations) {
+    extra.push(MetadataExtra.INTEGRATIONS);
+  }
+  if (payload.addons) {
+    extra.push(MetadataExtra.ADDONS);
+  }
+  if (payload.integration_count) {
+    extra.push(MetadataExtra.STATISTICS);
+  }
+
+  return {
+    [MetadataKey.UPDATED]: updated,
+    [MetadataKey.ADDED]: metadata ? metadata[MetadataKey.ADDED] : updated,
+    [MetadataKey.INSTALLATION_TYPE]:
+      InstallationTypes[payload.installation_type],
+    [MetadataKey.COUNTRY]: payload.country,
+    [MetadataKey.VERSION]: payload.version,
+    [MetadataKey.EXTRA]: extra,
+  };
+};
 
 export const bumpValue = (current?: number): number =>
   !current ? 1 : current + 1;
-
-export function isMetadata(metadata: unknown): metadata is Metadata {
-  return (<Metadata>metadata).extra !== undefined;
-}
