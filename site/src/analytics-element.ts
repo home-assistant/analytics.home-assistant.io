@@ -63,7 +63,7 @@ export class AnalyticsElement extends LitElement {
                 .isDarkMode=${this._isDarkMode}
               >
               </analytics-active-installations>
-              <p>
+              <p class="compare">
                 <a
                   href="https://www.home-assistant.io/installation/#compare-installation-methods"
                   target="_blank"
@@ -149,6 +149,9 @@ export class AnalyticsElement extends LitElement {
     }
     .content > * {
       margin-bottom: 16px;
+    }
+    .compare {
+      text-align: center;
     }
 
     analytics-versions,
