@@ -21,6 +21,15 @@ import {
   IntegrationDetails,
 } from "./data";
 
+// Default non internal domains
+const DEFAULT_DOMAINS: string[] = [
+  "alexa",
+  "cloud",
+  "google_translate",
+  "met",
+  "rpi_power",
+];
+
 @customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {
   @property({ attribute: false }) public lastDataEntry?: Analytics;
@@ -38,7 +47,7 @@ export class AnalyticsIntegrations extends LitElement {
 
   @internalProperty() private _currentTableSize = 30;
   @internalProperty() private _currentTablePage = 0;
-  @internalProperty() private _showInternal = false;
+  @internalProperty() private _showDefaultAndInternal = false;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
@@ -58,8 +67,10 @@ export class AnalyticsIntegrations extends LitElement {
       )
       .filter(
         (entry) =>
-          this._integrationDetails[entry.domain].quality_scale !== "internal" ||
-          this._showInternal
+          (!DEFAULT_DOMAINS.includes(entry.domain) &&
+            this._integrationDetails[entry.domain].quality_scale !==
+              "internal") ||
+          this._showDefaultAndInternal
       )
       .map((entry, idx) => {
         return { ...entry, idx };
@@ -102,11 +113,8 @@ export class AnalyticsIntegrations extends LitElement {
             `
           : ""}
       </div>
-      <mwc-formfield label="Show internal integrations">
-        <mwc-checkbox
-          id="internal"
-          @change=${this._toggleInternal}
-        ></mwc-checkbox>
+      <mwc-formfield label="Show default and internal integrations">
+        <mwc-checkbox @change=${this._toggleDefaultAndInternal}></mwc-checkbox>
       </mwc-formfield>
 
       <table>
@@ -195,8 +203,8 @@ export class AnalyticsIntegrations extends LitElement {
     this._filter = "";
   }
 
-  private _toggleInternal(ev: CustomEvent) {
-    this._showInternal = (ev.currentTarget as any).checked;
+  private _toggleDefaultAndInternal(ev: CustomEvent) {
+    this._showDefaultAndInternal = (ev.currentTarget as any).checked;
   }
 
   async getData() {
