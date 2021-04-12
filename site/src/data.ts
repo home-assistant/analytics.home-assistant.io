@@ -45,8 +45,7 @@ export const AnalyticsPages = ["installations", "statistics", "integrations"];
 
 export const fetchData = () => fetch("/data.json");
 
-export const fetchIntegrationDetails = () =>
-  fetch("https://www.home-assistant.io/integrations.json");
+export const fetchIntegrationDetails = () => fetch("/integration_details.json");
 
 export const relativeTime = (targetTimestamp: number): string => {
   const now = new Date();
