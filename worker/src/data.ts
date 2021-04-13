@@ -115,7 +115,7 @@ export const createQueueData = (): QueueData => ({
   count_users: [],
 });
 
-export const generateMetadata = (
+export const generateUuidMetadata = (
   payload: SanitizedPayload,
   updated: number,
   metadata?: UuidMetadata | null

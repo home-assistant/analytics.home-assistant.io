@@ -4,7 +4,7 @@ import {
   InstallationTypes,
   KV_PREFIX_UUID,
   SanitizedPayload,
-  generateMetadata,
+  generateUuidMetadata,
   UuidMetadataKey,
   UuidMetadata,
 } from "../data";
@@ -82,7 +82,7 @@ async function storePayload(
 ) {
   await KV.put(storageKey, JSON.stringify(payload), {
     expirationTtl,
-    metadata: generateMetadata(payload, currentTimestamp, metadata),
+    metadata: generateUuidMetadata(payload, currentTimestamp, metadata),
   });
 }
 
