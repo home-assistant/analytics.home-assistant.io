@@ -18,7 +18,10 @@ export async function handlePost(request: Request): Promise<Response> {
   }
 
   const storageKey = `${KV_PREFIX_UUID}:${payload.uuid}`;
-  const country = request.headers.get("cf-ipcountry");
+  let country = request.cf.country;
+  if (country === "US" && request.cf.regionCode) {
+    country = `${country}_${request.cf.regionCode}`;
+  }
 
   let sanitizedPayload: SanitizedPayload;
 

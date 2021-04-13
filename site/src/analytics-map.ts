@@ -27,9 +27,20 @@ export class AnalyticsMap extends UpdatingElement {
     if (this.showMap) {
       const countries: Record<string, Record<string, number>> = {};
       for (const country of Object.keys(this.lastDataEntry?.countries || {})) {
-        countries[country] = {
-          installations: this.lastDataEntry?.countries[country] || 0,
-        };
+        if (country.startsWith("US_")) {
+          const value = this.lastDataEntry?.countries[country] || 0;
+          if (!countries["US"]) {
+            countries["US"] = { installations: value };
+          } else {
+            countries["US"].installations =
+              countries["US"].installations + value;
+          }
+          console.log(country);
+        } else {
+          countries[country] = {
+            installations: this.lastDataEntry?.countries[country] || 0,
+          };
+        }
       }
       if (this._svgMap) {
         this._svgMap.applyData({
