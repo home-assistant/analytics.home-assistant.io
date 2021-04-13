@@ -20,8 +20,6 @@ export async function handlePost(request: Request): Promise<Response> {
     return new Response(null, { status: 400 });
   }
 
-  payload.uuid = String(payload.uuid);
-
   const storageKey = `${KV_PREFIX_UUID}:${payload.uuid}`;
   const country = request.headers.get("cf-ipcountry");
 
@@ -94,7 +92,7 @@ const sanitizePayload = (
     throw new Error("Missing required keys in the payload");
   }
 
-  if (payload.uuid.length !== 32) {
+  if (String(payload.uuid).length !== 32) {
     throw new Error("Wrong UUID format");
   }
 
