@@ -11,6 +11,7 @@
     "@mdi/js": "^5.9.55",
     "lit-element": "^2.4.0",
     "lit-html": "^1.3.0",
+    "superstruct": "^0.15.1",
     "svgmap": "^2.1.1"
   },
   "devDependencies": {

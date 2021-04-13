@@ -60,19 +60,19 @@ export interface Queue {
   data: QueueData;
 }
 
-export interface SanitizedPayload {
-  version: string;
-  country?: string;
-  installation_type: string;
-  integrations?: string[];
-  custom_integrations?: { domain: string; version: string | null }[];
+export interface IncommingPayload {
+  addon_count?: number;
   addons?: { slug: string }[];
+  automation_count?: number;
+  country?: string;
+  custom_integrations?: { domain: string; version: string | null }[];
+  installation_type: string;
+  integration_count?: number;
+  integrations?: string[];
   last_write?: number;
   state_count?: number;
-  addon_count?: number;
-  automation_count?: number;
-  integration_count?: number;
   user_count?: number;
+  version: string;
 }
 
 const BasePayloadKeys = [
@@ -116,7 +116,7 @@ export const createQueueData = (): QueueData => ({
 });
 
 export const generateUuidMetadata = (
-  payload: SanitizedPayload,
+  payload: IncommingPayload,
   updated: number,
   metadata?: UuidMetadata | null
 ): UuidMetadata => {

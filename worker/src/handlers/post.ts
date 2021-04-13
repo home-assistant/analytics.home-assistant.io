@@ -1,47 +1,42 @@
 // Receive data from a Home Assistant installation
 import {
-  AllowedPayloadKeys,
-  InstallationTypes,
-  KV_PREFIX_UUID,
-  SanitizedPayload,
   generateUuidMetadata,
-  UuidMetadataKey,
+  IncommingPayload,
+  KV_PREFIX_UUID,
   UuidMetadata,
+  UuidMetadataKey,
 } from "../data";
 import { daysToSeconds } from "../utils/date";
 import { deepEqual } from "../utils/deep-equal";
+import { assertIncommingPayload } from "../utils/validate";
 
 const updateThreshold = daysToSeconds(30);
 const expirationTtl = daysToSeconds(60);
 
 export async function handlePost(request: Request): Promise<Response> {
-  const payload = await request.json();
-  if (!payload.uuid) {
+  const incommingPayload = await request.json();
+  incommingPayload.country = request.cf.country;
+
+  try {
+    assertIncommingPayload(incommingPayload);
+  } catch (e) {
+    console.error(JSON.stringify(e));
     return new Response(null, { status: 400 });
   }
 
-  const storageKey = `${KV_PREFIX_UUID}:${payload.uuid}`;
-  const country = request.headers.get("cf-ipcountry");
-
-  let sanitizedPayload: SanitizedPayload;
-
-  try {
-    sanitizedPayload = sanitizePayload(payload, country);
-  } catch (err) {
-    return new Response(err.message, { status: 400 });
-  }
+  const storageKey = `${KV_PREFIX_UUID}:${incommingPayload.uuid}`;
 
   const currentTimestamp = new Date().getTime();
 
   // Get the current stored data for the storageKey if any
   const stored: {
-    value?: SanitizedPayload | null;
+    value?: IncommingPayload | null;
     metadata?: UuidMetadata | null;
   } = await KV.getWithMetadata(storageKey, "json");
 
   if (!stored || !stored.value) {
     // First contact for UUID, store payload
-    await storePayload(storageKey, sanitizedPayload, currentTimestamp);
+    await storePayload(storageKey, incommingPayload, currentTimestamp);
     return new Response();
   }
 
@@ -51,11 +46,11 @@ export async function handlePost(request: Request): Promise<Response> {
 
   delete stored.value.last_write;
 
-  if (!deepEqual(stored.value, sanitizedPayload)) {
+  if (!deepEqual(stored.value, incommingPayload)) {
     // Payload changed, update stored data
     await storePayload(
       storageKey,
-      sanitizedPayload,
+      incommingPayload,
       currentTimestamp,
       stored.metadata
     );
@@ -63,7 +58,7 @@ export async function handlePost(request: Request): Promise<Response> {
     // Threshold has passed, update stored data
     await storePayload(
       storageKey,
-      sanitizedPayload,
+      incommingPayload,
       currentTimestamp,
       stored.metadata
     );
@@ -74,7 +69,7 @@ export async function handlePost(request: Request): Promise<Response> {
 
 async function storePayload(
   storageKey: string,
-  payload: SanitizedPayload,
+  payload: IncommingPayload,
   currentTimestamp: number,
   metadata?: UuidMetadata | null
 ) {
@@ -83,55 +78,3 @@ async function storePayload(
     metadata: generateUuidMetadata(payload, currentTimestamp, metadata),
   });
 }
-
-const sanitizePayload = (
-  payload: any,
-  country: string | null
-): SanitizedPayload => {
-  if (!payload.installation_type || !payload.version) {
-    throw new Error("Missing required keys in the payload");
-  }
-
-  if (String(payload.uuid).length !== 32) {
-    throw new Error("Wrong UUID format");
-  }
-
-  const vs = payload.version.split(".");
-
-  if (
-    payload.version.length > 24 ||
-    vs.length < 3 ||
-    vs[0].length !== 4 ||
-    vs[1].length > 2
-  ) {
-    throw new Error("Wrong version format");
-  }
-
-  if (!(payload.installation_type in InstallationTypes)) {
-    throw new Error(
-      `${String(payload.installation_type)} is not a valid instalaltion type`
-    );
-  }
-
-  for (const entry of Object.keys(payload)) {
-    if (!AllowedPayloadKeys.includes(entry)) {
-      // Because versions of core can differ we just remove the unkown payload entries instead of hard failing
-      delete payload[entry];
-    }
-
-    if (entry === "integrations") {
-      for (const integration of payload.integrations) {
-        if (typeof integration === "string" || integration instanceof String) {
-          continue;
-        } else {
-          throw new Error(`${String(integration)} is not a valid integration`);
-        }
-      }
-    }
-  }
-
-  if (country && country.length == 2) {
-    payload.country = country;
-  }
-  return payload;
-};
