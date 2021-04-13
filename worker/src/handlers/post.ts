@@ -102,10 +102,9 @@ const sanitizePayload = (
 
   if (
     payload.version.length > 24 ||
-    vs > 4 ||
+    vs.length < 3 ||
     vs[0].length !== 4 ||
-    vs[1].length > 2 ||
-    vs[2].length > 2
+    vs[1].length > 2
   ) {
     throw new Error("Wrong version format");
   }
