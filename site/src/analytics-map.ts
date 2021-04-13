@@ -35,7 +35,6 @@ export class AnalyticsMap extends UpdatingElement {
             countries["US"].installations =
               countries["US"].installations + value;
           }
-          console.log(country);
         } else {
           countries[country] = {
             installations: this.lastDataEntry?.countries[country] || 0,
