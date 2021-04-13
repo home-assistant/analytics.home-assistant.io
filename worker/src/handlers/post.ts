@@ -3,10 +3,10 @@ import {
   AllowedPayloadKeys,
   InstallationTypes,
   KV_PREFIX_UUID,
-  Metadata,
   SanitizedPayload,
   generateMetadata,
-  MetadataKey,
+  UuidMetadataKey,
+  UuidMetadata,
 } from "../data";
 import { daysToSeconds } from "../utils/date";
 import { deepEqual } from "../utils/deep-equal";
@@ -19,6 +19,8 @@ export async function handlePost(request: Request): Promise<Response> {
   if (!payload.uuid) {
     return new Response(null, { status: 400 });
   }
+
+  payload.uuid = String(payload.uuid);
 
   const storageKey = `${KV_PREFIX_UUID}:${payload.uuid}`;
   const country = request.headers.get("cf-ipcountry");
@@ -36,7 +38,7 @@ export async function handlePost(request: Request): Promise<Response> {
   // Get the current stored data for the storageKey if any
   const stored: {
     value?: SanitizedPayload | null;
-    metadata?: Metadata | null;
+    metadata?: UuidMetadata | null;
   } = await KV.getWithMetadata(storageKey, "json");
 
   if (!stored || !stored.value) {
@@ -46,7 +48,7 @@ export async function handlePost(request: Request): Promise<Response> {
   }
 
   const lastWrite = stored.metadata
-    ? stored.metadata[MetadataKey.UPDATED]
+    ? stored.metadata[UuidMetadataKey.UPDATED]
     : stored.value.last_write;
 
   delete stored.value.last_write;
@@ -76,16 +78,12 @@ async function storePayload(
   storageKey: string,
   payload: SanitizedPayload,
   currentTimestamp: number,
-  metadata?: Metadata | null
+  metadata?: UuidMetadata | null
 ) {
-  await KV.put(
-    storageKey,
-    JSON.stringify({ ...payload, last_write: currentTimestamp }),
-    {
-      expirationTtl,
-      metadata: generateMetadata(payload, currentTimestamp, metadata),
-    }
-  );
+  await KV.put(storageKey, JSON.stringify(payload), {
+    expirationTtl,
+    metadata: generateMetadata(payload, currentTimestamp, metadata),
+  });
 }
 
 const sanitizePayload = (
@@ -96,7 +94,23 @@ const sanitizePayload = (
     throw new Error("Missing required keys in the payload");
   }
 
-  if (!Object.keys(InstallationTypes).includes(payload.installation_type)) {
+  if (payload.uuid.length !== 32) {
+    throw new Error("Wrong UUID format");
+  }
+
+  const vs = payload.version.split(".");
+
+  if (
+    payload.version.length > 24 ||
+    vs > 4 ||
+    vs[0].length !== 4 ||
+    vs[1].length > 2 ||
+    vs[2].length > 2
+  ) {
+    throw new Error("Wrong version format");
+  }
+
+  if (!(payload.installation_type in InstallationTypes)) {
     throw new Error(
       `${String(payload.installation_type)} is not a valid instalaltion type`
     );

@@ -4,7 +4,7 @@ export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 850;
 
-export enum MetadataKey {
+export enum UuidMetadataKey {
   ADDED = "a",
   COUNTRY = "c",
   EXTRA = "e",
@@ -26,17 +26,17 @@ export enum MetadataExtra {
   ADDONS = "a",
 }
 
-export interface Metadata {
-  [MetadataKey.ADDED]: number;
-  [MetadataKey.UPDATED]: number;
-  [MetadataKey.VERSION]: string;
-  [MetadataKey.INSTALLATION_TYPE]: ShortInstallationType;
-  [MetadataKey.COUNTRY]?: string;
-  [MetadataKey.EXTRA]: MetadataExtra[];
+export interface UuidMetadata {
+  [UuidMetadataKey.ADDED]: number;
+  [UuidMetadataKey.UPDATED]: number;
+  [UuidMetadataKey.VERSION]: string;
+  [UuidMetadataKey.INSTALLATION_TYPE]: ShortInstallationType;
+  [UuidMetadataKey.COUNTRY]?: string;
+  [UuidMetadataKey.EXTRA]: MetadataExtra[];
 }
 
 export interface ListEntry {
-  metadata?: Metadata;
+  metadata?: UuidMetadata;
   name: string;
   expiration?: number;
 }
@@ -118,8 +118,8 @@ export const createQueueData = (): QueueData => ({
 export const generateMetadata = (
   payload: SanitizedPayload,
   updated: number,
-  metadata?: Metadata | null
-): Metadata => {
+  metadata?: UuidMetadata | null
+): UuidMetadata => {
   const extra: MetadataExtra[] = [];
 
   if (payload.integrations) {
@@ -133,13 +133,15 @@ export const generateMetadata = (
   }
 
   return {
-    [MetadataKey.UPDATED]: updated,
-    [MetadataKey.ADDED]: metadata ? metadata[MetadataKey.ADDED] : updated,
-    [MetadataKey.INSTALLATION_TYPE]:
+    [UuidMetadataKey.UPDATED]: updated,
+    [UuidMetadataKey.ADDED]: metadata
+      ? metadata[UuidMetadataKey.ADDED]
+      : updated,
+    [UuidMetadataKey.INSTALLATION_TYPE]:
       InstallationTypes[payload.installation_type],
-    [MetadataKey.COUNTRY]: payload.country,
-    [MetadataKey.VERSION]: payload.version,
-    [MetadataKey.EXTRA]: extra,
+    [UuidMetadataKey.COUNTRY]: payload.country,
+    [UuidMetadataKey.VERSION]: payload.version,
+    [UuidMetadataKey.EXTRA]: extra,
   };
 };
 

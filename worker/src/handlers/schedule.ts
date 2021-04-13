@@ -11,10 +11,10 @@ import {
   KV_KEY_QUEUE,
   KV_KEY_CORE_ANALYTICS,
   KV_PREFIX_HISTORY,
-  Metadata,
   ListEntry,
-  MetadataKey,
   ShortInstallationType,
+  UuidMetadataKey,
+  UuidMetadata,
 } from "../data";
 import { average } from "../utils/average";
 
@@ -34,7 +34,10 @@ async function processQueue(): Promise<void> {
     const kv_list = await listKV(KV_PREFIX_UUID);
 
     for (const entry of kv_list) {
-      if (entry.metadata && entry.metadata[MetadataKey.EXTRA].length === 0) {
+      if (
+        entry.metadata &&
+        entry.metadata[UuidMetadataKey.EXTRA].length === 0
+      ) {
         // Entry does not have any extra keys
         queue.data = combineMetadataEntryData(queue.data, entry.metadata);
       } else {
@@ -123,30 +126,33 @@ async function listKV(prefix: string): Promise<ListEntry[]> {
 
 function combineMetadataEntryData(
   data: QueueData,
-  entrydata: Metadata
+  entrydata: UuidMetadata
 ): QueueData {
-  data.versions[entrydata[MetadataKey.VERSION]] = bumpValue(
-    data.versions[entrydata[MetadataKey.VERSION]]
+  data.versions[entrydata[UuidMetadataKey.VERSION]] = bumpValue(
+    data.versions[entrydata[UuidMetadataKey.VERSION]]
   );
 
-  if (entrydata[MetadataKey.COUNTRY]) {
-    data.countries[entrydata[MetadataKey.COUNTRY]!] = bumpValue(
-      data.countries[entrydata[MetadataKey.COUNTRY]!]
+  if (entrydata[UuidMetadataKey.COUNTRY]) {
+    data.countries[entrydata[UuidMetadataKey.COUNTRY]!] = bumpValue(
+      data.countries[entrydata[UuidMetadataKey.COUNTRY]!]
     );
   }
 
-  if (entrydata[MetadataKey.INSTALLATION_TYPE] === ShortInstallationType.OS) {
+  if (
+    entrydata[UuidMetadataKey.INSTALLATION_TYPE] === ShortInstallationType.OS
+  ) {
     data.installation_types.os++;
   } else if (
-    entrydata[MetadataKey.INSTALLATION_TYPE] === ShortInstallationType.CONTAINER
+    entrydata[UuidMetadataKey.INSTALLATION_TYPE] ===
+    ShortInstallationType.CONTAINER
   ) {
     data.installation_types.container++;
   } else if (
-    entrydata[MetadataKey.INSTALLATION_TYPE] === ShortInstallationType.CORE
+    entrydata[UuidMetadataKey.INSTALLATION_TYPE] === ShortInstallationType.CORE
   ) {
     data.installation_types.core++;
   } else if (
-    entrydata[MetadataKey.INSTALLATION_TYPE] ===
+    entrydata[UuidMetadataKey.INSTALLATION_TYPE] ===
     ShortInstallationType.SUPERVISED
   ) {
     data.installation_types.supervised++;
