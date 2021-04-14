@@ -16,7 +16,7 @@ const is_ha_installation_type = define<string>("HA_INSTALLATION_TYPE", (
   value
 ) => is(value, string()) && value in InstallationTypes);
 
-export const IncommingPayload = object({
+export const IncomingPayload = object({
   addon_count: optional(number()),
   addons: optional(
     array(
@@ -43,5 +43,5 @@ export const IncommingPayload = object({
   version: size(string(), 7, 22),
 });
 
-export const assertIncommingPayload = (data: unknown) =>
-  assert(data, IncommingPayload);
+export const assertIncomingPayload = (data: unknown) =>
+  assert(data, IncomingPayload);

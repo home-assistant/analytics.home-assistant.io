@@ -1,42 +1,42 @@
 // Receive data from a Home Assistant installation
 import {
   generateUuidMetadata,
-  IncommingPayload,
+  IncomingPayload,
   KV_PREFIX_UUID,
   UuidMetadata,
   UuidMetadataKey,
 } from "../data";
 import { daysToSeconds } from "../utils/date";
 import { deepEqual } from "../utils/deep-equal";
-import { assertIncommingPayload } from "../utils/validate";
+import { assertIncomingPayload } from "../utils/validate";
 
 const updateThreshold = daysToSeconds(30);
 const expirationTtl = daysToSeconds(60);
 
 export async function handlePost(request: Request): Promise<Response> {
-  const incommingPayload = await request.json();
-  incommingPayload.country = request.cf.country;
+  const incomingPayload = await request.json();
+  incomingPayload.country = request.cf.country;
 
   try {
-    assertIncommingPayload(incommingPayload);
+    assertIncomingPayload(incomingPayload);
   } catch (e) {
     console.error(JSON.stringify(e));
     return new Response(null, { status: 400 });
   }
 
-  const storageKey = `${KV_PREFIX_UUID}:${incommingPayload.uuid}`;
+  const storageKey = `${KV_PREFIX_UUID}:${incomingPayload.uuid}`;
 
   const currentTimestamp = new Date().getTime();
 
   // Get the current stored data for the storageKey if any
   const stored: {
-    value?: IncommingPayload | null;
+    value?: IncomingPayload | null;
     metadata?: UuidMetadata | null;
   } = await KV.getWithMetadata(storageKey, "json");
 
   if (!stored || !stored.value) {
     // First contact for UUID, store payload
-    await storePayload(storageKey, incommingPayload, currentTimestamp);
+    await storePayload(storageKey, incomingPayload, currentTimestamp);
     return new Response();
   }
 
@@ -46,11 +46,11 @@ export async function handlePost(request: Request): Promise<Response> {
 
   delete stored.value.last_write;
 
-  if (!deepEqual(stored.value, incommingPayload)) {
+  if (!deepEqual(stored.value, incomingPayload)) {
     // Payload changed, update stored data
     await storePayload(
       storageKey,
-      incommingPayload,
+      incomingPayload,
       currentTimestamp,
       stored.metadata
     );
@@ -58,7 +58,7 @@ export async function handlePost(request: Request): Promise<Response> {
     // Threshold has passed, update stored data
     await storePayload(
       storageKey,
-      incommingPayload,
+      incomingPayload,
       currentTimestamp,
       stored.metadata
     );
@@ -69,7 +69,7 @@ export async function handlePost(request: Request): Promise<Response> {
 
 async function storePayload(
   storageKey: string,
-  payload: IncommingPayload,
+  payload: IncomingPayload,
   currentTimestamp: number,
   metadata?: UuidMetadata | null
 ) {

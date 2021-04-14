@@ -60,7 +60,7 @@ export interface Queue {
   data: QueueData;
 }
 
-export interface IncommingPayload {
+export interface IncomingPayload {
   addon_count?: number;
   addons?: { slug: string }[];
   automation_count?: number;
@@ -116,7 +116,7 @@ export const createQueueData = (): QueueData => ({
 });
 
 export const generateUuidMetadata = (
-  payload: IncommingPayload,
+  payload: IncomingPayload,
   updated: number,
   metadata?: UuidMetadata | null
 ): UuidMetadata => {
