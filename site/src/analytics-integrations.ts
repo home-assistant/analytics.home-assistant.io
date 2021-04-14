@@ -25,8 +25,10 @@ import {
 const DEFAULT_DOMAINS: string[] = [
   "alexa",
   "cloud",
+  "ffmpeg",
   "google_translate",
   "met",
+  "mqtt",
   "rpi_power",
 ];
 
