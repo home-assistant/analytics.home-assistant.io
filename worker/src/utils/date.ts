@@ -1,4 +1,4 @@
-export const daysToSeconds = (days: number): number => days * 24 * 60 * 60;
+export const daysToMs = (days: number): number => 1000 * 60 * 60 * 24 * days;
 
 export const formatDate = (date: Date) => {
   return {
