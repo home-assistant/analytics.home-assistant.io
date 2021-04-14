@@ -12,6 +12,13 @@ import {
 } from "superstruct";
 import { InstallationTypes } from "../data";
 
+class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ValidationError";
+  }
+}
+
 const is_ha_installation_type = define<string>("HA_INSTALLATION_TYPE", (
   value
 ) => is(value, string()) && value in InstallationTypes);
@@ -43,5 +50,10 @@ export const IncomingPayload = object({
   version: size(string(), 7, 22),
 });
 
-export const assertIncomingPayload = (data: unknown) =>
-  assert(data, IncomingPayload);
+export const assertIncomingPayload = (data: unknown) => {
+  try {
+    assert(data, IncomingPayload);
+  } catch (e) {
+    throw new ValidationError(e);
+  }
+};
