@@ -1,11 +1,11 @@
 // Scheduled taks handler to manage the KV store
+import Toucan from "toucan-js";
 import { CurrentAnalytics } from "../../../site/src/data";
 import {
   createQueueData,
   bumpValue,
   Queue,
   QueueData,
-  SanitizedPayload,
   KV_PREFIX_UUID,
   KV_MAX_PROCESS_ENTRIES,
   KV_KEY_QUEUE,
@@ -15,22 +15,29 @@ import {
   ShortInstallationType,
   UuidMetadataKey,
   UuidMetadata,
+  IncomingPayload,
 } from "../data";
 import { average } from "../utils/average";
 
-export async function handleSchedule(event: ScheduledEvent): Promise<void> {
-  await processQueue();
+export async function handleSchedule(sentry: Toucan): Promise<void> {
+  try {
+    await processQueue(sentry);
+  } catch (e) {
+    sentry.captureException(e);
+  }
 }
 
-async function processQueue(): Promise<void> {
+async function processQueue(sentry: Toucan): Promise<void> {
+  sentry.addBreadcrumb({ message: "Prosess started" });
   const queue = (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || {
     entries: [],
     data: createQueueData(),
   };
 
+  sentry.setExtra("queue", queue);
+
   if (queue.entries.length === 0) {
-    // No entries, get list
-    console.log("No entries, get list");
+    sentry.addBreadcrumb({ message: "No entries, get list" });
     const kv_list = await listKV(KV_PREFIX_UUID);
 
     for (const entry of kv_list) {
@@ -47,13 +54,11 @@ async function processQueue(): Promise<void> {
   }
 
   async function handleEntry(entryKey: string) {
-    console.log("getting ", entryKey);
-
     let entryData;
     try {
-      entryData = await KV.get<SanitizedPayload>(entryKey, "json");
+      entryData = await KV.get<IncomingPayload>(entryKey, "json");
     } catch (e) {
-      console.log(e);
+      sentry.addBreadcrumb({ message: e });
     }
 
     if (entryData !== undefined && entryData !== null) {
@@ -68,8 +73,9 @@ async function processQueue(): Promise<void> {
   );
 
   if (queue.entries.length === 0) {
-    // No more entries, store and reset queue data
-    console.log("No more entries, store and reset queue data");
+    sentry.addBreadcrumb({
+      message: "No more entries, store and reset queue data",
+    });
     const core_analytics: Record<string, any> = {};
     const timestampString = String(new Date().getTime());
 
@@ -89,12 +95,13 @@ async function processQueue(): Promise<void> {
 
     core_analytics[timestampString] = queue_data;
 
-    // Trigger Netlify build
+    sentry.addBreadcrumb({ message: "Trigger Netlify build" });
     const resp = await fetch(NETLIFY_BUILD_HOOK, { method: "POST" });
     if (!resp.ok) {
       throw new Error("Failed to call Netlify build hook");
     }
 
+    sentry.addBreadcrumb({ message: "Store data" });
     await KV.put(
       `${KV_PREFIX_HISTORY}:${timestampString}`,
       JSON.stringify(queue_data)
@@ -102,7 +109,7 @@ async function processQueue(): Promise<void> {
     await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(core_analytics));
     queue.data = createQueueData();
   }
-
+  sentry.addBreadcrumb({ message: "Prosess complete" });
   await KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
 }
 
@@ -163,7 +170,7 @@ function combineMetadataEntryData(
 
 function combineEntryData(
   data: QueueData,
-  entrydata: SanitizedPayload
+  entrydata: IncomingPayload
 ): QueueData {
   const reported_integrations = entrydata.integrations || [];
 
