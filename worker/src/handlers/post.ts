@@ -7,12 +7,11 @@ import {
   UuidMetadata,
   UuidMetadataKey,
 } from "../data";
-import { daysToMs } from "../utils/date";
 import { deepEqual } from "../utils/deep-equal";
 import { assertIncomingPayload } from "../utils/validate";
 
-const updateThreshold = daysToMs(30);
-const expirationTtl = daysToMs(60);
+const updateThreshold = 2592000000;
+const expirationTtl = 5184000000;
 
 export async function handlePostWrapper(
   request: Request,
