@@ -1,4 +1,5 @@
 // Receive data from a Home Assistant installation
+import { assert } from "superstruct";
 import Toucan from "toucan-js";
 import {
   generateUuidMetadata,
@@ -8,7 +9,10 @@ import {
   UuidMetadataKey,
 } from "../data";
 import { deepEqual } from "../utils/deep-equal";
-import { assertIncomingPayload } from "../utils/validate";
+import {
+  createIncomingPayload,
+  IncomingPayloadStruct,
+} from "../utils/validate";
 
 const updateThreshold = 2592000000;
 const expirationTtl = 5184000;
@@ -26,23 +30,23 @@ export async function handlePostWrapper(
 }
 
 async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
+  let incomingPayload;
   sentry.addBreadcrumb({ message: "Prosess started" });
-  const incomingPayload = await request.json();
-  incomingPayload.country = request.cf.country;
+  const request_json = await request.json();
+  request_json.country = request.cf.country;
 
-  sentry.setUser({ id: incomingPayload.uuid });
-  sentry.setExtras(incomingPayload);
+  sentry.setUser({ id: request_json.uuid });
+  sentry.setExtras(request_json);
 
   try {
-    sentry.addBreadcrumb({ message: "Validate payload" });
-    assertIncomingPayload(incomingPayload);
+    sentry.addBreadcrumb({ message: "Validate incoming payload" });
+    incomingPayload = createIncomingPayload(request_json);
   } catch (e) {
     sentry.captureException(e);
     return new Response(null, { status: 400 });
   }
 
   const storageKey = `${KV_PREFIX_UUID}:${incomingPayload.uuid}`;
-
   const currentTimestamp = new Date().getTime();
 
   sentry.addBreadcrumb({
@@ -97,10 +101,12 @@ async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
 
 async function storePayload(
   storageKey: string,
-  payload: IncomingPayload,
+  payload: unknown,
   currentTimestamp: number,
   metadata?: UuidMetadata | null
 ) {
+  assert(payload, IncomingPayloadStruct);
+
   await KV.put(storageKey, JSON.stringify(payload), {
     expirationTtl,
     metadata: generateUuidMetadata(payload, currentTimestamp, metadata),

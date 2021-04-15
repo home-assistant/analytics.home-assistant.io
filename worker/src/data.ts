@@ -75,25 +75,6 @@ export interface IncomingPayload {
   version: string;
 }
 
-const BasePayloadKeys = [
-  "country",
-  "installation_type",
-  "supervisor",
-  "version",
-];
-
-export const AllowedPayloadKeys = BasePayloadKeys.concat([
-  "addon_count",
-  "addons",
-  "automation_count",
-  "custom_integrations",
-  "integration_count",
-  "integrations",
-  "last_write",
-  "state_count",
-  "user_count",
-]);
-
 export const InstallationTypes: Record<string, ShortInstallationType> = {
   "Home Assistant OS": ShortInstallationType.OS,
   "Home Assistant Container": ShortInstallationType.CONTAINER,
@@ -116,7 +97,7 @@ export const createQueueData = (): QueueData => ({
 });
 
 export const generateUuidMetadata = (
-  payload: IncomingPayload,
+  payload: any,
   updated: number,
   metadata?: UuidMetadata | null
 ): UuidMetadata => {
