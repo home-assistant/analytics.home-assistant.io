@@ -7,12 +7,11 @@ import {
   UuidMetadata,
   UuidMetadataKey,
 } from "../data";
-import { daysToMs } from "../utils/date";
 import { deepEqual } from "../utils/deep-equal";
 import { assertIncomingPayload } from "../utils/validate";
 
-const updateThreshold = daysToMs(30);
-const expirationTtl = daysToMs(60);
+const updateThreshold = 2592000000;
+const expirationTtl = 5184000;
 const withRegion = new Set(["US"]);
 
 export async function handlePostWrapper(
@@ -31,7 +30,7 @@ async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
   sentry.addBreadcrumb({ message: "Prosess started" });
   const incomingPayload = await request.json();
   incomingPayload.country = request.cf.country;
-  if (incomingPayload.country in withRegion) {
+  if (withRegion.has(incomingPayload.country)) {
     incomingPayload.region = request.cf.regionCode;
   }
 

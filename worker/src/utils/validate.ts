@@ -4,6 +4,7 @@ import {
   boolean,
   define,
   is,
+  nullable,
   number,
   object,
   optional,
@@ -30,7 +31,7 @@ export const IncomingPayload = object({
       object({
         slug: string(),
         protected: boolean(),
-        version: string(),
+        version: optional(nullable(string())),
         auto_update: boolean(),
       })
     )
@@ -39,7 +40,7 @@ export const IncomingPayload = object({
   country: optional(size(string(), 2, 2)),
   region: optional(size(string(), 2, 2)),
   custom_integrations: optional(
-    array(object({ domain: string(), version: optional(string()) }))
+    array(object({ domain: string(), version: optional(nullable(string())) }))
   ),
   installation_type: is_ha_installation_type,
   integration_count: optional(number()),
