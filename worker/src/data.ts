@@ -4,6 +4,43 @@ export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 850;
 
+export enum UuidMetadataKey {
+  ADDED = "a",
+  COUNTRY = "c",
+  EXTRA = "e",
+  INSTALLATION_TYPE = "i",
+  UPDATED = "u",
+  VERSION = "v",
+}
+
+export enum ShortInstallationType {
+  CORE = "c",
+  CONTAINER = "d",
+  OS = "o",
+  SUPERVISED = "s",
+}
+
+export enum MetadataExtra {
+  INTEGRATIONS = "i",
+  STATISTICS = "s",
+  ADDONS = "a",
+}
+
+export interface UuidMetadata {
+  [UuidMetadataKey.ADDED]: number;
+  [UuidMetadataKey.UPDATED]: number;
+  [UuidMetadataKey.VERSION]: string;
+  [UuidMetadataKey.INSTALLATION_TYPE]: ShortInstallationType;
+  [UuidMetadataKey.COUNTRY]?: string;
+  [UuidMetadataKey.EXTRA]: MetadataExtra[];
+}
+
+export interface ListEntry {
+  metadata?: UuidMetadata;
+  name: string;
+  expiration?: number;
+}
+
 export interface QueueData {
   reports_integrations: number;
   reports_statistics: number;
@@ -23,42 +60,46 @@ export interface Queue {
   data: QueueData;
 }
 
-export interface SanitizedPayload {
-  version: string;
-  country?: string;
-  installation_type: string;
-  integrations?: string[];
-  custom_integrations?: { domain: string; version: string | null }[];
+export interface IncomingPayload {
+  addon_count?: number;
   addons?: { slug: string }[];
+  automation_count?: number;
+  country?: string;
+  custom_integrations?: { domain: string; version: string | null }[];
+  installation_type: string;
+  integration_count?: number;
+  integrations?: string[];
   last_write?: number;
   state_count?: number;
-  addon_count?: number;
-  automation_count?: number;
-  integration_count?: number;
   user_count?: number;
+  version: string;
 }
 
-export const AllowedPayloadKeys = [
+const BasePayloadKeys = [
+  "country",
+  "installation_type",
+  "supervisor",
+  "version",
+];
+
+export const AllowedPayloadKeys = BasePayloadKeys.concat([
   "addon_count",
   "addons",
   "automation_count",
   "custom_integrations",
-  "installation_type",
   "integration_count",
   "integrations",
   "last_write",
   "state_count",
-  "supervisor",
   "user_count",
-  "version",
-];
+]);
 
-export const InstallationTypes = [
-  "Home Assistant OS",
-  "Home Assistant Container",
-  "Home Assistant Core",
-  "Home Assistant Supervised",
-];
+export const InstallationTypes: Record<string, ShortInstallationType> = {
+  "Home Assistant OS": ShortInstallationType.OS,
+  "Home Assistant Container": ShortInstallationType.CONTAINER,
+  "Home Assistant Core": ShortInstallationType.CORE,
+  "Home Assistant Supervised": ShortInstallationType.SUPERVISED,
+};
 
 export const createQueueData = (): QueueData => ({
   reports_integrations: 0,
@@ -73,6 +114,36 @@ export const createQueueData = (): QueueData => ({
   count_states: [],
   count_users: [],
 });
+
+export const generateUuidMetadata = (
+  payload: IncomingPayload,
+  updated: number,
+  metadata?: UuidMetadata | null
+): UuidMetadata => {
+  const extra: MetadataExtra[] = [];
+
+  if (payload.integrations) {
+    extra.push(MetadataExtra.INTEGRATIONS);
+  }
+  if (payload.addons) {
+    extra.push(MetadataExtra.ADDONS);
+  }
+  if (payload.integration_count) {
+    extra.push(MetadataExtra.STATISTICS);
+  }
+
+  return {
+    [UuidMetadataKey.UPDATED]: updated,
+    [UuidMetadataKey.ADDED]: metadata
+      ? metadata[UuidMetadataKey.ADDED]
+      : updated,
+    [UuidMetadataKey.INSTALLATION_TYPE]:
+      InstallationTypes[payload.installation_type],
+    [UuidMetadataKey.COUNTRY]: payload.country,
+    [UuidMetadataKey.VERSION]: payload.version,
+    [UuidMetadataKey.EXTRA]: extra,
+  };
+};
 
 export const bumpValue = (current?: number): number =>
   !current ? 1 : current + 1;
