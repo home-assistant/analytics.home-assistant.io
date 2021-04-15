@@ -4,6 +4,7 @@ import {
   css,
   customElement,
   html,
+  internalProperty,
   LitElement,
   property,
   PropertyValues,
@@ -18,6 +19,8 @@ export class AnalyticsActiveInstallations extends LitElement {
   @property({ type: Boolean }) public isMobile = false;
 
   @property({ type: Boolean }) public isDarkMode = false;
+
+  @internalProperty() private _logScale = false;
 
   @query("google-chart") private _chart?: GoogleChart;
 
@@ -46,6 +49,11 @@ export class AnalyticsActiveInstallations extends LitElement {
     ]);
 
     return html`
+      ${!this.isMobile
+        ? html`<mwc-formfield label="Logarithmic scale">
+            <mwc-checkbox @change=${this._toggleLogScale}></mwc-checkbox>
+          </mwc-formfield>`
+        : ""}
       <google-chart
         type="line"
         .cols=${[
@@ -85,7 +93,7 @@ export class AnalyticsActiveInstallations extends LitElement {
           },
           vAxis: {
             title: "Active installations",
-            logScale: true,
+            logScale: this._logScale,
             titleTextStyle: {
               color: this.isDarkMode ? "#e1e1e1" : "#212121",
             },
@@ -97,10 +105,27 @@ export class AnalyticsActiveInstallations extends LitElement {
     `;
   }
 
+  private _toggleLogScale(ev: CustomEvent) {
+    this._logScale = (ev.currentTarget as any).checked;
+  }
+
   static styles = css`
+    :host {
+      display: block;
+      position: relative;
+    }
     google-chart {
       height: 500px;
       width: 100%;
+    }
+    mwc-formfield {
+      position: absolute;
+      right: 16px;
+      z-index: 9;
+    }
+    mwc-checkbox {
+      --mdc-theme-secondary: var(--primary-color);
+      --mdc-checkbox-unchecked-color: var(--secondary-text-color);
     }
   `;
 }
