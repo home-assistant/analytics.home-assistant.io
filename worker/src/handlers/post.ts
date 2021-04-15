@@ -11,7 +11,7 @@ import { deepEqual } from "../utils/deep-equal";
 import { assertIncomingPayload } from "../utils/validate";
 
 const updateThreshold = 2592000000;
-const expirationTtl = 5184000000;
+const expirationTtl = 5184000;
 
 export async function handlePostWrapper(
   request: Request,
