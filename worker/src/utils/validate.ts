@@ -30,9 +30,9 @@ export const IncomingPayload = object({
     array(
       object({
         slug: string(),
-        protected: boolean(),
+        protected: nullable(boolean()),
         version: optional(nullable(string())),
-        auto_update: boolean(),
+        auto_update: nullable(boolean()),
       })
     )
   ),
