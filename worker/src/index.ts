@@ -12,7 +12,6 @@ const sentryClient = (event: FetchEvent | ScheduledEvent, handler: string) => {
   const client = new Toucan({
     dsn: SENTRY_DSN,
     event,
-    environment: "dev",
   });
   client.setTag("handler", handler);
 
