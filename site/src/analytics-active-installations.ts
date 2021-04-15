@@ -1,5 +1,6 @@
 import "@google-web-components/google-chart";
 import type { GoogleChart } from "@google-web-components/google-chart";
+import { Checkbox } from "@material/mwc-checkbox";
 import {
   css,
   customElement,
@@ -106,7 +107,7 @@ export class AnalyticsActiveInstallations extends LitElement {
   }
 
   private _toggleLogScale(ev: CustomEvent) {
-    this._logScale = (ev.currentTarget as any).checked;
+    this._logScale = (ev.currentTarget as Checkbox).checked;
   }
 
   static styles = css`
