@@ -10,6 +10,7 @@ export enum UuidMetadataKey {
   EXTRA = "e",
   INSTALLATION_TYPE = "i",
   UPDATED = "u",
+  REGION = "r",
   VERSION = "v",
 }
 
@@ -32,6 +33,7 @@ export interface UuidMetadata {
   [UuidMetadataKey.VERSION]: string;
   [UuidMetadataKey.INSTALLATION_TYPE]: ShortInstallationType;
   [UuidMetadataKey.COUNTRY]?: string;
+  [UuidMetadataKey.REGION]?: string;
   [UuidMetadataKey.EXTRA]: MetadataExtra[];
 }
 
@@ -65,6 +67,7 @@ export interface IncomingPayload {
   addons?: { slug: string }[];
   automation_count?: number;
   country?: string;
+  region?: string;
   custom_integrations?: { domain: string; version: string | null }[];
   installation_type: string;
   integration_count?: number;
@@ -140,6 +143,7 @@ export const generateUuidMetadata = (
     [UuidMetadataKey.INSTALLATION_TYPE]:
       InstallationTypes[payload.installation_type],
     [UuidMetadataKey.COUNTRY]: payload.country,
+    [UuidMetadataKey.REGION]: payload.region,
     [UuidMetadataKey.VERSION]: payload.version,
     [UuidMetadataKey.EXTRA]: extra,
   };
