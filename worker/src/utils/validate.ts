@@ -36,7 +36,8 @@ export const IncomingPayload = object({
     )
   ),
   automation_count: optional(number()),
-  country: size(string(), 2, 5),
+  country: size(string(), 2, 2),
+  region: optional(size(string(), 2, 2)),
   custom_integrations: optional(
     array(object({ domain: string(), version: optional(string()) }))
   ),
