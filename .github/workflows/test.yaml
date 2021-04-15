@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - staging
 
 env:
   NODE_VERSION: "14.2.0"

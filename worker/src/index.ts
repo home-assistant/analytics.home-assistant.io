@@ -5,13 +5,16 @@ import { handleSchedule } from "./handlers/schedule";
 declare global {
   const KV: KVNamespace;
   const NETLIFY_BUILD_HOOK: string;
+  const NETLIFY_BUILD_HOOK_STAGING: string;
   const SENTRY_DSN: string;
+  const WORKER_ENV: string;
 }
 
 const sentryClient = (event: FetchEvent | ScheduledEvent, handler: string) => {
   const client = new Toucan({
     dsn: SENTRY_DSN,
     event,
+    environment: WORKER_ENV,
   });
   client.setTag("handler", handler);
 

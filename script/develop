@@ -6,8 +6,8 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-curl -sSLf https://analytics.home-assistant.io/data.json | jq . > ./site/public/data.json
-curl -sSLf https://www.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
+curl -sSLf https://analytics-staging.home-assistant.io/data.json | jq . > ./site/public/data.json
+curl -sSLf https://rc.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
 
 if [ ! -d node_modules ]; then
   script/bootstrap

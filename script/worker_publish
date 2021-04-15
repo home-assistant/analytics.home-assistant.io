@@ -11,4 +11,4 @@ if [ ! -d node_modules ]; then
 fi
 
 cd ./worker
-../node_modules/.bin/wrangler publish
+../node_modules/.bin/wrangler publish -e production

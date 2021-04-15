@@ -96,7 +96,12 @@ async function processQueue(sentry: Toucan): Promise<void> {
     core_analytics[timestampString] = queue_data;
 
     sentry.addBreadcrumb({ message: "Trigger Netlify build" });
-    const resp = await fetch(NETLIFY_BUILD_HOOK, { method: "POST" });
+    const resp = await fetch(
+      WORKER_ENV === "production"
+        ? NETLIFY_BUILD_HOOK
+        : NETLIFY_BUILD_HOOK_STAGING,
+      { method: "POST" }
+    );
     if (!resp.ok) {
       throw new Error("Failed to call Netlify build hook");
     }
