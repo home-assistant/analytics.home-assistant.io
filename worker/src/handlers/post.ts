@@ -1,5 +1,4 @@
 // Receive data from a Home Assistant installation
-import { assert } from "superstruct";
 import Toucan from "toucan-js";
 import {
   generateUuidMetadata,
@@ -9,10 +8,7 @@ import {
   UuidMetadataKey,
 } from "../data";
 import { deepEqual } from "../utils/deep-equal";
-import {
-  createIncomingPayload,
-  IncomingPayloadStruct,
-} from "../utils/validate";
+import { createIncomingPayload } from "../utils/validate";
 
 const updateThreshold = 2592000000;
 const expirationTtl = 5184000;
@@ -101,12 +97,10 @@ async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
 
 async function storePayload(
   storageKey: string,
-  payload: unknown,
+  payload: any,
   currentTimestamp: number,
   metadata?: UuidMetadata | null
 ) {
-  assert(payload, IncomingPayloadStruct);
-
   await KV.put(storageKey, JSON.stringify(payload), {
     expirationTtl,
     metadata: generateUuidMetadata(payload, currentTimestamp, metadata),
