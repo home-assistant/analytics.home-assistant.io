@@ -75,34 +75,16 @@ export interface IncomingPayload {
   automation_count?: number;
   country?: string;
   region?: string;
-  custom_integrations?: { domain: string; version: string | null }[];
+  custom_integrations?: { domain: string; version?: string | null }[];
   installation_type: string;
   integration_count?: number;
   integrations?: string[];
   last_write?: number;
   state_count?: number;
   user_count?: number;
+  uuid: string;
   version: string;
 }
-
-const BasePayloadKeys = [
-  "country",
-  "installation_type",
-  "supervisor",
-  "version",
-];
-
-export const AllowedPayloadKeys = BasePayloadKeys.concat([
-  "addon_count",
-  "addons",
-  "automation_count",
-  "custom_integrations",
-  "integration_count",
-  "integrations",
-  "last_write",
-  "state_count",
-  "user_count",
-]);
 
 export const InstallationTypes: Record<string, ShortInstallationType> = {
   "Home Assistant OS": ShortInstallationType.OS,
