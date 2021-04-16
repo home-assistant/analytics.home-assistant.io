@@ -112,26 +112,6 @@ export const InstallationTypes: Record<string, ShortInstallationType> = {
   Unknown: ShortInstallationType.UNKNOWN,
 };
 
-export const createQueueData = (): QueueData => ({
-  reports_integrations: 0,
-  reports_statistics: 0,
-  versions: {},
-  countries: {},
-  installation_types: {
-    os: 0,
-    container: 0,
-    core: 0,
-    supervised: 0,
-    unknown: 0,
-  },
-  integrations: {},
-  count_addons: [],
-  count_automations: [],
-  count_integrations: [],
-  count_states: [],
-  count_users: [],
-});
-
 export const generateUuidMetadata = (
   payload: IncomingPayload,
   updated: number,

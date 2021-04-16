@@ -2,7 +2,6 @@
 import Toucan from "toucan-js";
 import { CurrentAnalytics } from "../../../site/src/data";
 import {
-  createQueueData,
   bumpValue,
   Queue,
   QueueData,
@@ -18,6 +17,7 @@ import {
   IncomingPayload,
 } from "../data";
 import { average } from "../utils/average";
+import { createQueueData } from "../utils/validate";
 
 export async function handleSchedule(sentry: Toucan): Promise<void> {
   try {
@@ -31,8 +31,10 @@ async function processQueue(sentry: Toucan): Promise<void> {
   sentry.addBreadcrumb({ message: "Prosess started" });
   const queue = (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || {
     entries: [],
-    data: createQueueData(),
+    data: createQueueData({}),
   };
+
+  queue.data = createQueueData(queue.data);
 
   sentry.setExtra("queue", queue);
 
@@ -107,7 +109,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
       JSON.stringify(queue_data)
     );
     await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(core_analytics));
-    queue.data = createQueueData();
+    queue.data = createQueueData({});
   }
   sentry.addBreadcrumb({ message: "Prosess complete" });
   await KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
@@ -163,6 +165,11 @@ function combineMetadataEntryData(
     ShortInstallationType.SUPERVISED
   ) {
     data.installation_types.supervised++;
+  } else if (
+    entrydata[UuidMetadataKey.INSTALLATION_TYPE] ===
+    ShortInstallationType.UNKNOWN
+  ) {
+    data.installation_types.unknown++;
   }
 
   return data;
@@ -192,6 +199,8 @@ function combineEntryData(
     data.installation_types.core++;
   } else if (entrydata.installation_type === "Home Assistant Supervised") {
     data.installation_types.supervised++;
+  } else if (entrydata.installation_type === "Unknown") {
+    data.installation_types.unknown++;
   }
 
   if (entrydata.addon_count) {

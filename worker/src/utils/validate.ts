@@ -1,6 +1,7 @@
 import {
   array,
   assert,
+  create,
   boolean,
   define,
   is,
@@ -10,8 +11,10 @@ import {
   optional,
   size,
   string,
+  defaulted,
+  record,
 } from "superstruct";
-import { InstallationTypes } from "../data";
+import { InstallationTypes, QueueData } from "../data";
 
 class ValidationError extends Error {
   constructor(message: string) {
@@ -55,6 +58,43 @@ export const IncomingPayload = object({
 export const assertIncomingPayload = (data: unknown) => {
   try {
     assert(data, IncomingPayload);
+  } catch (e) {
+    throw new ValidationError(e);
+  }
+};
+
+const QueueDataStruct = object({
+  reports_integrations: defaulted(number(), 0),
+  reports_statistics: defaulted(number(), 0),
+  versions: defaulted(record(string(), number()), {}),
+  countries: defaulted(record(string(), number()), {}),
+  installation_types: defaulted(
+    object({
+      os: defaulted(number(), 0),
+      container: defaulted(number(), 0),
+      core: defaulted(number(), 0),
+      supervised: defaulted(number(), 0),
+      unknown: defaulted(number(), 0),
+    }),
+    {
+      os: 0,
+      container: 0,
+      core: 0,
+      supervised: 0,
+      unknown: 0,
+    }
+  ),
+  integrations: defaulted(record(string(), number()), {}),
+  count_addons: defaulted(array(number()), []),
+  count_automations: defaulted(array(number()), []),
+  count_integrations: defaulted(array(number()), []),
+  count_states: defaulted(array(number()), []),
+  count_users: defaulted(array(number()), []),
+});
+
+export const createQueueData = (data: unknown): QueueData => {
+  try {
+    return create(data, QueueDataStruct);
   } catch (e) {
     throw new ValidationError(e);
   }
