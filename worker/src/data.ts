@@ -65,13 +65,14 @@ export interface IncomingPayload {
   addons?: { slug: string }[];
   automation_count?: number;
   country?: string;
-  custom_integrations?: { domain: string; version: string | null }[];
+  custom_integrations?: { domain: string; version?: string | null }[];
   installation_type: string;
   integration_count?: number;
   integrations?: string[];
   last_write?: number;
   state_count?: number;
   user_count?: number;
+  uuid: string;
   version: string;
 }
 
@@ -97,7 +98,7 @@ export const createQueueData = (): QueueData => ({
 });
 
 export const generateUuidMetadata = (
-  payload: any,
+  payload: IncomingPayload,
   updated: number,
   metadata?: UuidMetadata | null
 ): UuidMetadata => {

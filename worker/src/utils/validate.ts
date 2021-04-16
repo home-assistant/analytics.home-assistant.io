@@ -16,7 +16,7 @@ import {
   Struct,
   StructError,
 } from "superstruct";
-import { InstallationTypes } from "../data";
+import { IncomingPayload, InstallationTypes } from "../data";
 
 class ValidationError extends Error {
   constructor(error: StructError) {
@@ -64,7 +64,7 @@ export const IncomingPayloadStruct = object({
   version: size(string(), 7, 22),
 });
 
-export const createIncomingPayload = (data: unknown) => {
+export const createIncomingPayload = (data: unknown): IncomingPayload => {
   try {
     return create(data, IncomingPayloadStruct);
   } catch (e) {

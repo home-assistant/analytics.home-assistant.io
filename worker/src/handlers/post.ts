@@ -97,7 +97,7 @@ async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
 
 async function storePayload(
   storageKey: string,
-  payload: any,
+  payload: IncomingPayload,
   currentTimestamp: number,
   metadata?: UuidMetadata | null
 ) {
