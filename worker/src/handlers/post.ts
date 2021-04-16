@@ -12,6 +12,7 @@ import { assertIncomingPayload } from "../utils/validate";
 
 const updateThreshold = 2592000000;
 const expirationTtl = 5184000;
+const withRegion = new Set(["US"]);
 
 export async function handlePostWrapper(
   request: Request,
@@ -29,6 +30,9 @@ async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
   sentry.addBreadcrumb({ message: "Prosess started" });
   const incomingPayload = await request.json();
   incomingPayload.country = request.cf.country;
+  if (withRegion.has(incomingPayload.country)) {
+    incomingPayload.region = request.cf.regionCode;
+  }
 
   sentry.setUser({ id: incomingPayload.uuid });
   sentry.setExtras(incomingPayload);
