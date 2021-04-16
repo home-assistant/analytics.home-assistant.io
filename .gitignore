@@ -3,3 +3,4 @@ dist
 worker/worker
 site/public/data.json
 site/public/integration_details.json
+.vscode/settings.json

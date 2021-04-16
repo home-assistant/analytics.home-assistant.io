@@ -10,6 +10,7 @@ export enum UuidMetadataKey {
   EXTRA = "e",
   INSTALLATION_TYPE = "i",
   UPDATED = "u",
+  REGION = "r",
   VERSION = "v",
 }
 
@@ -18,6 +19,7 @@ export enum ShortInstallationType {
   CONTAINER = "d",
   OS = "o",
   SUPERVISED = "s",
+  UNKNOWN = "u",
 }
 
 export enum MetadataExtra {
@@ -32,6 +34,7 @@ export interface UuidMetadata {
   [UuidMetadataKey.VERSION]: string;
   [UuidMetadataKey.INSTALLATION_TYPE]: ShortInstallationType;
   [UuidMetadataKey.COUNTRY]?: string;
+  [UuidMetadataKey.REGION]?: string;
   [UuidMetadataKey.EXTRA]: MetadataExtra[];
 }
 
@@ -46,7 +49,13 @@ export interface QueueData {
   reports_statistics: number;
   versions: Record<string, number>;
   countries: Record<string, number>;
-  installation_types: { os: 0; container: 0; core: 0; supervised: 0 };
+  installation_types: {
+    os: number;
+    container: number;
+    core: number;
+    supervised: number;
+    unknown: number;
+  };
   integrations: Record<string, number>;
   count_addons: number[];
   count_automations: number[];
@@ -65,6 +74,7 @@ export interface IncomingPayload {
   addons?: { slug: string }[];
   automation_count?: number;
   country?: string;
+  region?: string;
   custom_integrations?: { domain: string; version?: string | null }[];
   installation_type: string;
   integration_count?: number;
@@ -81,6 +91,7 @@ export const InstallationTypes: Record<string, ShortInstallationType> = {
   "Home Assistant Container": ShortInstallationType.CONTAINER,
   "Home Assistant Core": ShortInstallationType.CORE,
   "Home Assistant Supervised": ShortInstallationType.SUPERVISED,
+  Unknown: ShortInstallationType.UNKNOWN,
 };
 
 export const createQueueData = (): QueueData => ({
@@ -88,7 +99,13 @@ export const createQueueData = (): QueueData => ({
   reports_statistics: 0,
   versions: {},
   countries: {},
-  installation_types: { os: 0, container: 0, core: 0, supervised: 0 },
+  installation_types: {
+    os: 0,
+    container: 0,
+    core: 0,
+    supervised: 0,
+    unknown: 0,
+  },
   integrations: {},
   count_addons: [],
   count_automations: [],
@@ -122,6 +139,7 @@ export const generateUuidMetadata = (
     [UuidMetadataKey.INSTALLATION_TYPE]:
       InstallationTypes[payload.installation_type],
     [UuidMetadataKey.COUNTRY]: payload.country,
+    [UuidMetadataKey.REGION]: payload.region,
     [UuidMetadataKey.VERSION]: payload.version,
     [UuidMetadataKey.EXTRA]: extra,
   };
