@@ -18,6 +18,7 @@ export enum ShortInstallationType {
   CONTAINER = "d",
   OS = "o",
   SUPERVISED = "s",
+  UNKNOWN = "u",
 }
 
 export enum MetadataExtra {
@@ -46,7 +47,13 @@ export interface QueueData {
   reports_statistics: number;
   versions: Record<string, number>;
   countries: Record<string, number>;
-  installation_types: { os: 0; container: 0; core: 0; supervised: 0 };
+  installation_types: {
+    os: number;
+    container: number;
+    core: number;
+    supervised: number;
+    unknown: number;
+  };
   integrations: Record<string, number>;
   count_addons: number[];
   count_automations: number[];
@@ -99,6 +106,7 @@ export const InstallationTypes: Record<string, ShortInstallationType> = {
   "Home Assistant Container": ShortInstallationType.CONTAINER,
   "Home Assistant Core": ShortInstallationType.CORE,
   "Home Assistant Supervised": ShortInstallationType.SUPERVISED,
+  Unknown: ShortInstallationType.UNKNOWN,
 };
 
 export const createQueueData = (): QueueData => ({
@@ -106,7 +114,13 @@ export const createQueueData = (): QueueData => ({
   reports_statistics: 0,
   versions: {},
   countries: {},
-  installation_types: { os: 0, container: 0, core: 0, supervised: 0 },
+  installation_types: {
+    os: 0,
+    container: 0,
+    core: 0,
+    supervised: 0,
+    unknown: 0,
+  },
   integrations: {},
   count_addons: [],
   count_automations: [],
