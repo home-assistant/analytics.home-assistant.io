@@ -8,7 +8,7 @@ import {
   UuidMetadataKey,
 } from "../data";
 import { deepEqual } from "../utils/deep-equal";
-import { assertIncomingPayload } from "../utils/validate";
+import { createIncomingPayload } from "../utils/validate";
 
 const updateThreshold = 2592000000;
 const expirationTtl = 5184000;
@@ -27,26 +27,26 @@ export async function handlePostWrapper(
 }
 
 async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
+  let incomingPayload;
   sentry.addBreadcrumb({ message: "Prosess started" });
-  const incomingPayload = await request.json();
-  incomingPayload.country = request.cf.country;
-  if (withRegion.has(incomingPayload.country)) {
-    incomingPayload.region = request.cf.regionCode;
+  const request_json = await request.json();
+  request_json.country = request.cf.country;
+  if (withRegion.has(request_json.country)) {
+    request_json.region = request.cf.regionCode;
   }
 
-  sentry.setUser({ id: incomingPayload.uuid });
-  sentry.setExtras(incomingPayload);
+  sentry.setUser({ id: request_json.uuid });
+  sentry.setExtras(request_json);
 
   try {
-    sentry.addBreadcrumb({ message: "Validate payload" });
-    assertIncomingPayload(incomingPayload);
+    sentry.addBreadcrumb({ message: "Validate incoming payload" });
+    incomingPayload = createIncomingPayload(request_json);
   } catch (e) {
     sentry.captureException(e);
     return new Response(null, { status: 400 });
   }
 
   const storageKey = `${KV_PREFIX_UUID}:${incomingPayload.uuid}`;
-
   const currentTimestamp = new Date().getTime();
 
   sentry.addBreadcrumb({
