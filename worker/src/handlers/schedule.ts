@@ -234,7 +234,8 @@ const processQueueData = (data: QueueData): CurrentAnalytics => {
       data.installation_types.container +
       data.installation_types.core +
       data.installation_types.os +
-      data.installation_types.supervised,
+      data.installation_types.supervised +
+      data.installation_types.unknown,
     avg_users: average(data.count_users),
     avg_automations: average(data.count_automations),
     avg_integrations: average(data.count_integrations),
