@@ -13,6 +13,7 @@ declare global {
 const sentryClient = (event: FetchEvent | ScheduledEvent, handler: string) => {
   const client = new Toucan({
     dsn: SENTRY_DSN,
+    allowedHeaders: ["user-agent"],
     event,
     environment: WORKER_ENV,
   });
