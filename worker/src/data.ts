@@ -73,7 +73,7 @@ export interface IncomingPayload {
   addon_count?: number;
   addons?: {
     slug: string;
-    version?: string;
+    version?: null | string;
     protected: null | boolean;
     auto_update: null | boolean;
   }[];
