@@ -23,7 +23,7 @@ name = "analytics-v1-staging"
 zone_id = "0ba583492080d3db28c103574f1d19cf"
 route = "https://analytics-api-staging.home-assistant.io/v1"
 kv_namespaces = [
-         { binding = "KV", id = "7892aa96dc6540d9b7e685c92bee384c", preview_id = "7892aa96dc6540d9b7e685c92bee384c"}
+         { binding = "KV", id = "4cc304f1df304ac7bacebe722a26c536", preview_id = "7892aa96dc6540d9b7e685c92bee384c"}
 ]
 vars = {WORKER_ENV = "staging"}
 
