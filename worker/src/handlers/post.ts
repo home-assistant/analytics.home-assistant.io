@@ -26,7 +26,10 @@ export async function handlePostWrapper(
   }
 }
 
-async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
+export async function handlePost(
+  request: Request,
+  sentry: Toucan
+): Promise<Response> {
   let incomingPayload;
   sentry.addBreadcrumb({ message: "Prosess started" });
   const request_json = await request.json();
@@ -69,7 +72,7 @@ async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
 
   delete stored.value.last_write;
 
-  if (!deepEqual(stored.value, incomingPayload)) {
+  if (!deepEqual(stored.value, JSON.parse(JSON.stringify(incomingPayload)))) {
     sentry.addBreadcrumb({ message: "Payload changed, update stored data" });
     await storePayload(
       storageKey,
@@ -87,6 +90,7 @@ async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
         target: updateThreshold,
       },
     });
+
     await storePayload(
       storageKey,
       incomingPayload,
