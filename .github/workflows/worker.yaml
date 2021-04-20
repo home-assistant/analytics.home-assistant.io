@@ -24,7 +24,13 @@ jobs:
       - name: Set environment
         id: environment
         run: |
-          echo "::set-ouput name=environment::production"
+          branch=$(echo "${{ github.ref }}" | awk -F"/" '{print $NF}' )
+          environment="staging"
+
+          if [[ "${branch}" == "main" ]]; then
+            environment="production"
+          fi
+          echo "::set-ouput name=environment::${environment}"
 
       - name: Publish ${{ steps.environment.outputs.environment }} worker
         uses: cloudflare/wrangler-action@1.3.0
