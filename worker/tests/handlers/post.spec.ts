@@ -25,8 +25,6 @@ describe("post handler", function () {
     };
     MockKV = {
       put: jest.fn(async () => {}),
-      get: jest.fn(async () => {}),
-      list: jest.fn(async () => {}),
       getWithMetadata: jest.fn(async () => {}),
     };
     (global as any).Response = MockResponse;
