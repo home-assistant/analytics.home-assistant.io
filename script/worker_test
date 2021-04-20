@@ -1,0 +1,14 @@
+#! /bin/sh
+# Build the worker
+
+# Stop on errors
+set -e
+
+cd "$(dirname "$0")/.."
+
+if [ ! -d node_modules ]; then
+  script/bootstrap
+fi
+
+cd ./worker
+../node_modules/.bin/jest --verbose
