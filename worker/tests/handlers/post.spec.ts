@@ -68,23 +68,20 @@ describe("post handler", function () {
     MockKV.getWithMetadata = jest.fn(async () => ({
       value: { ...BASE_PAYLOAD },
     }));
-    MockRequest.json = async () =>
-      JSON.parse(
-        JSON.stringify({
-          ...BASE_PAYLOAD,
-          installation_type: "Home Assistant OS",
-          integrations: ["awesome"],
-          integration_count: 1,
-          addons: [
-            {
-              slug: "test_addon",
-              version: "1970.1.1",
-              protected: true,
-              auto_update: false,
-            },
-          ],
-        })
-      );
+    MockRequest.json = async () => ({
+      ...BASE_PAYLOAD,
+      installation_type: "Home Assistant OS",
+      integrations: ["awesome"],
+      integration_count: 1,
+      addons: [
+        {
+          slug: "test_addon",
+          version: "1970.1.1",
+          protected: true,
+          auto_update: false,
+        },
+      ],
+    });
 
     await handlePost(MockRequest, MockSentry);
     expect(MockKV.getWithMetadata).toBeCalledWith(
