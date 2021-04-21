@@ -19,7 +19,7 @@ vars = {WORKER_ENV = "production"}
 
 # For dev environment, use '-e dev'
 [env.dev]
-name = "analytics-v1-dev"
+name = "analytics-dev-v1"
 zone_id = "0ba583492080d3db28c103574f1d19cf"
 route = "https://analytics-api-dev.home-assistant.io/v1"
 kv_namespaces = [
@@ -30,7 +30,7 @@ vars = {WORKER_ENV = "dev"}
 
 # For local develoment, use '-e local-dev'
 [env.local-dev]
-name = "analytics-v1-local-dev"
+name = "analytics-local-dev-v1"
 workers_dev = true
 kv_namespaces = [
          { binding = "KV", preview_id = "7892aa96dc6540d9b7e685c92bee384c"}
