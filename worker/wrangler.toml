@@ -6,7 +6,7 @@ account_id = "dc9f963dfa4a630ca83eda7ccd8f363d"
 crons = ["*/10 * * * *"]
 
 
-# For staging production, use '-e staging'
+# For production environment, use '-e production'
 [env.production]
 name = "analytics-v1"
 zone_id = "0ba583492080d3db28c103574f1d19cf"
@@ -17,23 +17,23 @@ kv_namespaces = [
 vars = {WORKER_ENV = "production"}
 
 
-# For staging environment, use '-e staging'
-[env.staging]
-name = "analytics-v1-staging"
-zone_id = "0ba583492080d3db28c103574f1d19cf"
-route = "https://analytics-api-staging.home-assistant.io/v1"
-kv_namespaces = [
-         { binding = "KV", id = "4cc304f1df304ac7bacebe722a26c536", preview_id = "7892aa96dc6540d9b7e685c92bee384c"}
-]
-vars = {WORKER_ENV = "staging"}
-
-
-# For local develoment, use '-e dev'
+# For dev environment, use '-e dev'
 [env.dev]
 name = "analytics-v1-dev"
+zone_id = "0ba583492080d3db28c103574f1d19cf"
+route = "https://analytics-api-dev.home-assistant.io/v1"
+kv_namespaces = [
+         { binding = "KV", id = "7892aa96dc6540d9b7e685c92bee384c", preview_id = "7892aa96dc6540d9b7e685c92bee384c"}
+]
+vars = {WORKER_ENV = "dev"}
+
+
+# For local develoment, use '-e local-dev'
+[env.local-dev]
+name = "analytics-v1-local-dev"
 workers_dev = true
 kv_namespaces = [
          { binding = "KV", preview_id = "7892aa96dc6540d9b7e685c92bee384c"}
 ]
-vars = {WORKER_ENV = "dev"}
+vars = {WORKER_ENV = "local-dev"}
 

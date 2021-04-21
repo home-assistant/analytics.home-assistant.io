@@ -11,4 +11,4 @@ if [ ! -d node_modules ]; then
 fi
 
 cd ./worker
-RUST_BACKTRACE=full ../node_modules/.bin/wrangler dev -e dev
+RUST_BACKTRACE=full ../node_modules/.bin/wrangler dev -e local-dev

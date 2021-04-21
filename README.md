@@ -23,11 +23,11 @@ The website source are located in the site directory.
 To do local development of the website first clone the repository and open the devcontainer.
 Once the devcontainer has started run `script/develop` in the terminal, a preview of the site will open in your default browser.
 
-PR's should target the `staging` (default) branch.
+PR's should target the `dev` (default) branch.
 
 ## Sites
 
-| Environment | URL                                          |
-| ----------- | -------------------------------------------- |
-| Production  | https://analytics.home-assistant.io/         |
-| Staging     | https://analytics-staging.home-assistant.io/ |
+| Environment | URL                                      |
+| ----------- | ---------------------------------------- |
+| Production  | https://analytics.home-assistant.io/     |
+| Staging     | https://analytics-dev.home-assistant.io/ |

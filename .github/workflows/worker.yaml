@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - staging
+      - dev
 
 env:
   WRANGLER_VERSION: "1.15.0"
@@ -25,7 +25,7 @@ jobs:
         id: environment
         run: |
           branch=$(echo "${{ github.ref }}" | awk -F"/" '{print $NF}' )
-          environment="staging"
+          environment="dev"
 
           if [[ "${branch}" == "main" ]]; then
             environment="production"

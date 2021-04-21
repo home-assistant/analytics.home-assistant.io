@@ -8,7 +8,7 @@ cd "$(dirname "$0")/.."
 
 mkdir -p ./site/public
 
-curl -sSLf https://analytics-staging.home-assistant.io/data.json | jq . > ./site/public/data.json
+curl -sSLf https://analytics-dev.home-assistant.io/data.json | jq . > ./site/public/data.json
 curl -sSLf https://rc.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
 
 
