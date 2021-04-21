@@ -73,6 +73,16 @@ describe("post handler", function () {
         JSON.stringify({
           ...BASE_PAYLOAD,
           installation_type: "Home Assistant OS",
+          integrations: ["awesome"],
+          integration_count: 1,
+          addons: [
+            {
+              slug: "test_addon",
+              version: "1970.1.1",
+              protected: true,
+              auto_update: false,
+            },
+          ],
         })
       );
 
@@ -93,6 +103,7 @@ describe("post handler", function () {
           v: BASE_PAYLOAD.version,
           c: "XX",
           i: "o",
+          e: ["i", "a", "s"],
         }),
       })
     );
