@@ -45,5 +45,8 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Install packages
+        run: script/bootstrap
+
       - name: Build
         run: script/worker_test

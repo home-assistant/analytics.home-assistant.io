@@ -49,6 +49,7 @@ export async function handlePost(
     return new Response(null, { status: 400 });
   }
 
+  const stringifiedPayload = JSON.stringify(incomingPayload);
   const storageKey = `${KV_PREFIX_UUID}:${incomingPayload.uuid}`;
   const currentTimestamp = new Date().getTime();
 
@@ -62,7 +63,12 @@ export async function handlePost(
 
   if (!stored || !stored.value) {
     sentry.addBreadcrumb({ message: "First contact for UUID, store payload" });
-    await storePayload(storageKey, incomingPayload, currentTimestamp);
+    await storePayload(
+      storageKey,
+      incomingPayload,
+      stringifiedPayload,
+      currentTimestamp
+    );
     return new Response();
   }
 
@@ -72,11 +78,15 @@ export async function handlePost(
 
   delete stored.value.last_write;
 
-  if (!deepEqual(stored.value, JSON.parse(JSON.stringify(incomingPayload)))) {
+  // We test the stringifiedPayload since superstruct adds
+  // undefined keys for all optional keys in the object,
+  // these are not present when stringifyin, like we do when we store the data
+  if (!deepEqual(stored.value, JSON.parse(stringifiedPayload))) {
     sentry.addBreadcrumb({ message: "Payload changed, update stored data" });
     await storePayload(
       storageKey,
       incomingPayload,
+      stringifiedPayload,
       currentTimestamp,
       stored.metadata
     );
@@ -94,6 +104,7 @@ export async function handlePost(
     await storePayload(
       storageKey,
       incomingPayload,
+      stringifiedPayload,
       currentTimestamp,
       stored.metadata
     );
@@ -106,10 +117,11 @@ export async function handlePost(
 async function storePayload(
   storageKey: string,
   payload: IncomingPayload,
+  stringifiedPayload: string,
   currentTimestamp: number,
   metadata?: UuidMetadata | null
 ) {
-  await KV.put(storageKey, JSON.stringify(payload), {
+  await KV.put(storageKey, JSON.stringify(stringifiedPayload), {
     expirationTtl,
     metadata: generateUuidMetadata(payload, currentTimestamp, metadata),
   });
