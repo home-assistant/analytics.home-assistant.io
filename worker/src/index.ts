@@ -6,6 +6,7 @@ declare global {
   const KV: KVNamespace;
   const NETLIFY_BUILD_HOOK: string;
   const SENTRY_DSN: string;
+  const WORKER_ENV: string;
 }
 
 const sentryClient = (event: FetchEvent | ScheduledEvent, handler: string) => {
@@ -13,6 +14,7 @@ const sentryClient = (event: FetchEvent | ScheduledEvent, handler: string) => {
     dsn: SENTRY_DSN,
     allowedHeaders: ["user-agent"],
     event,
+    environment: WORKER_ENV,
   });
   client.setTag("handler", handler);
 
