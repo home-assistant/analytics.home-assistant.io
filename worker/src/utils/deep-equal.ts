@@ -29,11 +29,13 @@ export const deepEqual = (a: any, b: any): boolean => {
       if (a.size !== b.size) {
         return false;
       }
+      // @ts-ignore TS2569
       for (i of a.entries()) {
         if (!b.has(i[0])) {
           return false;
         }
       }
+      // @ts-ignore TS2569
       for (i of a.entries()) {
         if (!deepEqual(i[1], b.get(i[0]))) {
           return false;
@@ -46,6 +48,7 @@ export const deepEqual = (a: any, b: any): boolean => {
       if (a.size !== b.size) {
         return false;
       }
+      // @ts-ignore TS2569
       for (i of a.entries()) {
         if (!b.has(i[0])) {
           return false;
