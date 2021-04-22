@@ -71,7 +71,12 @@ export interface Queue {
 
 export interface IncomingPayload {
   addon_count?: number;
-  addons?: { slug: string }[];
+  addons?: {
+    slug: string;
+    version?: null | string;
+    protected: null | boolean;
+    auto_update: null | boolean;
+  }[];
   automation_count?: number;
   country?: string;
   region?: string;
