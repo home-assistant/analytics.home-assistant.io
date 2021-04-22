@@ -32,7 +32,7 @@ export class AnalyticsAverage extends LitElement {
         </div>
         <div class="metric">
           <span>Average users</span>
-          <span .title=${users}>${Math.round(Number(users))}</span>
+          <span .title=${users}>${Number(users)}</span>
         </div>
       </div>
       <div class="footer">
