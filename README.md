@@ -30,4 +30,4 @@ PR's should target the `dev` (default) branch.
 | Environment | URL                                      |
 | ----------- | ---------------------------------------- |
 | Production  | https://analytics.home-assistant.io/     |
-| Staging     | https://analytics-dev.home-assistant.io/ |
+| Dev         | https://analytics-dev.home-assistant.io/ |
