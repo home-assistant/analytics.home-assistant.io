@@ -28,6 +28,12 @@ export enum MetadataExtra {
   ADDONS = "a",
 }
 
+export enum ScheduledTask {
+  PROCESS_QUEUE = "*/2 * * * *",
+  RESET_QUEUE = "5 0 * * *",
+  UPDATE_HISTORY = "0 * * * *",
+}
+
 export interface UuidMetadata {
   [UuidMetadataKey.ADDED]: number;
   [UuidMetadataKey.UPDATED]: number;
@@ -67,6 +73,8 @@ export interface QueueData {
 export interface Queue {
   entries: string[];
   data: QueueData;
+  schema_version: number;
+  process_complete: boolean;
 }
 
 export interface IncomingPayload {
@@ -98,6 +106,15 @@ export const InstallationTypes: Record<string, ShortInstallationType> = {
   "Home Assistant Supervised": ShortInstallationType.SUPERVISED,
   Unknown: ShortInstallationType.UNKNOWN,
 };
+
+export const QUEUE_SCHEMA_VERSION = 1;
+
+export const createQueueDefaults = (): Queue => ({
+  entries: [],
+  data: createQueueData(),
+  schema_version: QUEUE_SCHEMA_VERSION,
+  process_complete: false,
+});
 
 export const createQueueData = (): QueueData => ({
   reports_integrations: 0,

@@ -2,42 +2,92 @@
 import Toucan from "toucan-js";
 import { CurrentAnalytics } from "../../../site/src/data";
 import {
-  createQueueData,
   bumpValue,
+  createQueueData,
+  createQueueDefaults,
+  IncomingPayload,
+  KV_KEY_CORE_ANALYTICS,
+  KV_KEY_QUEUE,
+  KV_MAX_PROCESS_ENTRIES,
+  KV_PREFIX_HISTORY,
+  KV_PREFIX_UUID,
+  ListEntry,
+  QUEUE_SCHEMA_VERSION,
   Queue,
   QueueData,
-  KV_PREFIX_UUID,
-  KV_MAX_PROCESS_ENTRIES,
-  KV_KEY_QUEUE,
-  KV_KEY_CORE_ANALYTICS,
-  KV_PREFIX_HISTORY,
-  ListEntry,
+  ScheduledTask,
   ShortInstallationType,
-  UuidMetadataKey,
   UuidMetadata,
-  IncomingPayload,
+  UuidMetadataKey,
 } from "../data";
 import { average } from "../utils/average";
 
-export async function handleSchedule(sentry: Toucan): Promise<void> {
+export async function handleSchedule(
+  event: ScheduledEvent,
+  sentry: Toucan
+): Promise<void> {
+  // @ts-expect-error Missing type for cron on ScheduledEvent https://github.com/cloudflare/workers-types/pull/86
+  const scheduledTask = event.cron;
+
   try {
-    await processQueue(sentry);
+    if (scheduledTask === ScheduledTask.PROCESS_QUEUE) {
+      // Runs every 2 minutes
+      await processQueue(sentry);
+    } else if (scheduledTask === ScheduledTask.RESET_QUEUE) {
+      // Runs every day
+      await resetQueue(sentry);
+    } else if (scheduledTask === ScheduledTask.UPDATE_HISTORY) {
+      // Runs every hour
+      await updateHistory(sentry);
+    }
   } catch (e) {
     sentry.captureException(e);
   }
 }
 
-async function processQueue(sentry: Toucan): Promise<void> {
+const getQueueData = async (): Promise<Queue> =>
+  (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || createQueueDefaults();
+
+async function resetQueue(sentry: Toucan): Promise<void> {
+  sentry.setTag("scheduled-task", "RESET_QUEUE");
   sentry.addBreadcrumb({ message: "Prosess started" });
-  const queue = (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || {
-    entries: [],
-    data: createQueueData(),
-  };
+  const queue = await getQueueData();
 
   sentry.setExtra("queue", queue);
 
-  if (queue.entries.length === 0) {
-    sentry.addBreadcrumb({ message: "No entries, get list" });
+  if (queue.entries.length === 0 && queue.process_complete) {
+    await KV.put(KV_KEY_QUEUE, JSON.stringify(createQueueDefaults()));
+  }
+}
+async function updateHistory(sentry: Toucan): Promise<void> {
+  sentry.setTag("scheduled-task", "UPDATE_HISTORY");
+  sentry.addBreadcrumb({ message: "Prosess started" });
+  let data = createQueueData();
+
+  const kv_list = await listKV(KV_PREFIX_UUID);
+
+  for (const entry of kv_list) {
+    if (entry.metadata) {
+      data = combineMetadataEntryData(data, entry.metadata);
+    }
+  }
+}
+
+async function processQueue(sentry: Toucan): Promise<void> {
+  sentry.setTag("scheduled-task", "PROCESS_QUEUE");
+  sentry.addBreadcrumb({ message: "Prosess started" });
+  let queue = await getQueueData();
+
+  sentry.setExtra("queue", queue);
+
+  if (
+    queue.entries.length === 0 ||
+    queue.schema_version !== QUEUE_SCHEMA_VERSION
+  ) {
+    sentry.addBreadcrumb({ message: "Reset queue and get list of entries" });
+    // Reset queue
+    queue = createQueueDefaults();
+
     const kv_list = await listKV(KV_PREFIX_UUID);
 
     for (const entry of kv_list) {
@@ -107,7 +157,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
       JSON.stringify(queue_data)
     );
     await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(core_analytics));
-    queue.data = createQueueData();
+    queue = createQueueDefaults();
   }
   sentry.addBreadcrumb({ message: "Prosess complete" });
   await KV.put(KV_KEY_QUEUE, JSON.stringify(queue));

@@ -32,5 +32,5 @@ addEventListener("fetch", (event: FetchEvent) => {
 });
 
 addEventListener("scheduled", (event) => {
-  event.waitUntil(handleSchedule(sentryClient(event, "schedule")));
+  event.waitUntil(handleSchedule(event, sentryClient(event, "schedule")));
 });

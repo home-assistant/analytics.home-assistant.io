@@ -32,8 +32,6 @@ describe("post handler", function () {
   });
 
   it("First interaction", async () => {
-    MockKV.getWithMetadata = jest.fn(async () => ({}));
-
     await handlePost(MockRequest, MockSentry);
     expect(MockKV.getWithMetadata).toBeCalledWith(
       "uuid:12345678901234567890123456789012",
