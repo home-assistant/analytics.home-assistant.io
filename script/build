@@ -13,7 +13,7 @@ if [ -n "$CF_KV_TOKEN" ]; then
     sleep 61 # Wait for KV writes to reach all nodes
   fi
 
-  if [ "$BRANCH" == "main" ]; then
+  if [ "$BRANCH" = "main" ]; then
     curl -sSLf "$CF_KV_URL" \
       -H "Authorization: Bearer $CF_KV_TOKEN" \
       -H "Content-Type:application/json" | jq . > ./site/public/data.json
