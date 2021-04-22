@@ -27,7 +27,7 @@ PR's should target the `dev` (default) branch.
 
 ## Sites
 
-| Environment | URL                                      |
-| ----------- | ---------------------------------------- |
-| Production  | https://analytics.home-assistant.io/     |
-| Dev         | https://analytics-dev.home-assistant.io/ |
+| Environment | URL                                                |
+| ----------- | -------------------------------------------------- |
+| Production  | https://analytics.home-assistant.io/               |
+| Dev         | https://dev--home-assistant-analytics.netlify.app/ |

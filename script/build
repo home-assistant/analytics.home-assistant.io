@@ -20,14 +20,14 @@ if [ -n "$CF_KV_TOKEN" ]; then
     curl -sSLf https://analytics.home-assistant.io/data.json | jq . > ./site/public/data.json
     curl -sSLf https://www.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
   else
-    curl -sSLf "$CF_KV_STAGING_URL" \
+    curl -sSLf "$CF_KV_URL_DEV" \
       -H "Authorization: Bearer $CF_KV_TOKEN" \
       -H "Content-Type:application/json" | jq . > ./site/public/data.json
     curl -sSLf https://rc.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
   fi
 
 else
-  curl -sSLf https://analytics-dev.home-assistant.io/data.json | jq . > ./site/public/data.json
+  curl -sSLf https://dev--home-assistant-analytics.netlify.app/data.json | jq . > ./site/public/data.json
   curl -sSLf https://rc.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
 fi
 
