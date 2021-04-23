@@ -9,12 +9,25 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
   }
 
   const analyticsData: AnalyticsData = {
-    current: {} as AnalyticsData["current"],
+    current: {
+      avg_addons: 0,
+      avg_automations: 0,
+      avg_integrations: 0,
+      avg_states: 0,
+      avg_users: 0,
+      countries: {},
+      integrations: {},
+      last_updated: 0,
+      reports_integrations: 0,
+      reports_statistics: 0,
+      versions: {},
+    },
     history: [],
     schema_version: SCHEMA_VERSION_ANALYTICS,
   };
 
   if (!data || Object.keys(data).length === 0) {
+    // No data... return base
     return analyticsData;
   }
 
