@@ -101,6 +101,11 @@ async function updateHistory(sentry: Toucan): Promise<void> {
   });
 
   await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(analyticsData));
+
+  const resp = await fetch(NETLIFY_BUILD_HOOK, { method: "POST" });
+  if (!resp.ok) {
+    throw new Error("Failed to call Netlify build hook");
+  }
 }
 
 async function processQueue(sentry: Toucan): Promise<void> {
