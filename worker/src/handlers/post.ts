@@ -31,7 +31,7 @@ export async function handlePost(
   sentry: Toucan
 ): Promise<Response> {
   let incomingPayload;
-  sentry.addBreadcrumb({ message: "Prosess started" });
+  sentry.addBreadcrumb({ message: "Process started" });
   const request_json = await request.json();
   request_json.country = request.cf.country;
   if (withRegion.has(request_json.country)) {
@@ -110,7 +110,7 @@ export async function handlePost(
     );
   }
 
-  sentry.addBreadcrumb({ message: "Prosess complete" });
+  sentry.addBreadcrumb({ message: "Process complete" });
   return new Response();
 }
 

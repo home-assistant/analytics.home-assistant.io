@@ -50,7 +50,7 @@ const getQueueData = async (): Promise<Queue> =>
 
 async function resetQueue(sentry: Toucan): Promise<void> {
   sentry.setTag("scheduled-task", "RESET_QUEUE");
-  sentry.addBreadcrumb({ message: "Prosess started" });
+  sentry.addBreadcrumb({ message: "Process started" });
   const queue = await getQueueData();
 
   sentry.setExtra("queue", queue);
@@ -61,7 +61,7 @@ async function resetQueue(sentry: Toucan): Promise<void> {
 }
 async function updateHistory(sentry: Toucan): Promise<void> {
   sentry.setTag("scheduled-task", "UPDATE_HISTORY");
-  sentry.addBreadcrumb({ message: "Prosess started" });
+  sentry.addBreadcrumb({ message: "Process started" });
   let data = createQueueData();
 
   const kv_list = await listKV(KV_PREFIX_UUID);
@@ -75,7 +75,7 @@ async function updateHistory(sentry: Toucan): Promise<void> {
 
 async function processQueue(sentry: Toucan): Promise<void> {
   sentry.setTag("scheduled-task", "PROCESS_QUEUE");
-  sentry.addBreadcrumb({ message: "Prosess started" });
+  sentry.addBreadcrumb({ message: "Process started" });
   let queue = await getQueueData();
 
   sentry.setExtra("queue", queue);
@@ -159,7 +159,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
     await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(core_analytics));
     queue = createQueueDefaults();
   }
-  sentry.addBreadcrumb({ message: "Prosess complete" });
+  sentry.addBreadcrumb({ message: "Process complete" });
   await KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
 }
 
