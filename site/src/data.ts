@@ -3,6 +3,7 @@ interface InstallationTypes {
   container: number;
   supervised: number;
   os: number;
+  unknown: number;
 }
 
 type Integrations = Record<string, number>;

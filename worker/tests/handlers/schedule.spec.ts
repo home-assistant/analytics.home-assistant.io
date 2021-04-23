@@ -1,9 +1,11 @@
 import {
+  createQueueData,
   createQueueDefaults,
   KV_KEY_CORE_ANALYTICS,
   KV_KEY_QUEUE,
   ScheduledTask,
   SCHEMA_VERSION_ANALYTICS,
+  SCHEMA_VERSION_QUEUE,
 } from "../../src/data";
 import { handleSchedule } from "../../src/handlers/schedule";
 import { MockedKV, MockedSentry } from "../mock";
@@ -17,9 +19,13 @@ const BaseEvent = {
 describe("schedule handler", function () {
   let MockSentry;
   let MockKV;
+  let MockFetch;
+
   beforeEach(() => {
     MockSentry = MockedSentry();
     (global as any).KV = MockKV = MockedKV();
+    (global as any).fetch = MockFetch = jest.fn(async () => ({ ok: true }));
+    (global as any).NETLIFY_BUILD_HOOK = "";
   });
 
   describe("Unexpected task", function () {
@@ -124,6 +130,123 @@ describe("schedule handler", function () {
         KV_KEY_CORE_ANALYTICS,
         expect.stringContaining('"active_installations":4')
       );
+    });
+  });
+
+  describe("PROCESS_QUEUE", function () {
+    const event = { ...BaseEvent, cron: ScheduledTask.PROCESS_QUEUE };
+    it("No queue - list 2000 (with pagination)", async () => {
+      MockKV.get = jest.fn(async () => ({ entries: [] }));
+
+      MockKV.list = jest.fn(
+        async (data: { prefix: string; cursor?: string }) => ({
+          keys: Array.from({ length: 1000 }, (_, i) => ({ name: `uuid:${i}` })),
+          cursor: "abc",
+          list_complete: data.cursor !== undefined,
+        })
+      );
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockKV.get).toBeCalledWith(KV_KEY_QUEUE, "json");
+      expect(MockKV.list).toBeCalledTimes(2);
+      expect(MockSentry.setTag).toBeCalledWith(
+        "scheduled-task",
+        "PROCESS_QUEUE"
+      );
+
+      expect(MockKV.put).toBeCalledWith(KV_KEY_QUEUE, expect.any(String));
+      expect(MockKV.put).toBeCalledTimes(1);
+    });
+
+    it("Continue queue - 2000 entries left", async () => {
+      MockKV.get = jest.fn(async (key: string) => {
+        if (key === KV_KEY_QUEUE) {
+          return {
+            schema_version: SCHEMA_VERSION_QUEUE,
+            process_complete: false,
+            entries: Array.from({ length: 2000 }, (_, i) => ({
+              name: `uuid:${i}`,
+            })),
+            data: createQueueData(),
+          };
+        }
+
+        return {};
+      });
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockKV.get).toBeCalledWith(KV_KEY_QUEUE, "json");
+      expect(MockKV.list).not.toBeCalled();
+      expect(MockSentry.setTag).toBeCalledWith(
+        "scheduled-task",
+        "PROCESS_QUEUE"
+      );
+
+      expect(MockKV.put).toBeCalledWith(KV_KEY_QUEUE, expect.any(String));
+      expect(MockKV.put).toBeCalledTimes(1);
+    });
+
+    it("Continue queue - 500 entries left", async () => {
+      MockKV.get = jest.fn(async (key: string) => {
+        if (key === KV_KEY_QUEUE) {
+          return {
+            schema_version: SCHEMA_VERSION_QUEUE,
+            process_complete: false,
+            entries: Array.from({ length: 500 }, (_, i) => ({
+              name: `uuid:${i}`,
+            })),
+            data: createQueueData(),
+          };
+        }
+
+        return {};
+      });
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockKV.get).toBeCalledWith(KV_KEY_QUEUE, "json");
+      expect(MockKV.list).not.toBeCalled();
+      expect(MockSentry.setTag).toBeCalledWith(
+        "scheduled-task",
+        "PROCESS_QUEUE"
+      );
+
+      expect(MockKV.put).toBeCalledWith(KV_KEY_QUEUE, expect.any(String));
+      expect(MockKV.put).toBeCalledWith(
+        KV_KEY_CORE_ANALYTICS,
+        expect.any(String)
+      );
+      expect(MockKV.put).toBeCalledWith(
+        expect.stringContaining("history:"),
+        expect.any(String)
+      );
+      expect(MockFetch).toBeCalledTimes(1);
+      expect(MockKV.put).toBeCalledTimes(3);
+    });
+
+    it("Wait for reset", async () => {
+      MockKV.get = jest.fn(async () => ({
+        entries: [],
+        process_complete: true,
+        schema_version: SCHEMA_VERSION_QUEUE,
+      }));
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockKV.get).toBeCalledWith(KV_KEY_QUEUE, "json");
+      expect(MockSentry.setTag).toBeCalledWith(
+        "scheduled-task",
+        "PROCESS_QUEUE"
+      );
+
+      expect(MockKV.put).not.toBeCalled();
+      expect(MockKV.list).not.toBeCalled();
+
+      expect(MockSentry.addBreadcrumb).toBeCalledWith({
+        message: "Process complete, waiting for reset",
+      });
     });
   });
 });
