@@ -136,7 +136,7 @@ describe("schedule handler", function () {
   describe("PROCESS_QUEUE", function () {
     const event = { ...BaseEvent, cron: ScheduledTask.PROCESS_QUEUE };
     it("No queue - list 2000 (with pagination)", async () => {
-      MockKV.get = jest.fn(async () => ({ entries: [] }));
+      MockKV.get = jest.fn(async () => createQueueDefaults());
 
       MockKV.list = jest.fn(
         async (data: { prefix: string; cursor?: string }) => ({
@@ -184,7 +184,10 @@ describe("schedule handler", function () {
         "PROCESS_QUEUE"
       );
 
-      expect(MockKV.put).toBeCalledWith(KV_KEY_QUEUE, expect.any(String));
+      expect(MockKV.put).toBeCalledWith(
+        KV_KEY_QUEUE,
+        expect.stringContaining('"process_complete":false')
+      );
       expect(MockKV.put).toBeCalledTimes(1);
     });
 
@@ -213,7 +216,10 @@ describe("schedule handler", function () {
         "PROCESS_QUEUE"
       );
 
-      expect(MockKV.put).toBeCalledWith(KV_KEY_QUEUE, expect.any(String));
+      expect(MockKV.put).toBeCalledWith(
+        KV_KEY_QUEUE,
+        expect.stringContaining('"process_complete":true')
+      );
       expect(MockKV.put).toBeCalledWith(
         KV_KEY_CORE_ANALYTICS,
         expect.any(String)
