@@ -28,6 +28,16 @@ describe("schedule handler", function () {
     (global as any).KV = MockKV;
   });
 
+  describe("Unexpected task", function () {
+    const event = { ...BaseEvent, cron: "test" };
+    it("Unexpected cron trigger", async () => {
+      await handleSchedule(event, MockSentry);
+      expect(MockSentry.captureException).toBeCalledWith(
+        Error("Unexpected schedule task: test")
+      );
+    });
+  });
+
   describe("RESET_QUEUE", function () {
     const event = { ...BaseEvent, cron: ScheduledTask.RESET_QUEUE };
     it("Not ready to reset", async () => {
