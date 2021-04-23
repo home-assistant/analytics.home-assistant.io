@@ -1,5 +1,10 @@
-import { KV_KEY_QUEUE, ScheduledTask } from "../../src/data";
+import {
+  createQueueDefaults,
+  KV_KEY_QUEUE,
+  ScheduledTask,
+} from "../../src/data";
 import { handleSchedule } from "../../src/handlers/schedule";
+import { MockedKV, MockedSentry } from "../mock";
 
 const BaseEvent = {
   type: "cron",
@@ -10,22 +15,9 @@ const BaseEvent = {
 describe("schedule handler", function () {
   let MockSentry;
   let MockKV;
-
   beforeEach(() => {
-    MockSentry = {
-      addBreadcrumb: jest.fn(),
-      setUser: jest.fn(),
-      setTag: jest.fn(),
-      setExtra: jest.fn(),
-      captureException: jest.fn(),
-    };
-    MockKV = {
-      put: jest.fn(async () => {}),
-      get: jest.fn(async () => {}),
-      list: jest.fn(async () => {}),
-      getWithMetadata: jest.fn(async () => {}),
-    };
-    (global as any).KV = MockKV;
+    MockSentry = MockedSentry();
+    (global as any).KV = MockKV = MockedKV();
   });
 
   describe("Unexpected task", function () {
@@ -51,6 +43,20 @@ describe("schedule handler", function () {
       expect(MockKV.get).toBeCalledWith(KV_KEY_QUEUE, "json");
       expect(MockSentry.setTag).toBeCalledWith("scheduled-task", "RESET_QUEUE");
       expect(MockKV.put).toBeCalledTimes(0);
+    });
+
+    it("Queue handing is done, reset queue", async () => {
+      MockKV.get = jest.fn(async () => ({
+        process_complete: true,
+        entries: [],
+      }));
+
+      await handleSchedule(event, MockSentry);
+      expect(MockKV.put).toBeCalledTimes(1);
+      expect(MockKV.put).toBeCalledWith(
+        KV_KEY_QUEUE,
+        JSON.stringify(createQueueDefaults())
+      );
     });
   });
 });
