@@ -39,6 +39,8 @@ export async function handleSchedule(
     } else if (scheduledTask === ScheduledTask.UPDATE_HISTORY) {
       // Runs every hour
       await updateHistory(sentry);
+    } else {
+        throw new Error(`Unexpected schedule task: ${scheduleTask}`);
     }
   } catch (e) {
     sentry.captureException(e);
