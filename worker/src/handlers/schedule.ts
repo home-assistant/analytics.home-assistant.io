@@ -12,15 +12,17 @@ import {
   KV_PREFIX_HISTORY,
   KV_PREFIX_UUID,
   ListEntry,
-  QUEUE_SCHEMA_VERSION,
+  SCHEMA_VERSION_QUEUE,
   Queue,
   QueueData,
   ScheduledTask,
   ShortInstallationType,
   UuidMetadata,
   UuidMetadataKey,
+  AnalyticsData,
 } from "../data";
 import { average } from "../utils/average";
+import { migrateAnalyticsData } from "../utils/migrate";
 
 export async function handleSchedule(
   event: ScheduledEvent,
@@ -49,6 +51,11 @@ export async function handleSchedule(
 
 const getQueueData = async (): Promise<Queue> =>
   (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || createQueueDefaults();
+
+const getAnalyticsData = async (): Promise<AnalyticsData> => {
+  const data = await KV.get(KV_KEY_CORE_ANALYTICS, "json");
+  return migrateAnalyticsData(data);
+};
 
 async function resetQueue(sentry: Toucan): Promise<void> {
   sentry.setTag("scheduled-task", "RESET_QUEUE");
@@ -84,7 +91,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
 
   if (
     queue.entries.length === 0 ||
-    queue.schema_version !== QUEUE_SCHEMA_VERSION
+    queue.schema_version !== SCHEMA_VERSION_QUEUE
   ) {
     sentry.addBreadcrumb({ message: "Reset queue and get list of entries" });
     // Reset queue
