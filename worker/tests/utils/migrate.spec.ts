@@ -1,13 +1,27 @@
 import { SCHEMA_VERSION_ANALYTICS } from "../../src/data";
 import { migrateAnalyticsData } from "../../src/utils/migrate";
+import { MockedSentry } from "../mock";
 
 describe("migrateAnalyticsData", function () {
+  let MockSentry;
+
+  beforeEach(() => {
+    MockSentry = MockedSentry();
+  });
+
   it("migrate from no version", function () {
     const data = {
       "1": { active_installations: 3 },
       "2": { reports_integrations: 1337, active_installations: 3 },
     };
-    const migrated = migrateAnalyticsData(data);
+    const migrated = migrateAnalyticsData(MockSentry, data);
+
+    expect(MockSentry.addBreadcrumb).toBeCalledWith({
+      message: "Migration started from before we had version",
+    });
+    expect(MockSentry.addBreadcrumb).toBeCalledWith({
+      message: "Migration complete",
+    });
 
     expect(migrated.history[0].active_installations).toBe(3);
     expect(migrated.history.length).toBe(1);
@@ -16,14 +30,25 @@ describe("migrateAnalyticsData", function () {
   });
 
   it("migrate from no data", function () {
-    expect(migrateAnalyticsData(null).schema_version).toBe(
+    expect(migrateAnalyticsData(MockSentry, null).schema_version).toBe(
       SCHEMA_VERSION_ANALYTICS
     );
-    expect(migrateAnalyticsData(undefined).schema_version).toBe(
+    expect(MockSentry.addBreadcrumb).toHaveBeenLastCalledWith({
+      message: "No data, return base object",
+    });
+
+    expect(migrateAnalyticsData(MockSentry, undefined).schema_version).toBe(
       SCHEMA_VERSION_ANALYTICS
     );
-    expect(migrateAnalyticsData({}).schema_version).toBe(
+    expect(MockSentry.addBreadcrumb).toHaveBeenLastCalledWith({
+      message: "No data, return base object",
+    });
+
+    expect(migrateAnalyticsData(MockSentry, {}).schema_version).toBe(
       SCHEMA_VERSION_ANALYTICS
     );
+    expect(MockSentry.addBreadcrumb).toHaveBeenLastCalledWith({
+      message: "No data, return base object",
+    });
   });
 });

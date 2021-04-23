@@ -52,9 +52,9 @@ export async function handleSchedule(
 const getQueueData = async (): Promise<Queue> =>
   (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || createQueueDefaults();
 
-const getAnalyticsData = async (): Promise<AnalyticsData> => {
+const getAnalyticsData = async (sentry: Toucan): Promise<AnalyticsData> => {
   const data = await KV.get(KV_KEY_CORE_ANALYTICS, "json");
-  return migrateAnalyticsData(data);
+  return migrateAnalyticsData(sentry, data);
 };
 
 async function resetQueue(sentry: Toucan): Promise<void> {
@@ -76,7 +76,7 @@ async function updateHistory(sentry: Toucan): Promise<void> {
   let data = createQueueData();
 
   sentry.addBreadcrumb({ message: "Get current data" });
-  const analyticsData = await getAnalyticsData();
+  const analyticsData = await getAnalyticsData(sentry);
   const timestampString = String(new Date().getTime());
 
   sentry.addBreadcrumb({ message: "List UUID entries" });
