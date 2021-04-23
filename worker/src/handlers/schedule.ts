@@ -40,7 +40,7 @@ export async function handleSchedule(
       // Runs every hour
       await updateHistory(sentry);
     } else {
-        throw new Error(`Unexpected schedule task: ${scheduleTask}`);
+      throw new Error(`Unexpected schedule task: ${scheduledTask}`);
     }
   } catch (e) {
     sentry.captureException(e);
