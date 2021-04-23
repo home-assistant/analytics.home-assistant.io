@@ -101,10 +101,18 @@ export interface AnalyticsDataCurrent {
   countries: Record<string, number>;
   integrations: Record<string, number>;
   last_updated: number;
-  reported_from: number;
+  extened_data_from: number;
   reports_integrations: number;
   reports_statistics: number;
   versions: Record<string, number>;
+  active_installations: number;
+  installation_types: {
+    os: number;
+    container: number;
+    core: number;
+    supervised: number;
+    unknown: number;
+  };
 }
 
 export interface AnalyticsData {
