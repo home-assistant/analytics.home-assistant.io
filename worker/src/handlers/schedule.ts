@@ -1,6 +1,5 @@
 // Scheduled taks handler to manage the KV store
 import Toucan from "toucan-js";
-import { CurrentAnalytics } from "../../../site/src/data";
 import {
   bumpValue,
   createQueueData,
@@ -52,9 +51,9 @@ export async function handleSchedule(
 const getQueueData = async (): Promise<Queue> =>
   (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || createQueueDefaults();
 
-const getAnalyticsData = async (sentry: Toucan): Promise<AnalyticsData> => {
+const getAnalyticsData = async (): Promise<AnalyticsData> => {
   const data = await KV.get(KV_KEY_CORE_ANALYTICS, "json");
-  return migrateAnalyticsData(sentry, data);
+  return migrateAnalyticsData(data);
 };
 
 async function resetQueue(sentry: Toucan): Promise<void> {
@@ -76,7 +75,7 @@ async function updateHistory(sentry: Toucan): Promise<void> {
   let data = createQueueData();
 
   sentry.addBreadcrumb({ message: "Get current data" });
-  const analyticsData = await getAnalyticsData(sentry);
+  const analyticsData = await getAnalyticsData();
   const timestampString = String(new Date().getTime());
 
   sentry.addBreadcrumb({ message: "List UUID entries" });
@@ -182,7 +181,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
     const timestampString = String(timestamp);
 
     const queue_data = processQueueData(queue.data);
-    const storedAnalytics = await getAnalyticsData(sentry);
+    const storedAnalytics = await getAnalyticsData();
 
     storedAnalytics.current = {
       ...queue_data,
@@ -319,11 +318,9 @@ function combineEntryData(
   return data;
 }
 
-const processQueueData = (data: QueueData): CurrentAnalytics => {
-  const last_updated = new Date().getTime();
-
+const processQueueData = (data: QueueData) => {
   return {
-    last_updated,
+    last_updated: new Date().getTime(),
     countries: data.countries,
     installation_types: data.installation_types,
     active_installations:

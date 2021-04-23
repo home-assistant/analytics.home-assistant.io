@@ -1,19 +1,19 @@
 import { css, customElement, html, LitElement, property } from "lit-element";
-import { Analytics } from "./data";
+import { AnalyticsDataCurrent } from "../../worker/src/data";
 
 @customElement("analytics-average")
 export class AnalyticsAverage extends LitElement {
-  @property({ attribute: false }) public lastDataEntry?: Analytics;
+  @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
 
   render() {
-    if (this.lastDataEntry === undefined) {
+    if (this.currentData === undefined) {
       return html``;
     }
 
-    const integrations = this.lastDataEntry.avg_integrations.toFixed(2);
-    const entities = this.lastDataEntry.avg_states.toFixed(2);
-    const automations = this.lastDataEntry.avg_automations.toFixed(2);
-    const users = this.lastDataEntry.avg_users.toFixed(2);
+    const integrations = this.currentData.avg_integrations.toFixed(2);
+    const entities = this.currentData.avg_states.toFixed(2);
+    const automations = this.currentData.avg_automations.toFixed(2);
+    const users = this.currentData.avg_users.toFixed(2);
 
     return html`<div class="grid">
         <div class="metric">
@@ -36,9 +36,9 @@ export class AnalyticsAverage extends LitElement {
         </div>
       </div>
       <div class="footer">
-        ${this.lastDataEntry.reports_statistics || "Unkown"} of
-        ${this.lastDataEntry.active_installations} installations have chosen to
-        share usage statistics
+        ${this.currentData.reports_statistics || "Unkown"} of
+        ${this.currentData.extened_data_from} installations have chosen to share
+        usage statistics
       </div>`;
   }
 

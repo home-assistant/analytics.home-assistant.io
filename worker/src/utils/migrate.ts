@@ -1,16 +1,11 @@
-import Toucan from "toucan-js";
 import { AnalyticsData, SCHEMA_VERSION_ANALYTICS } from "../data";
 
-export const migrateAnalyticsData = (
-  sentry: Toucan,
-  data: any
-): AnalyticsData => {
+export const migrateAnalyticsData = (data: any): AnalyticsData => {
   if (
     data &&
     data.schema_version &&
     data.schema_version === SCHEMA_VERSION_ANALYTICS
   ) {
-    sentry.addBreadcrumb({ message: "Migration not needed" });
     return data;
   }
 
@@ -42,14 +37,10 @@ export const migrateAnalyticsData = (
   };
 
   if (!data || Object.keys(data).length === 0) {
-    sentry.addBreadcrumb({ message: "No data, return base object" });
     return analyticsData;
   }
 
   if (!data.schema_version) {
-    sentry.addBreadcrumb({
-      message: "Migration started from before we had version",
-    });
     const dataKeys = Object.keys(data);
     const lastDataEntryKey = dataKeys[dataKeys.length - 1];
     const lastDataEntry = data[lastDataEntryKey];
@@ -72,6 +63,5 @@ export const migrateAnalyticsData = (
       lastDataEntry.active_installations;
   }
 
-  sentry.addBreadcrumb({ message: "Migration complete" });
   return analyticsData;
 };

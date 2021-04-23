@@ -15,11 +15,11 @@ import {
   PropertyValues,
 } from "lit-element";
 import {
-  Analytics,
   fetchIntegrationDetails,
   IntegrationData,
   IntegrationDetails,
 } from "./data";
+import { AnalyticsDataCurrent } from "../../worker/src/data";
 
 // Default non internal domains
 const DEFAULT_DOMAINS: string[] = [
@@ -32,7 +32,7 @@ const DEFAULT_DOMAINS: string[] = [
 
 @customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {
-  @property({ attribute: false }) public lastDataEntry?: Analytics;
+  @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
 
   @property({ type: Boolean }) public isMobile = false;
 
@@ -56,7 +56,7 @@ export class AnalyticsIntegrations extends LitElement {
   }
 
   render() {
-    if (this._integrations === undefined || this.lastDataEntry === undefined) {
+    if (this._integrations === undefined || this.currentData === undefined) {
       return html``;
     }
 
@@ -146,7 +146,7 @@ export class AnalyticsIntegrations extends LitElement {
                 ${entry.installations}
                 (${+(
                   (100 * entry.installations) /
-                  this.lastDataEntry!.reports_integrations
+                  this.currentData!.reports_integrations
                 ).toFixed(1)}%)
               </td>
             </tr>
@@ -186,9 +186,9 @@ export class AnalyticsIntegrations extends LitElement {
         </div>
       </div>
       <div class="footer">
-        ${this.lastDataEntry.reports_integrations || "Unkown"} of
-        ${this.lastDataEntry.active_installations} installations have chosen to
-        share their used integrations
+        ${this.currentData.reports_integrations || "Unkown"} of
+        ${this.currentData.extened_data_from} installations have chosen to share
+        their used integrations
       </div>
     `;
   }
@@ -221,7 +221,7 @@ export class AnalyticsIntegrations extends LitElement {
           return {
             domain,
             title: this._integrationDetails[domain].title || domain,
-            installations: this.lastDataEntry?.integrations[domain] || 0,
+            installations: this.currentData?.integrations[domain] || 0,
           };
         }
       );

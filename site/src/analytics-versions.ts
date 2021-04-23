@@ -9,11 +9,11 @@ import {
   PropertyValues,
   query,
 } from "lit-element";
-import { Analytics } from "./data";
+import { AnalyticsDataCurrent } from "../../worker/src/data";
 
 @customElement("analytics-versions")
 export class AnalyticsVersions extends LitElement {
-  @property({ attribute: false }) public lastDataEntry?: Analytics;
+  @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
 
   @property({ type: Boolean }) public isMobile = false;
 
@@ -29,18 +29,17 @@ export class AnalyticsVersions extends LitElement {
   }
 
   render() {
-    if (this.lastDataEntry === undefined) {
+    if (this.currentData === undefined) {
       return html``;
     }
 
-    const sortedVersions = Object.keys(this.lastDataEntry.versions).sort(
-      (a, b) =>
-        this.lastDataEntry!.versions[b] - this.lastDataEntry!.versions[a]
+    const sortedVersions = Object.keys(this.currentData.versions).sort(
+      (a, b) => this.currentData!.versions[b] - this.currentData!.versions[a]
     );
 
     const rows = sortedVersions
       .slice(0, 5)
-      .map((version) => [version, this.lastDataEntry!.versions[version]]);
+      .map((version) => [version, this.currentData!.versions[version]]);
 
     rows.push([
       "Other",
@@ -48,7 +47,7 @@ export class AnalyticsVersions extends LitElement {
         .slice(5)
         .reduce(
           (accumulator, currentValue) =>
-            accumulator + this.lastDataEntry!.versions[currentValue],
+            accumulator + this.currentData!.versions[currentValue],
           0
         ),
     ]);
