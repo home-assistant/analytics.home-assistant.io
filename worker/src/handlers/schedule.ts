@@ -72,6 +72,8 @@ async function updateHistory(sentry: Toucan): Promise<void> {
   sentry.setTag("scheduled-task", "UPDATE_HISTORY");
   sentry.addBreadcrumb({ message: "Process started" });
   let data = createQueueData();
+  const analyticsData = await getAnalyticsData();
+  const timestampString = String(new Date().getTime());
 
   const kv_list = await listKV(KV_PREFIX_UUID);
 
@@ -80,6 +82,25 @@ async function updateHistory(sentry: Toucan): Promise<void> {
       data = combineMetadataEntryData(data, entry.metadata);
     }
   }
+
+  const active_installations =
+    data.installation_types.container +
+    data.installation_types.core +
+    data.installation_types.os +
+    data.installation_types.supervised +
+    data.installation_types.unknown;
+
+  analyticsData.current.installation_types = data.installation_types;
+  analyticsData.current.active_installations = active_installations;
+  analyticsData.current.versions = data.versions;
+  analyticsData.current.countries = data.countries;
+  analyticsData.history.push({
+    timestamp: timestampString,
+    active_installations,
+    installation_types: data.installation_types,
+  });
+
+  await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(analyticsData));
 }
 
 async function processQueue(sentry: Toucan): Promise<void> {
