@@ -11,8 +11,11 @@ describe("migrateAnalyticsData", function () {
 
   it("migrate from no version", function () {
     const data = {
-      "1": { active_installations: 3 },
-      "2": { reports_integrations: 1337, active_installations: 3 },
+      "2": { active_installations: 2 },
+      "4": { active_installations: 4 },
+      "1": { active_installations: 1 },
+      "3": { active_installations: 3 },
+      "5": { reports_integrations: 1337, active_installations: 5 },
     };
     const migrated = migrateAnalyticsData(MockSentry, data);
 
@@ -23,10 +26,10 @@ describe("migrateAnalyticsData", function () {
       message: "Migration complete",
     });
 
-    expect(migrated.history[0].active_installations).toBe(3);
-    expect(migrated.history.length).toBe(1);
+    expect(migrated.history[0].active_installations).toBe(1);
+    expect(migrated.history.length).toBe(4);
     expect(migrated.current.reports_integrations).toBe(1337);
-    expect(migrated.current.extened_data_from).toBe(3);
+    expect(migrated.current.extened_data_from).toBe(5);
   });
 
   it("migrate from no data", function () {
