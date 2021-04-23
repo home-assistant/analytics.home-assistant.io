@@ -101,6 +101,7 @@ export interface AnalyticsDataCurrent {
   countries: Record<string, number>;
   integrations: Record<string, number>;
   last_updated: number;
+  reported_from: number;
   reports_integrations: number;
   reports_statistics: number;
   versions: Record<string, number>;

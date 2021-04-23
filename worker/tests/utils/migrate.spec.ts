@@ -12,6 +12,7 @@ describe("migrateAnalyticsData", function () {
     expect(migrated.history[0].active_installations).toBe(3);
     expect(migrated.history.length).toBe(1);
     expect(migrated.current.reports_integrations).toBe(1337);
+    expect(migrated.current.reported_from).toBe(3);
     expect(migrated.current).not.toContain("active_installations");
   });
 

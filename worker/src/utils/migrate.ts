@@ -20,6 +20,7 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
       last_updated: 0,
       reports_integrations: 0,
       reports_statistics: 0,
+      reported_from: 0,
       versions: {},
     },
     history: [],
@@ -50,9 +51,12 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
       (a, b) => Number(a.timestamp) - Number(b.timestamp)
     );
 
+    const reported_from = lastDataEntry.active_installations;
+
     delete lastDataEntry.active_installations;
     delete lastDataEntry.installation_types;
     analyticsData.current = lastDataEntry;
+    analyticsData.current.reported_from = reported_from;
   }
 
   return analyticsData;
