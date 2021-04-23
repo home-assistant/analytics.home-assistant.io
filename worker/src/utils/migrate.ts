@@ -40,7 +40,7 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
     return analyticsData;
   }
 
-  if (!data?.schema_version) {
+  if (!data.schema_version) {
     // Before we tracked schema_version
     const dataKeys = Object.keys(data);
     const lastDataEntryKey = dataKeys[dataKeys.length - 1];
