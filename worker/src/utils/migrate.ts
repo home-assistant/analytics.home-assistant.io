@@ -2,7 +2,8 @@ import { AnalyticsData, SCHEMA_VERSION_ANALYTICS } from "../data";
 
 export const migrateAnalyticsData = (data: any): AnalyticsData => {
   if (
-    data?.schema_version &&
+    data &&
+    data.schema_version &&
     data.schema_version === SCHEMA_VERSION_ANALYTICS
   ) {
     return data;
