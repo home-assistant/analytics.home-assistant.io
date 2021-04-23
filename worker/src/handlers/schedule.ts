@@ -65,16 +65,21 @@ async function resetQueue(sentry: Toucan): Promise<void> {
   sentry.setExtra("queue", queue);
 
   if (queue.entries.length === 0 && queue.process_complete) {
+    sentry.addBreadcrumb({ message: "Store reset queue" });
     await KV.put(KV_KEY_QUEUE, JSON.stringify(createQueueDefaults()));
   }
+  sentry.addBreadcrumb({ message: "Process complete" });
 }
 async function updateHistory(sentry: Toucan): Promise<void> {
   sentry.setTag("scheduled-task", "UPDATE_HISTORY");
   sentry.addBreadcrumb({ message: "Process started" });
   let data = createQueueData();
+
+  sentry.addBreadcrumb({ message: "Get current data" });
   const analyticsData = await getAnalyticsData();
   const timestampString = String(new Date().getTime());
 
+  sentry.addBreadcrumb({ message: "List UUID entries" });
   const kv_list = await listKV(KV_PREFIX_UUID);
 
   for (const entry of kv_list) {
@@ -83,6 +88,7 @@ async function updateHistory(sentry: Toucan): Promise<void> {
     }
   }
 
+  sentry.addBreadcrumb({ message: "Update analyticsData" });
   const active_installations =
     data.installation_types.container +
     data.installation_types.core +
@@ -100,12 +106,15 @@ async function updateHistory(sentry: Toucan): Promise<void> {
     installation_types: data.installation_types,
   });
 
+  sentry.addBreadcrumb({ message: "Store data" });
   await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(analyticsData));
 
+  sentry.addBreadcrumb({ message: "Trigger Netlify build" });
   const resp = await fetch(NETLIFY_BUILD_HOOK, { method: "POST" });
   if (!resp.ok) {
     throw new Error("Failed to call Netlify build hook");
   }
+  sentry.addBreadcrumb({ message: "Process complete" });
 }
 
 async function processQueue(sentry: Toucan): Promise<void> {
