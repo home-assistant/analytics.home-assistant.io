@@ -19,6 +19,7 @@ import {
   UuidMetadata,
   UuidMetadataKey,
   AnalyticsData,
+  generateUuidMetadata,
 } from "../data";
 import { average } from "../utils/average";
 import { migrateAnalyticsData } from "../utils/migrate";
@@ -69,6 +70,7 @@ async function resetQueue(sentry: Toucan): Promise<void> {
   }
   sentry.addBreadcrumb({ message: "Process complete" });
 }
+
 async function updateHistory(sentry: Toucan): Promise<void> {
   sentry.setTag("scheduled-task", "UPDATE_HISTORY");
   sentry.addBreadcrumb({ message: "Process started" });
@@ -76,10 +78,34 @@ async function updateHistory(sentry: Toucan): Promise<void> {
 
   sentry.addBreadcrumb({ message: "Get current data" });
   const analyticsData = await getAnalyticsData();
-  const timestampString = String(new Date().getTime());
+  const timestamp = new Date().getTime();
+  const timestampString = String(timestamp);
 
   sentry.addBreadcrumb({ message: "List UUID entries" });
   const kv_list = await listKV(KV_PREFIX_UUID);
+
+  const missingMetata = kv_list.filter((entry) => !entry.metadata);
+
+  async function handleMissingMetadata(entry: ListEntry) {
+    try {
+      const value = await KV.get<IncomingPayload>(entry.name, "json");
+      await KV.put(entry.name, JSON.stringify(value), {
+        expiration: entry.expiration,
+        metadata: generateUuidMetadata(value!, timestamp),
+      });
+    } catch (e) {
+      sentry.addBreadcrumb({ message: e });
+    }
+  }
+
+  if (missingMetata.length !== 0) {
+    await Promise.all(
+      missingMetata
+        .splice(0, KV_MAX_PROCESS_ENTRIES)
+        .map((entry) => handleMissingMetadata(entry))
+    );
+    return;
+  }
 
   for (const entry of kv_list) {
     if (entry.metadata) {

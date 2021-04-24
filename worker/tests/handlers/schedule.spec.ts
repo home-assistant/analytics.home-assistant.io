@@ -131,6 +131,40 @@ describe("schedule handler", function () {
         expect.stringContaining('"active_installations":4')
       );
     });
+
+    it("Entries with missing metadata", async () => {
+      MockKV.get = jest.fn(async (key: string) => {
+        const KV_DATA = {
+          [KV_KEY_CORE_ANALYTICS]: { "1234": { active_installations: 3 } },
+          "uuid:1": { version: "123456" },
+        };
+
+        return KV_DATA[key];
+      });
+
+      MockKV.list = jest.fn(async () => ({
+        list_complete: true,
+        keys: [
+          { name: "uuid:1", expiration: 1234567 },
+          { name: "uuid:2", metadata: { v: "2021.1.2", i: "c" } },
+        ],
+      }));
+
+      await handleSchedule(event, MockSentry);
+      expect(MockFetch).not.toBeCalled();
+      expect(MockKV.get).toBeCalledWith(KV_KEY_CORE_ANALYTICS, "json");
+      expect(MockSentry.setTag).toBeCalledWith(
+        "scheduled-task",
+        "UPDATE_HISTORY"
+      );
+      expect(MockKV.put).toBeCalledWith(
+        "uuid:1",
+        expect.any(String),
+        expect.objectContaining({
+          metadata: expect.objectContaining({ v: "123456" }),
+        })
+      );
+    });
   });
 
   describe("PROCESS_QUEUE", function () {
