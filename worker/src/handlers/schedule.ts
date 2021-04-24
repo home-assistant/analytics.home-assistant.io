@@ -1,43 +1,144 @@
 // Scheduled taks handler to manage the KV store
 import Toucan from "toucan-js";
-import { CurrentAnalytics } from "../../../site/src/data";
 import {
-  createQueueData,
   bumpValue,
+  createQueueData,
+  createQueueDefaults,
+  IncomingPayload,
+  KV_KEY_CORE_ANALYTICS,
+  KV_KEY_QUEUE,
+  KV_MAX_PROCESS_ENTRIES,
+  KV_PREFIX_HISTORY,
+  KV_PREFIX_UUID,
+  ListEntry,
+  SCHEMA_VERSION_QUEUE,
   Queue,
   QueueData,
-  KV_PREFIX_UUID,
-  KV_MAX_PROCESS_ENTRIES,
-  KV_KEY_QUEUE,
-  KV_KEY_CORE_ANALYTICS,
-  KV_PREFIX_HISTORY,
-  ListEntry,
+  ScheduledTask,
   ShortInstallationType,
-  UuidMetadataKey,
   UuidMetadata,
-  IncomingPayload,
+  UuidMetadataKey,
+  AnalyticsData,
 } from "../data";
 import { average } from "../utils/average";
+import { migrateAnalyticsData } from "../utils/migrate";
 
-export async function handleSchedule(sentry: Toucan): Promise<void> {
+export async function handleSchedule(
+  event: ScheduledEvent,
+  sentry: Toucan
+): Promise<void> {
+  // @ts-expect-error Missing type for cron on ScheduledEvent https://github.com/cloudflare/workers-types/pull/86
+  const scheduledTask = event.cron;
+
   try {
-    await processQueue(sentry);
+    if (scheduledTask === ScheduledTask.PROCESS_QUEUE) {
+      // Runs every 2 minutes
+      await processQueue(sentry);
+    } else if (scheduledTask === ScheduledTask.RESET_QUEUE) {
+      // Runs every day
+      await resetQueue(sentry);
+    } else if (scheduledTask === ScheduledTask.UPDATE_HISTORY) {
+      // Runs every hour
+      await updateHistory(sentry);
+    } else {
+      throw new Error(`Unexpected schedule task: ${scheduledTask}`);
+    }
   } catch (e) {
     sentry.captureException(e);
   }
 }
 
-async function processQueue(sentry: Toucan): Promise<void> {
-  sentry.addBreadcrumb({ message: "Prosess started" });
-  const queue = (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || {
-    entries: [],
-    data: createQueueData(),
-  };
+const getQueueData = async (): Promise<Queue> =>
+  (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || createQueueDefaults();
+
+const getAnalyticsData = async (): Promise<AnalyticsData> => {
+  const data = await KV.get(KV_KEY_CORE_ANALYTICS, "json");
+  return migrateAnalyticsData(data);
+};
+
+async function resetQueue(sentry: Toucan): Promise<void> {
+  sentry.setTag("scheduled-task", "RESET_QUEUE");
+  sentry.addBreadcrumb({ message: "Process started" });
+  const queue = await getQueueData();
 
   sentry.setExtra("queue", queue);
 
-  if (queue.entries.length === 0) {
-    sentry.addBreadcrumb({ message: "No entries, get list" });
+  if (queue.entries.length === 0 && queue.process_complete) {
+    sentry.addBreadcrumb({ message: "Store reset queue" });
+    await KV.put(KV_KEY_QUEUE, JSON.stringify(createQueueDefaults()));
+  }
+  sentry.addBreadcrumb({ message: "Process complete" });
+}
+async function updateHistory(sentry: Toucan): Promise<void> {
+  sentry.setTag("scheduled-task", "UPDATE_HISTORY");
+  sentry.addBreadcrumb({ message: "Process started" });
+  let data = createQueueData();
+
+  sentry.addBreadcrumb({ message: "Get current data" });
+  const analyticsData = await getAnalyticsData();
+  const timestampString = String(new Date().getTime());
+
+  sentry.addBreadcrumb({ message: "List UUID entries" });
+  const kv_list = await listKV(KV_PREFIX_UUID);
+
+  for (const entry of kv_list) {
+    if (entry.metadata) {
+      data = combineMetadataEntryData(data, entry.metadata);
+    }
+  }
+
+  sentry.addBreadcrumb({ message: "Update analyticsData" });
+  const active_installations =
+    data.installation_types.container +
+    data.installation_types.core +
+    data.installation_types.os +
+    data.installation_types.supervised +
+    data.installation_types.unknown;
+
+  analyticsData.current.installation_types = data.installation_types;
+  analyticsData.current.active_installations = active_installations;
+  analyticsData.current.versions = data.versions;
+  analyticsData.current.countries = data.countries;
+  analyticsData.history.push({
+    timestamp: timestampString,
+    active_installations,
+    installation_types: data.installation_types,
+  });
+
+  sentry.addBreadcrumb({ message: "Trigger Netlify build" });
+  const resp = await fetch(NETLIFY_BUILD_HOOK, { method: "POST" });
+  if (!resp.ok) {
+    throw new Error("Failed to call Netlify build hook");
+  }
+
+  sentry.addBreadcrumb({ message: "Store data" });
+  await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(analyticsData));
+
+  sentry.addBreadcrumb({ message: "Process complete" });
+}
+
+async function processQueue(sentry: Toucan): Promise<void> {
+  sentry.setTag("scheduled-task", "PROCESS_QUEUE");
+  sentry.addBreadcrumb({ message: "Process started" });
+  let queue = await getQueueData();
+
+  sentry.setExtra("queue", queue);
+
+  if (
+    queue.entries.length === 0 ||
+    queue.schema_version !== SCHEMA_VERSION_QUEUE
+  ) {
+    if (
+      queue.schema_version === SCHEMA_VERSION_QUEUE &&
+      queue.process_complete
+    ) {
+      sentry.addBreadcrumb({ message: "Process complete, waiting for reset" });
+      return;
+    }
+    sentry.addBreadcrumb({ message: "Reset queue and get list of entries" });
+    // Reset queue
+    queue = createQueueDefaults();
+
     const kv_list = await listKV(KV_PREFIX_UUID);
 
     for (const entry of kv_list) {
@@ -76,24 +177,17 @@ async function processQueue(sentry: Toucan): Promise<void> {
     sentry.addBreadcrumb({
       message: "No more entries, store and reset queue data",
     });
-    const core_analytics: Record<string, any> = {};
-    const timestampString = String(new Date().getTime());
+    const timestamp = new Date().getTime();
+    const timestampString = String(timestamp);
 
     const queue_data = processQueueData(queue.data);
-    const storedAnalytics =
-      (await KV.get<{ [key: string]: CurrentAnalytics }>(
-        KV_KEY_CORE_ANALYTICS,
-        "json"
-      )) || {};
+    const storedAnalytics = await getAnalyticsData();
 
-    for (const key of Object.keys(storedAnalytics)) {
-      core_analytics[key] = {
-        active_installations: storedAnalytics[key].active_installations,
-        installation_types: storedAnalytics[key].installation_types,
-      };
-    }
-
-    core_analytics[timestampString] = queue_data;
+    storedAnalytics.current = {
+      ...queue_data,
+      last_updated: timestamp,
+      extended_data_from: queue_data.active_installations,
+    };
 
     sentry.addBreadcrumb({ message: "Trigger Netlify build" });
     const resp = await fetch(NETLIFY_BUILD_HOOK, { method: "POST" });
@@ -106,10 +200,11 @@ async function processQueue(sentry: Toucan): Promise<void> {
       `${KV_PREFIX_HISTORY}:${timestampString}`,
       JSON.stringify(queue_data)
     );
-    await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(core_analytics));
-    queue.data = createQueueData();
+    await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(storedAnalytics));
+    queue = createQueueDefaults();
+    queue.process_complete = true;
   }
-  sentry.addBreadcrumb({ message: "Prosess complete" });
+  sentry.addBreadcrumb({ message: "Process complete" });
   await KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
 }
 
@@ -223,11 +318,9 @@ function combineEntryData(
   return data;
 }
 
-const processQueueData = (data: QueueData): CurrentAnalytics => {
-  const last_updated = new Date().getTime();
-
+const processQueueData = (data: QueueData) => {
   return {
-    last_updated,
+    last_updated: new Date().getTime(),
     countries: data.countries,
     installation_types: data.installation_types,
     active_installations:

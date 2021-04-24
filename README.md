@@ -10,6 +10,16 @@ This recieves the payload from the [`analytics` integration](https://www.home-as
 
 The worker source are located in the worker directory.
 
+### Schedule
+
+As a part of the worker, there is several scheduled tasks that iterates over the stored data and makes a generated object that the site uses, these tasks run at different times.
+
+| task             | runs               | description                                                                                                                                                                 |
+| ---------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PROCESS_QUEUE`  | Every 2 min        | Processes the current queue untill everything is done, when it's done the site will regenerate with the new data, then it waits untill the next `RESET_QUEUE` task has run. |
+| `UPDATE_HISTORY` | Every hour         | Update history, this will update the installation types, versions, and totals, when it's done the site will regenerate with the new data.                                   |
+| `RESET_QUEUE`    | 5min past midnight | This will reset the queue if it's empty, so the next `PROCESS_QUEUE` can start                                                                                              |
+
 ## Site
 
 The source of the https://analytics.home-assistant.io website.

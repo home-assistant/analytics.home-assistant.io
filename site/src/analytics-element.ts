@@ -14,7 +14,9 @@ import "./analytics-versions";
 import "./analytics-header";
 import "./analytics-installation-types";
 import "./analytics-map";
-import { AnalyticsData, fetchData } from "./data";
+import { fetchData } from "./data";
+import { migrateAnalyticsData } from "../../worker/src/utils/migrate";
+import { AnalyticsData } from "../../worker/src/data";
 
 const mqlMobile = matchMedia("(max-width: 600px)");
 const mqlDarkMode = matchMedia("(prefers-color-scheme: dark)");
@@ -49,16 +51,13 @@ export class AnalyticsElement extends LitElement {
       return html`Loading…`;
     }
 
-    const dataKeys = Object.keys(this._data);
-    const lastDataEntry = this._data[dataKeys[dataKeys.length - 1]];
-
     return html`
       <analytics-header .currentPage=${this._currentPage}> </analytics-header>
       <div class="content">
         ${this._currentPage === "installations"
           ? html`
               <analytics-active-installations
-                .data=${this._data}
+                .historyData=${this._data.history}
                 .isMobile=${this._isMobile}
                 .isDarkMode=${this._isDarkMode}
               >
@@ -74,13 +73,13 @@ export class AnalyticsElement extends LitElement {
 
               <div class="half">
                 <analytics-versions
-                  .lastDataEntry=${lastDataEntry}
+                  .currentData=${this._data.current}
                   .isMobile=${this._isMobile}
                   .isDarkMode=${this._isDarkMode}
                 >
                 </analytics-versions>
                 <analytics-installation-types
-                  .lastDataEntry=${lastDataEntry}
+                  .currentData=${this._data.current}
                   .isMobile=${this._isMobile}
                   .isDarkMode=${this._isDarkMode}
                 >
@@ -89,18 +88,18 @@ export class AnalyticsElement extends LitElement {
             `
           : this._currentPage === "statistics"
           ? html`<analytics-average
-              .lastDataEntry=${lastDataEntry}
+              .currentData=${this._data.current}
             ></analytics-average>`
           : this._currentPage === "integrations"
           ? html`<analytics-integrations
-              .lastDataEntry=${lastDataEntry}
+              .currentData=${this._data.current}
               .isMobile=${this._isMobile}
             >
             </analytics-integrations>`
           : ""}
       </div>
       <analytics-map
-        .lastDataEntry=${lastDataEntry}
+        .currentData=${this._data.current}
         .isDarkMode=${this._isDarkMode}
         .showMap=${this._currentPage === "installations"}
       >
@@ -112,7 +111,7 @@ export class AnalyticsElement extends LitElement {
     try {
       const response = await ((window as any).dataPromise || fetchData());
       if (response.ok) {
-        this._data = await response.json();
+        this._data = migrateAnalyticsData(await response.json());
       } else {
         this._error = true;
       }

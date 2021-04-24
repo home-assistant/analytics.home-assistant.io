@@ -4,6 +4,9 @@ export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 850;
 
+export const SCHEMA_VERSION_QUEUE = 1;
+export const SCHEMA_VERSION_ANALYTICS = 1;
+
 export enum UuidMetadataKey {
   ADDED = "a",
   COUNTRY = "c",
@@ -26,6 +29,12 @@ export enum MetadataExtra {
   INTEGRATIONS = "i",
   STATISTICS = "s",
   ADDONS = "a",
+}
+
+export enum ScheduledTask {
+  PROCESS_QUEUE = "*/2 * * * *",
+  RESET_QUEUE = "5 0 * * *",
+  UPDATE_HISTORY = "0 * * * *",
 }
 
 export interface UuidMetadata {
@@ -67,6 +76,49 @@ export interface QueueData {
 export interface Queue {
   entries: string[];
   data: QueueData;
+  schema_version: number;
+  process_complete: boolean;
+}
+
+export interface AnalyticsDataHistory {
+  timestamp: string;
+  active_installations: number;
+  installation_types: {
+    os: number;
+    container: number;
+    core: number;
+    supervised: number;
+    unknown: number;
+  };
+}
+
+export interface AnalyticsDataCurrent {
+  avg_addons: number;
+  avg_automations: number;
+  avg_integrations: number;
+  avg_states: number;
+  avg_users: number;
+  countries: Record<string, number>;
+  integrations: Record<string, number>;
+  last_updated: number;
+  extended_data_from: number;
+  reports_integrations: number;
+  reports_statistics: number;
+  versions: Record<string, number>;
+  active_installations: number;
+  installation_types: {
+    os: number;
+    container: number;
+    core: number;
+    supervised: number;
+    unknown: number;
+  };
+}
+
+export interface AnalyticsData {
+  schema_version: number;
+  history: AnalyticsDataHistory[];
+  current: AnalyticsDataCurrent;
 }
 
 export interface IncomingPayload {
@@ -98,6 +150,13 @@ export const InstallationTypes: Record<string, ShortInstallationType> = {
   "Home Assistant Supervised": ShortInstallationType.SUPERVISED,
   Unknown: ShortInstallationType.UNKNOWN,
 };
+
+export const createQueueDefaults = (): Queue => ({
+  entries: [],
+  data: createQueueData(),
+  schema_version: SCHEMA_VERSION_QUEUE,
+  process_complete: false,
+});
 
 export const createQueueData = (): QueueData => ({
   reports_integrations: 0,

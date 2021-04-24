@@ -1,4 +1,5 @@
 import { handlePost } from "../../src/handlers/post";
+import { MockedKV, MockedSentry } from "../mock";
 
 class MockResponse {}
 
@@ -14,26 +15,16 @@ describe("post handler", function () {
   let MockKV;
 
   beforeEach(() => {
-    MockSentry = {
-      addBreadcrumb: jest.fn(),
-      setUser: jest.fn(),
-      setExtras: jest.fn(),
-    };
+    MockSentry = MockedSentry();
+    (global as any).KV = MockKV = MockedKV();
     MockRequest = {
       json: async () => ({ ...BASE_PAYLOAD }),
       cf: { country: "XX" },
     };
-    MockKV = {
-      put: jest.fn(async () => {}),
-      getWithMetadata: jest.fn(async () => {}),
-    };
     (global as any).Response = MockResponse;
-    (global as any).KV = MockKV;
   });
 
   it("First interaction", async () => {
-    MockKV.getWithMetadata = jest.fn(async () => ({}));
-
     await handlePost(MockRequest, MockSentry);
     expect(MockKV.getWithMetadata).toBeCalledWith(
       "uuid:12345678901234567890123456789012",

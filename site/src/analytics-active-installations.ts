@@ -11,11 +11,11 @@ import {
   PropertyValues,
   query,
 } from "lit-element";
-import { AnalyticsData } from "./data";
+import { AnalyticsDataHistory } from "../../worker/src/data";
 
 @customElement("analytics-active-installations")
 export class AnalyticsActiveInstallations extends LitElement {
-  @property({ attribute: false }) public data?: AnalyticsData;
+  @property({ attribute: false }) public historyData?: AnalyticsDataHistory[];
 
   @property({ type: Boolean }) public isMobile = false;
 
@@ -33,20 +33,19 @@ export class AnalyticsActiveInstallations extends LitElement {
   }
 
   render() {
-    if (this.data === undefined) {
+    if (this.historyData === undefined) {
       return html``;
     }
 
-    const dataKeys = Object.keys(this.data!);
-    const lastEntry = this.data![dataKeys[dataKeys.length - 1]];
+    const lastEntry = this.historyData[this.historyData.length - 1];
 
-    const rows = dataKeys.map((timestamp) => [
-      new Date(Number(timestamp)),
-      this.data![timestamp].active_installations,
-      this.data![timestamp].installation_types.os,
-      this.data![timestamp].installation_types.container,
-      this.data![timestamp].installation_types.supervised,
-      this.data![timestamp].installation_types.core,
+    const rows = this.historyData.map((entry) => [
+      new Date(Number(entry.timestamp)),
+      entry.active_installations,
+      entry.installation_types.os,
+      entry.installation_types.container,
+      entry.installation_types.supervised,
+      entry.installation_types.core,
     ]);
 
     return html`

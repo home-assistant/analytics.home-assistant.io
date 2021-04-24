@@ -3,7 +3,7 @@ webpack_config = "webpack.config.js"
 account_id = "dc9f963dfa4a630ca83eda7ccd8f363d"
 
 [triggers]
-crons = ["*/10 * * * *"]
+crons = ["*/2 * * * *", "5 0 * * *", "0 * * * *"]
 
 
 # For production environment, use '-e production'

@@ -1,7 +1,7 @@
 import svgMap from "svgmap";
 import "svgmap/dist/svgMap.min.css";
 import { customElement, UpdatingElement, property } from "lit-element";
-import { Analytics } from "./data";
+import { AnalyticsDataCurrent } from "../../worker/src/data";
 
 @customElement("analytics-map")
 export class AnalyticsMap extends UpdatingElement {
@@ -9,7 +9,7 @@ export class AnalyticsMap extends UpdatingElement {
 
   @property({ type: Boolean }) public isDarkMode = false;
 
-  @property({ attribute: false }) public lastDataEntry?: Analytics;
+  @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
 
   private _svgMap?;
 
@@ -26,9 +26,9 @@ export class AnalyticsMap extends UpdatingElement {
   private _setMap() {
     if (this.showMap) {
       const countries: Record<string, Record<string, number>> = {};
-      for (const country of Object.keys(this.lastDataEntry?.countries || {})) {
+      for (const country of Object.keys(this.currentData?.countries || {})) {
         countries[country] = {
-          installations: this.lastDataEntry?.countries[country] || 0,
+          installations: this.currentData?.countries[country] || 0,
         };
       }
       if (this._svgMap) {
