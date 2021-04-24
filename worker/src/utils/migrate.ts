@@ -21,7 +21,7 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
       last_updated: 0,
       reports_integrations: 0,
       reports_statistics: 0,
-      extened_data_from: 0,
+      extended_data_from: 0,
       versions: {},
       installation_types: {
         os: 0,
@@ -59,7 +59,7 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
     );
 
     analyticsData.current = lastDataEntry;
-    analyticsData.current.extened_data_from =
+    analyticsData.current.extended_data_from =
       lastDataEntry.active_installations;
   }
 

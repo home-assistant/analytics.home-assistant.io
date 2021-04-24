@@ -93,13 +93,13 @@ describe("schedule handler", function () {
       expect(MockKV.put).toBeCalledTimes(1);
       expect(MockKV.put).toBeCalledWith(
         KV_KEY_CORE_ANALYTICS,
-        expect.stringContaining('"extened_data_from":3')
+        expect.stringContaining('"extended_data_from":3')
       );
     });
 
     it("Update history and partial current", async () => {
       MockKV.get = jest.fn(async () => ({
-        current: { extened_data_from: 3 },
+        current: { extended_data_from: 3 },
         history: [],
         schema_version: SCHEMA_VERSION_ANALYTICS,
       }));
@@ -124,7 +124,7 @@ describe("schedule handler", function () {
       expect(MockKV.put).toBeCalledTimes(1);
       expect(MockKV.put).toBeCalledWith(
         KV_KEY_CORE_ANALYTICS,
-        expect.stringContaining('"extened_data_from":3')
+        expect.stringContaining('"extended_data_from":3')
       );
       expect(MockKV.put).toBeCalledWith(
         KV_KEY_CORE_ANALYTICS,

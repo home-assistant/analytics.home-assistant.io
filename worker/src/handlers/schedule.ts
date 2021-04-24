@@ -186,7 +186,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
     storedAnalytics.current = {
       ...queue_data,
       last_updated: timestamp,
-      extened_data_from: queue_data.active_installations,
+      extended_data_from: queue_data.active_installations,
     };
 
     sentry.addBreadcrumb({ message: "Trigger Netlify build" });

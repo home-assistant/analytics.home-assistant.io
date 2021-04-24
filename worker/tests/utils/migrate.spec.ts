@@ -22,7 +22,7 @@ describe("migrateAnalyticsData", function () {
     expect(migrated.history[0].active_installations).toBe(1);
     expect(migrated.history.length).toBe(4);
     expect(migrated.current.reports_integrations).toBe(1337);
-    expect(migrated.current.extened_data_from).toBe(5);
+    expect(migrated.current.extended_data_from).toBe(5);
   });
 
   it("migrate from no data", function () {

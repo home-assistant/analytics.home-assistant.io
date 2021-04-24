@@ -37,8 +37,8 @@ export class AnalyticsAverage extends LitElement {
       </div>
       <div class="footer">
         ${this.currentData.reports_statistics || "Unkown"} of
-        ${this.currentData.extened_data_from} installations have chosen to share
-        usage statistics
+        ${this.currentData.extended_data_from} installations have chosen to
+        share usage statistics
       </div>`;
   }
 
