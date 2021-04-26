@@ -12,4 +12,5 @@ export const MockedSentry = () => ({
   setExtra: jest.fn(),
   setExtras: jest.fn(),
   captureException: jest.fn(),
+  captureMessage: jest.fn(),
 });

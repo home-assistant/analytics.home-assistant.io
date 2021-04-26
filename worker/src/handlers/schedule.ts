@@ -87,18 +87,18 @@ async function updateHistory(sentry: Toucan): Promise<void> {
   const missingMetata = kv_list.filter((entry) => !entry.metadata);
 
   async function handleMissingMetadata(entry: ListEntry) {
-    try {
-      const value = await KV.get<IncomingPayload>(entry.name, "json");
-      await KV.put(entry.name, JSON.stringify(value), {
-        expiration: entry.expiration,
-        metadata: generateUuidMetadata(value!, timestamp),
-      });
-    } catch (e) {
-      sentry.addBreadcrumb({ message: e });
-    }
+    const value = await KV.get<IncomingPayload>(entry.name, "json");
+    await KV.put(entry.name, JSON.stringify(value), {
+      expiration: entry.expiration,
+      metadata: generateUuidMetadata(value!, timestamp),
+    });
   }
 
   if (missingMetata.length !== 0) {
+    sentry.captureMessage(
+      `${missingMetata.length} entries is missing metadata`,
+      "info"
+    );
     await Promise.all(
       missingMetata
         .splice(0, KV_MAX_PROCESS_ENTRIES)
@@ -182,11 +182,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
 
   async function handleEntry(entryKey: string) {
     let entryData;
-    try {
-      entryData = await KV.get<IncomingPayload>(entryKey, "json");
-    } catch (e) {
-      sentry.addBreadcrumb({ message: e });
-    }
+    entryData = await KV.get<IncomingPayload>(entryKey, "json");
 
     if (entryData !== undefined && entryData !== null) {
       queue.data = combineEntryData(queue.data, entryData);
