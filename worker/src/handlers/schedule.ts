@@ -101,7 +101,7 @@ async function updateHistory(sentry: Toucan): Promise<void> {
     );
     await Promise.all(
       missingMetata
-        .splice(0, KV_MAX_PROCESS_ENTRIES)
+        .splice(0, Math.round(KV_MAX_PROCESS_ENTRIES / 2))
         .map((entry) => handleMissingMetadata(entry))
     );
     return;
