@@ -1,13 +1,39 @@
-name = "analytics-v1"
 type = "webpack"
 webpack_config = "webpack.config.js"
 account_id = "dc9f963dfa4a630ca83eda7ccd8f363d"
+
+[triggers]
+crons = ["*/2 * * * *", "5 0 * * *", "0 * * * *"]
+
+
+# For production environment, use '-e production'
+[env.production]
+name = "analytics-v1"
 zone_id = "0ba583492080d3db28c103574f1d19cf"
 route = "https://analytics-api.home-assistant.io/v1"
-
 kv_namespaces = [
          { binding = "KV", id = "8b2f9c3e5f6b4c62b3782498dc05e895", preview_id = "7892aa96dc6540d9b7e685c92bee384c"}
 ]
+vars = {WORKER_ENV = "production"}
 
-[triggers]
-crons = ["*/10 * * * *"]
+
+# For dev environment, use '-e dev'
+[env.dev]
+name = "analytics-dev-v1"
+zone_id = "0ba583492080d3db28c103574f1d19cf"
+route = "https://analytics-api-dev.home-assistant.io/v1"
+kv_namespaces = [
+         { binding = "KV", id = "7892aa96dc6540d9b7e685c92bee384c", preview_id = "7892aa96dc6540d9b7e685c92bee384c"}
+]
+vars = {WORKER_ENV = "dev"}
+
+
+# For local develoment, use '-e local-dev'
+[env.local-dev]
+name = "analytics-local-dev-v1"
+workers_dev = true
+kv_namespaces = [
+         { binding = "KV", preview_id = "7892aa96dc6540d9b7e685c92bee384c"}
+]
+vars = {WORKER_ENV = "local-dev"}
+

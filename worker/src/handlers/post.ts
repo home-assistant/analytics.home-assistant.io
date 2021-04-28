@@ -26,9 +26,12 @@ export async function handlePostWrapper(
   }
 }
 
-async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
+export async function handlePost(
+  request: Request,
+  sentry: Toucan
+): Promise<Response> {
   let incomingPayload;
-  sentry.addBreadcrumb({ message: "Prosess started" });
+  sentry.addBreadcrumb({ message: "Process started" });
   const request_json = await request.json();
   request_json.country = request.cf.country;
   if (withRegion.has(request_json.country)) {
@@ -46,6 +49,7 @@ async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
     return new Response(null, { status: 400 });
   }
 
+  const stringifiedPayload = JSON.stringify(incomingPayload);
   const storageKey = `${KV_PREFIX_UUID}:${incomingPayload.uuid}`;
   const currentTimestamp = new Date().getTime();
 
@@ -59,7 +63,12 @@ async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
 
   if (!stored || !stored.value) {
     sentry.addBreadcrumb({ message: "First contact for UUID, store payload" });
-    await storePayload(storageKey, incomingPayload, currentTimestamp);
+    await storePayload(
+      storageKey,
+      incomingPayload,
+      stringifiedPayload,
+      currentTimestamp
+    );
     return new Response();
   }
 
@@ -69,11 +78,15 @@ async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
 
   delete stored.value.last_write;
 
-  if (!deepEqual(stored.value, incomingPayload)) {
+  // We test the stringifiedPayload since superstruct adds
+  // undefined keys for all optional keys in the object,
+  // these are not present when stringifyin, like we do when we store the data
+  if (!deepEqual(stored.value, JSON.parse(stringifiedPayload))) {
     sentry.addBreadcrumb({ message: "Payload changed, update stored data" });
     await storePayload(
       storageKey,
       incomingPayload,
+      stringifiedPayload,
       currentTimestamp,
       stored.metadata
     );
@@ -87,25 +100,28 @@ async function handlePost(request: Request, sentry: Toucan): Promise<Response> {
         target: updateThreshold,
       },
     });
+
     await storePayload(
       storageKey,
       incomingPayload,
+      stringifiedPayload,
       currentTimestamp,
       stored.metadata
     );
   }
 
-  sentry.addBreadcrumb({ message: "Prosess complete" });
+  sentry.addBreadcrumb({ message: "Process complete" });
   return new Response();
 }
 
 async function storePayload(
   storageKey: string,
   payload: IncomingPayload,
+  stringifiedPayload: string,
   currentTimestamp: number,
   metadata?: UuidMetadata | null
 ) {
-  await KV.put(storageKey, JSON.stringify(payload), {
+  await KV.put(storageKey, stringifiedPayload, {
     expirationTtl,
     metadata: generateUuidMetadata(payload, currentTimestamp, metadata),
   });

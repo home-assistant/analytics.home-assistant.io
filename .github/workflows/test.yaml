@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - dev
 
 env:
   NODE_VERSION: "14.2.0"
@@ -34,3 +35,19 @@ jobs:
 
       - name: Build
         run: script/build
+
+  test-worker:
+    runs-on: ubuntu-latest
+    name: Test worker
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2.1.5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install packages
+        run: script/bootstrap
+
+      - name: Build
+        run: script/worker_test

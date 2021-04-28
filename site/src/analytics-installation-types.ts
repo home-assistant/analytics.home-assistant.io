@@ -9,11 +9,11 @@ import {
   PropertyValues,
   query,
 } from "lit-element";
-import { Analytics } from "./data";
+import { AnalyticsDataCurrent } from "../../worker/src/data";
 
 @customElement("analytics-installation-types")
 export class AnalyticsInstallationTypes extends LitElement {
-  @property({ attribute: false }) public lastDataEntry?: Analytics;
+  @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
 
   @property({ type: Boolean }) public isMobile = false;
 
@@ -29,15 +29,15 @@ export class AnalyticsInstallationTypes extends LitElement {
   }
 
   render() {
-    if (this.lastDataEntry === undefined) {
+    if (this.currentData === undefined) {
       return html``;
     }
 
     const rows = [
-      ["Operating System", this.lastDataEntry.installation_types.os],
-      ["Container", this.lastDataEntry.installation_types.container],
-      ["Supervised", this.lastDataEntry.installation_types.supervised],
-      ["Core", this.lastDataEntry.installation_types.core],
+      ["Operating System", this.currentData.installation_types.os],
+      ["Container", this.currentData.installation_types.container],
+      ["Supervised", this.currentData.installation_types.supervised],
+      ["Core", this.currentData.installation_types.core],
     ];
 
     return html`

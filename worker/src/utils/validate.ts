@@ -60,6 +60,9 @@ export const IncomingPayloadStruct = object({
   integrations: optional(array(string())),
   state_count: optional(number()),
   supervisor: optional(object({ supported: boolean(), healthy: boolean() })),
+  operating_system: optional(
+    object({ board: string(), version: optional(nullable(string())) })
+  ),
   user_count: optional(number()),
   uuid: size(string(), 32, 32),
   version: size(string(), 7, 22),
