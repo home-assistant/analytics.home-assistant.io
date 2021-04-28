@@ -50,6 +50,27 @@ describe("createIncomingPayload", function () {
     expect(payload.version).toBe(BASE_PAYLOAD.version);
   });
 
+  it("Valid full payload", function () {
+    const payload = createIncomingPayload({
+      ...BASE_PAYLOAD,
+      addon_count: 1,
+      addons: [ADDON],
+      automation_count: 1,
+      country: "XX",
+      custom_integrations: [{ domain: "awesome_custom", version: null }],
+      integration_count: 1,
+      integrations: ["awesome"],
+      operating_system: { board: "blue", version: "123" },
+      region: "XX",
+      state_count: 1,
+      supervisor: { healthy: false, supported: true },
+      user_count: 1,
+    });
+    expect(payload.uuid).toBe(BASE_PAYLOAD.uuid);
+    expect(payload.installation_type).toBe(BASE_PAYLOAD.installation_type);
+    expect(payload.version).toBe(BASE_PAYLOAD.version);
+  });
+
   it("Default true", function () {
     const payload = createIncomingPayload({
       ...BASE_PAYLOAD,
