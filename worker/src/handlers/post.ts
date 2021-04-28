@@ -121,7 +121,7 @@ async function storePayload(
   currentTimestamp: number,
   metadata?: UuidMetadata | null
 ) {
-  await KV.put(storageKey, JSON.stringify(stringifiedPayload), {
+  await KV.put(storageKey, stringifiedPayload, {
     expirationTtl,
     metadata: generateUuidMetadata(payload, currentTimestamp, metadata),
   });
