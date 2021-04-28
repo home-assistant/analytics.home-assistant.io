@@ -12,7 +12,7 @@ The worker source are located in the worker directory.
 
 ### Schedule
 
-As a part of the worker, there is several scheduled tasks that iterates over the stored data and makes a generated object that the site uses, these tasks run at different times.
+There are several scheduled tasks that iterate over the stored data and generate the data that the site uses. These tasks run at different times.
 
 | task             | runs               | description                                                                                                                                                                 |
 | ---------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
