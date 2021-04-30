@@ -16,7 +16,7 @@
     "toucan-js": "^2.4.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^2.2.1",
+    "@cloudflare/workers-types": "^2.2.2",
     "@cloudflare/wrangler": "^1.16.1",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.0.1",
