@@ -56,7 +56,15 @@ export interface ListEntry {
 }
 
 export interface QueueData {
-  addons: Record<string, { total: number; versions: Record<string, number> }>;
+  addons: Record<
+    string,
+    {
+      total: number;
+      versions: Record<string, number>;
+      protected: number;
+      auto_update: 0;
+    }
+  >;
   custom_integrations: Record<
     string,
     { total: number; versions: Record<string, number> }

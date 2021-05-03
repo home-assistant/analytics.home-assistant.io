@@ -340,11 +340,27 @@ function combineEntryData(
   if (reported_addons.length) {
     for (const addon of reported_addons) {
       if (!data.addons[addon.slug]) {
-        data.addons[addon.slug] = { total: 0, versions: {} };
+        data.addons[addon.slug] = {
+          total: 0,
+          versions: {},
+          protected: 0,
+          auto_update: 0,
+        };
       }
       data.addons[addon.slug].total++;
+
+      if (addon.auto_update) {
+        data.addons[addon.slug].auto_update++;
+      }
+
+      if (addon.protected) {
+        data.addons[addon.slug].protected++;
+      }
+
       if (addon.version) {
-        data.addons[addon.slug].versions[addon.version];
+        data.addons[addon.slug].versions[addon.version] = bumpValue(
+          data.addons[addon.slug].versions[addon.version]
+        );
       }
     }
   }
@@ -361,7 +377,11 @@ function combineEntryData(
       if (custom_integration.version) {
         data.custom_integrations[custom_integration.domain].versions[
           custom_integration.version
-        ];
+        ] = bumpValue(
+          data.custom_integrations[custom_integration.domain].versions[
+            custom_integration.version
+          ]
+        );
       }
     }
   }
