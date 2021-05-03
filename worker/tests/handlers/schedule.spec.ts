@@ -1,7 +1,9 @@
 import {
   createQueueData,
   createQueueDefaults,
+  KV_KEY_ADDONS,
   KV_KEY_CORE_ANALYTICS,
+  KV_KEY_CUSTOM_INTEGRATIONS,
   KV_KEY_QUEUE,
   ScheduledTask,
   SCHEMA_VERSION_ANALYTICS,
@@ -258,12 +260,17 @@ describe("schedule handler", function () {
         KV_KEY_CORE_ANALYTICS,
         expect.any(String)
       );
+      expect(MockKV.put).toBeCalledWith(KV_KEY_ADDONS, expect.any(String));
+      expect(MockKV.put).toBeCalledWith(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        expect.any(String)
+      );
       expect(MockKV.put).toBeCalledWith(
         expect.stringContaining("history:"),
         expect.any(String)
       );
       expect(MockFetch).toBeCalledTimes(1);
-      expect(MockKV.put).toBeCalledTimes(3);
+      expect(MockKV.put).toBeCalledTimes(5);
     });
 
     it("Wait for reset", async () => {

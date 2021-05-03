@@ -17,16 +17,30 @@ if [ -n "$CF_KV_TOKEN" ]; then
     curl -sSLf "$CF_KV_URL" \
       -H "Authorization: Bearer $CF_KV_TOKEN" \
       -H "Content-Type:application/json" | jq . > ./site/public/data.json
+    curl -sSLf "$CF_KV_URL_CUSTOM_INTEGRATIONS" \
+      -H "Authorization: Bearer $CF_KV_TOKEN" \
+      -H "Content-Type:application/json" | jq . > ./site/public/custom_integrations.json
+    curl -sSLf "$CF_KV_URL_ADDONS" \
+      -H "Authorization: Bearer $CF_KV_TOKEN" \
+      -H "Content-Type:application/json" | jq . > ./site/public/addons.json
     curl -sSLf https://www.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
   else
     curl -sSLf "$CF_KV_URL_DEV" \
       -H "Authorization: Bearer $CF_KV_TOKEN" \
       -H "Content-Type:application/json" | jq . > ./site/public/data.json
+    curl -sSLf "$CF_KV_URL_CUSTOM_INTEGRATIONS_DEV" \
+      -H "Authorization: Bearer $CF_KV_TOKEN" \
+      -H "Content-Type:application/json" | jq . > ./site/public/custom_integrations.json
+    curl -sSLf "$CF_KV_URL_ADDONS_DEV" \
+      -H "Authorization: Bearer $CF_KV_TOKEN" \
+      -H "Content-Type:application/json" | jq . > ./site/public/addons.json
     curl -sSLf https://rc.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
   fi
 
 else
   curl -sSLf https://dev--home-assistant-analytics.netlify.app/data.json | jq . > ./site/public/data.json
+  curl -sSLf https://dev--home-assistant-analytics.netlify.app/custom_integrations.json | jq . > ./site/public/custom_integrations.json
+  curl -sSLf https://dev--home-assistant-analytics.netlify.app/addons.json | jq . > ./site/public/addons.json
   curl -sSLf https://rc.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
 fi
 
