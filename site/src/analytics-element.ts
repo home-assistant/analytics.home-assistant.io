@@ -128,6 +128,7 @@ export class AnalyticsElement extends LitElement {
       const response = await ((window as any).dataPromise || fetchData());
       if (response.ok) {
         this._data = migrateAnalyticsData(await response.json());
+        console.log(this._data);
       } else {
         this._error = true;
       }

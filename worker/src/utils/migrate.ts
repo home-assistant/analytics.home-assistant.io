@@ -65,9 +65,8 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
   }
 
   if (data.schema_version < 2) {
-    for (const key of Object.keys(data)) {
-      analyticsData[key] = data[key];
-    }
+    analyticsData.current = { ...analyticsData.current, ...data.current };
+    analyticsData.history = data.history;
   }
 
   return analyticsData;
