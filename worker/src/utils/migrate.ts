@@ -23,6 +23,7 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
       reports_statistics: 0,
       extended_data_from: 0,
       versions: {},
+      operating_system: { boards: {}, versions: {} },
       installation_types: {
         os: 0,
         container: 0,
@@ -61,6 +62,12 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
     analyticsData.current = lastDataEntry;
     analyticsData.current.extended_data_from =
       lastDataEntry.active_installations;
+  }
+
+  if (data.schema_version < 2) {
+    for (const key of Object.keys(data)) {
+      analyticsData[key] = data[key];
+    }
   }
 
   return analyticsData;
