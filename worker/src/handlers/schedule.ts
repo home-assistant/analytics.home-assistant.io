@@ -22,6 +22,7 @@ import {
   generateUuidMetadata,
   KV_KEY_ADDONS,
   KV_KEY_CUSTOM_INTEGRATIONS,
+  BRANDS_DOMAINS_URL,
 } from "../data";
 import { average } from "../utils/average";
 import { migrateAnalyticsData } from "../utils/migrate";
@@ -182,12 +183,20 @@ async function processQueue(sentry: Toucan): Promise<void> {
     }
   }
 
+  sentry.addBreadcrumb({ message: "Fetching domain list from brands" });
+  const brandsDomainsResponse = await fetch(BRANDS_DOMAINS_URL);
+  if (!brandsDomainsResponse.ok) {
+    throw Error("Could not get domain list from brands");
+  }
+
+  const brandsDomains: string[] = await brandsDomainsResponse.json();
+
   async function handleEntry(entryKey: string) {
     let entryData;
     entryData = await KV.get<IncomingPayload>(entryKey, "json");
 
     if (entryData !== undefined && entryData !== null) {
-      queue.data = combineEntryData(queue.data, entryData);
+      queue.data = combineEntryData(queue.data, entryData, brandsDomains);
     }
   }
 
@@ -225,11 +234,12 @@ async function processQueue(sentry: Toucan): Promise<void> {
       JSON.stringify(queue_data)
     );
     await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(storedAnalytics));
-    await KV.put(KV_KEY_ADDONS, JSON.stringify(queue.data.addons));
     await KV.put(
       KV_KEY_CUSTOM_INTEGRATIONS,
       JSON.stringify(queue.data.custom_integrations)
     );
+    await KV.put(KV_KEY_ADDONS, JSON.stringify(queue.data.addons));
+
     queue = createQueueDefaults();
     queue.process_complete = true;
   }
@@ -294,7 +304,8 @@ function combineMetadataEntryData(
 
 function combineEntryData(
   data: QueueData,
-  entrydata: IncomingPayload
+  entrydata: IncomingPayload,
+  brandsDomains: string[]
 ): QueueData {
   const reported_integrations = entrydata.integrations || [];
   const reported_custom_integrations = entrydata.custom_integrations || [];
@@ -367,6 +378,10 @@ function combineEntryData(
 
   if (reported_custom_integrations.length) {
     for (const custom_integration of reported_custom_integrations) {
+      if (!brandsDomains.includes(custom_integration.domain)) {
+        continue;
+      }
+
       if (!data.custom_integrations[custom_integration.domain]) {
         data.custom_integrations[custom_integration.domain] = {
           total: 0,

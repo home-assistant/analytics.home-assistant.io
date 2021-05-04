@@ -26,7 +26,10 @@ describe("schedule handler", function () {
   beforeEach(() => {
     MockSentry = MockedSentry();
     (global as any).KV = MockKV = MockedKV();
-    (global as any).fetch = MockFetch = jest.fn(async () => ({ ok: true }));
+    (global as any).fetch = MockFetch = jest.fn(async () => ({
+      ok: true,
+      json: jest.fn(async () => ["custom_valid"]),
+    }));
     (global as any).NETLIFY_BUILD_HOOK = "";
   });
 
@@ -240,7 +243,12 @@ describe("schedule handler", function () {
           };
         }
 
-        return {};
+        return {
+          custom_integrations: [
+            { domain: "custom_invalid", version: "1.2.3" },
+            { domain: "custom_valid", version: "1.2.3" },
+          ],
+        };
       });
 
       await handleSchedule(event, MockSentry);
@@ -263,13 +271,13 @@ describe("schedule handler", function () {
       expect(MockKV.put).toBeCalledWith(KV_KEY_ADDONS, expect.any(String));
       expect(MockKV.put).toBeCalledWith(
         KV_KEY_CUSTOM_INTEGRATIONS,
-        expect.any(String)
+        '{"custom_valid":{"total":500,"versions":{"1.2.3":500}}}'
       );
       expect(MockKV.put).toBeCalledWith(
         expect.stringContaining("history:"),
         expect.any(String)
       );
-      expect(MockFetch).toBeCalledTimes(1);
+      expect(MockFetch).toBeCalledTimes(2);
       expect(MockKV.put).toBeCalledTimes(5);
     });
 
