@@ -5,7 +5,6 @@ account_id = "dc9f963dfa4a630ca83eda7ccd8f363d"
 [triggers]
 crons = ["*/2 * * * *", "5 0 * * *", "0 * * * *"]
 
-
 # For production environment, use '-e production'
 [env.production]
 name = "analytics-v1"
@@ -37,3 +36,8 @@ kv_namespaces = [
 ]
 vars = {WORKER_ENV = "local-dev"}
 
+
+[build]
+upload.format = "service-worker"
+command = "../node_modules/.bin/webpack build -c webpack.config.js"
+watch_dir = "./src"
