@@ -11,6 +11,21 @@ import {
 } from "lit-element";
 import { AnalyticsDataCurrent } from "../../worker/src/data";
 
+const friendlyBoardName: Record<string, string> = {
+  "intel-nuc": "Intel NUC",
+  ova: "OVA",
+  "odroid-c2": "Odroid C2",
+  "odroid-c4": "Odroid C4",
+  "odroid-n2": "Odroid N2",
+  "odroid-xu4": "Odroid XU4",
+  rpi: "Raspberry Pi",
+  rpi0: "Raspberry Pi 0",
+  rpi2: "Raspberry Pi 2",
+  rpi3: "Raspberry Pi 3",
+  rpi4: "Raspberry Pi 4",
+  tinker: "Asus TinkerBoard",
+};
+
 @customElement("analytics-os-boards")
 export class AnalyticsOsBoards extends LitElement {
   @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
@@ -45,7 +60,7 @@ export class AnalyticsOsBoards extends LitElement {
     );
 
     const rows = sortedBoards.map((board) => [
-      board,
+      friendlyBoardName[board],
       this.currentData!.operating_system.boards[board],
     ]);
 
