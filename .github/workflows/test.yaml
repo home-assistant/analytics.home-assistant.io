@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Install packages
+        run: script/bootstrap
+
       - name: Build
         run: script/worker_build
 
@@ -32,6 +35,9 @@ jobs:
       - uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install packages
+        run: script/bootstrap
 
       - name: Build
         run: script/build
