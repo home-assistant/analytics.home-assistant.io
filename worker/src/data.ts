@@ -7,7 +7,7 @@ export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 850;
 
 export const BRANDS_DOMAINS_URL =
-  "http://brands.home-assistant.io/domains.json";
+  "https://brands.home-assistant.io/domains.json";
 
 export const SCHEMA_VERSION_QUEUE = 2;
 export const SCHEMA_VERSION_ANALYTICS = 1;
