@@ -6,7 +6,6 @@ import {
   html,
   LitElement,
   property,
-  PropertyValues,
   query,
 } from "lit-element";
 import { AnalyticsDataCurrent } from "../../worker/src/data";
@@ -36,9 +35,16 @@ export class AnalyticsOsBoards extends LitElement {
 
   @query("google-chart") private _chart?: GoogleChart;
 
-  protected firstUpdated(_changedProperties: PropertyValues) {
-    super.firstUpdated(_changedProperties);
+  public connectedCallback(): void {
+    super.connectedCallback();
     window.addEventListener("resize", () => {
+      this._chart?.redraw();
+    });
+  }
+
+  public disconnectCallback(): void {
+    super.disconnectCallback();
+    window.removeEventListener("resize", () => {
       this._chart?.redraw();
     });
   }

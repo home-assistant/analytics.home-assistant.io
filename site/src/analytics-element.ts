@@ -128,7 +128,6 @@ export class AnalyticsElement extends LitElement {
       const response = await ((window as any).dataPromise || fetchData());
       if (response.ok) {
         this._data = migrateAnalyticsData(await response.json());
-        console.log(this._data);
       } else {
         this._error = true;
       }
@@ -170,10 +169,7 @@ export class AnalyticsElement extends LitElement {
       text-align: center;
     }
 
-    analytics-core-versions,
-    analytics-os-versions,
-    analytics-os-boards,
-    analytics-installation-types {
+    .half > * {
       flex: 1;
     }
 
