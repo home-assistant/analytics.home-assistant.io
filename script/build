@@ -42,7 +42,9 @@ jq -n "$integration_details" --argjson integration_details "$integration_details
 jq -n "$data" --argjson data "$data" > "$data_path"
 
 
-script/bootstrap
+if [ ! -d node_modules ]; then
+  script/bootstrap
+fi
 
 cd ./site
 ../node_modules/.bin/vite build
