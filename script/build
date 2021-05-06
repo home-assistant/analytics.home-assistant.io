@@ -24,12 +24,12 @@ if [ -n "$CF_KV_TOKEN" ]; then
     data=$(curl -sSLf "$CF_KV_URL" \
       -H "Authorization: Bearer $CF_KV_TOKEN" \
       -H "Content-Type:application/json")
-    $integration_details=$(curl -sSLf https://www.home-assistant.io/integrations.json)
+    integration_details=$(curl -sSLf https://www.home-assistant.io/integrations.json)
   else
     data=$(curl -sSLf "$CF_KV_URL_DEV" \
       -H "Authorization: Bearer $CF_KV_TOKEN" \
       -H "Content-Type:application/json")
-    $integration_details=$(curl -sSLf https://rc.home-assistant.io/integrationsINVALID.json)
+    integration_details=$(curl -sSLf https://rc.home-assistant.io/integrationsINVALID.json)
   fi
 
 else
