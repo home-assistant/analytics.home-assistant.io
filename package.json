@@ -10,7 +10,7 @@
     "@mdi/font": "^5.9.55",
     "@mdi/js": "^5.9.55",
     "lit-element": "^2.5.0",
-    "lit-html": "^1.4.0",
+    "lit-html": "^1.4.1",
     "superstruct": "^0.15.1",
     "svgmap": "^2.1.1",
     "toucan-js": "^2.4.1"
