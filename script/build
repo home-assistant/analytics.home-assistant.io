@@ -38,8 +38,8 @@ else
 fi
 
 # Export to files
-jq -n "$integration_details" --argjson integration_details "$integration_details" > "$integration_details_path"
-jq -n "$data" --argjson data "$data" > "$data_path"
+jq -n "$input" --argjson input "$integration_details" > "$integration_details_path"
+jq -n "$input" --argjson input "$data" > "$data_path"
 
 
 if [ ! -d node_modules ]; then
