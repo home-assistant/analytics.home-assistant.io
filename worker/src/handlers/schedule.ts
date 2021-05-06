@@ -189,7 +189,14 @@ async function processQueue(sentry: Toucan): Promise<void> {
     throw Error("Could not get domain list from brands");
   }
 
-  const brandsDomains: string[] = await brandsDomainsResponse.json();
+  const brandsDomainsJson: {
+    core: string[];
+    custom: string[];
+  } = await brandsDomainsResponse.json();
+
+  const brandsDomains: Set<string> = new Set(
+    brandsDomainsJson.custom.concat(brandsDomainsJson.core)
+  );
 
   async function handleEntry(entryKey: string) {
     let entryData;
@@ -305,7 +312,7 @@ function combineMetadataEntryData(
 function combineEntryData(
   data: QueueData,
   entrydata: IncomingPayload,
-  brandsDomains: string[]
+  brandsDomains: Set<string>
 ): QueueData {
   const reported_integrations = entrydata.integrations || [];
   const reported_custom_integrations = entrydata.custom_integrations || [];
@@ -378,7 +385,7 @@ function combineEntryData(
 
   if (reported_custom_integrations.length) {
     for (const custom_integration of reported_custom_integrations) {
-      if (!brandsDomains.includes(custom_integration.domain)) {
+      if (!brandsDomains.has(custom_integration.domain)) {
         continue;
       }
 
@@ -404,7 +411,7 @@ function combineEntryData(
   if (reported_integrations.length) {
     data.reports_integrations++;
     for (const integration of reported_integrations) {
-      if (!brandsDomains.includes(integration)) {
+      if (!brandsDomains.has(integration)) {
         continue;
       }
       data.integrations[integration] = bumpValue(

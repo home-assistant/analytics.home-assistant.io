@@ -28,7 +28,10 @@ describe("schedule handler", function () {
     (global as any).KV = MockKV = MockedKV();
     (global as any).fetch = MockFetch = jest.fn(async () => ({
       ok: true,
-      json: jest.fn(async () => ["custom_valid"]),
+      json: jest.fn(async () => ({
+        core: ["core_valid"],
+        custom: ["custom_valid"],
+      })),
     }));
     (global as any).NETLIFY_BUILD_HOOK = "";
   });
@@ -244,6 +247,7 @@ describe("schedule handler", function () {
         }
 
         return {
+          integrations: ["core_invalid", "core_valid"],
           custom_integrations: [
             { domain: "custom_invalid", version: "1.2.3" },
             { domain: "custom_valid", version: "1.2.3" },
@@ -266,7 +270,11 @@ describe("schedule handler", function () {
       );
       expect(MockKV.put).toBeCalledWith(
         KV_KEY_CORE_ANALYTICS,
-        expect.any(String)
+        expect.stringContaining("core_valid")
+      );
+      expect(MockKV.put).toBeCalledWith(
+        KV_KEY_CORE_ANALYTICS,
+        expect.not.stringContaining("core_invalid")
       );
       expect(MockKV.put).toBeCalledWith(KV_KEY_ADDONS, expect.any(String));
       expect(MockKV.put).toBeCalledWith(
