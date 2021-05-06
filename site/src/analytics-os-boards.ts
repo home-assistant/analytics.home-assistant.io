@@ -28,7 +28,7 @@ export class AnalyticsOsBoards extends LitElement {
   render() {
     if (
       this.currentData === undefined ||
-      !this.currentData.operating_system.boards
+      Object.keys(this.currentData.operating_system.boards).length === 0
     ) {
       return html``;
     }

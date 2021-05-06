@@ -13,7 +13,7 @@ export class AnalyticsOsVersions extends LitElement {
   render() {
     if (
       this.currentData === undefined ||
-      !this.currentData.operating_system.versions
+      Object.keys(this.currentData.operating_system.versions).length === 0
     ) {
       return html``;
     }

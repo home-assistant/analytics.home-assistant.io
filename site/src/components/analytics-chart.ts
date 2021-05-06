@@ -32,17 +32,17 @@ export class AnalyticsChart extends LitElement {
 
   public connectedCallback(): void {
     super.connectedCallback();
-    window.addEventListener("resize", () => {
-      this._chart?.redraw();
-    });
+    window.addEventListener("resize", this._handleResize);
   }
 
   public disconnectedCallback(): void {
     super.disconnectedCallback();
-    window.removeEventListener("resize", () => {
-      this._chart?.redraw();
-    });
+    window.removeEventListener("resize", this._handleResize);
   }
+
+  private _handleResize = () => {
+    this._chart?.redraw();
+  };
 
   render() {
     return html`
