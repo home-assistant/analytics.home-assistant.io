@@ -1,14 +1,6 @@
-import "@google-web-components/google-chart";
-import { GoogleChart } from "@google-web-components/google-chart";
-import {
-  css,
-  customElement,
-  html,
-  LitElement,
-  property,
-  query,
-} from "lit-element";
+import { css, customElement, html, LitElement, property } from "lit-element";
 import { AnalyticsDataCurrent } from "../../worker/src/data";
+import "./components/analytics-chart";
 
 @customElement("analytics-core-versions")
 export class AnalyticsCoreVersions extends LitElement {
@@ -17,22 +9,6 @@ export class AnalyticsCoreVersions extends LitElement {
   @property({ type: Boolean }) public isMobile = false;
 
   @property({ type: Boolean }) public isDarkMode = false;
-
-  @query("google-chart") private _chart?: GoogleChart;
-
-  public connectedCallback(): void {
-    super.connectedCallback();
-    window.addEventListener("resize", () => {
-      this._chart?.redraw();
-    });
-  }
-
-  public disconnectCallback(): void {
-    super.disconnectCallback();
-    window.removeEventListener("resize", () => {
-      this._chart?.redraw();
-    });
-  }
 
   render() {
     if (this.currentData === undefined) {
@@ -59,49 +35,24 @@ export class AnalyticsCoreVersions extends LitElement {
     ]);
 
     return html`
-      <google-chart
-        type="pie"
-        .cols=${[
+      <analytics-chart
+        chartType="pie"
+        .columns=${[
           { label: "Version", type: "string" },
           { label: "Count", type: "number" },
         ]}
-        .options=${{
-          title: "Top 5 used core versions",
-          chartArea: {
-            width: this.isMobile ? "100%" : "70%",
-            height: this.isMobile ? "80%" : "70%",
-          },
-          sliceVisibilityThreshold: 0,
-          backgroundColor: this.isDarkMode ? "#111111" : "#fafafa",
-          titleTextStyle: {
-            color: this.isDarkMode ? "#e1e1e1" : "#212121",
-          },
-          legend: {
-            position: this.isMobile ? "top" : "right",
-            alignment: "start",
-            textStyle: {
-              color: this.isDarkMode ? "#e1e1e1" : "#212121",
-            },
-          },
-        }}
         .rows=${rows}
+        .options=${{ title: "Top 5 used core versions" }}
+        .isDarkMode=${this.isDarkMode}
+        .isMobile=${this.isMobile}
       >
-      </google-chart>
+      </analytics-chart>
     `;
   }
 
   static styles = css`
     :host {
       display: block;
-    }
-    google-chart {
-      height: 500px;
-      width: 100%;
-    }
-    @media only screen and (max-width: 1000px) and (min-width: 600px) {
-      google-chart {
-        height: 300px;
-      }
     }
   `;
 }

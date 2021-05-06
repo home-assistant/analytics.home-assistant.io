@@ -1,5 +1,3 @@
-import "@google-web-components/google-chart";
-import type { GoogleChart } from "@google-web-components/google-chart";
 import { Checkbox } from "@material/mwc-checkbox";
 import {
   css,
@@ -8,9 +6,9 @@ import {
   internalProperty,
   LitElement,
   property,
-  query,
 } from "lit-element";
 import { AnalyticsDataHistory } from "../../worker/src/data";
+import "./components/analytics-chart";
 
 @customElement("analytics-active-installations")
 export class AnalyticsActiveInstallations extends LitElement {
@@ -21,22 +19,6 @@ export class AnalyticsActiveInstallations extends LitElement {
   @property({ type: Boolean }) public isDarkMode = false;
 
   @internalProperty() private _logScale = false;
-
-  @query("google-chart") private _chart?: GoogleChart;
-
-  public connectedCallback(): void {
-    super.connectedCallback();
-    window.addEventListener("resize", () => {
-      this._chart?.redraw();
-    });
-  }
-
-  public disconnectCallback(): void {
-    super.disconnectCallback();
-    window.removeEventListener("resize", () => {
-      this._chart?.redraw();
-    });
-  }
 
   render() {
     if (this.historyData === undefined) {
@@ -60,9 +42,9 @@ export class AnalyticsActiveInstallations extends LitElement {
             <mwc-checkbox @change=${this._toggleLogScale}></mwc-checkbox>
           </mwc-formfield>`
         : ""}
-      <google-chart
-        type="line"
-        .cols=${[
+      <analytics-chart
+        chartType="line"
+        .columns=${[
           { label: "Date", type: "date" },
           { label: "Total", type: "number" },
           { label: "Operating System", type: "number" },
@@ -70,26 +52,15 @@ export class AnalyticsActiveInstallations extends LitElement {
           { label: "Supervised", type: "number" },
           { label: "Core", type: "number" },
         ]}
+        .rows=${rows}
         .options=${{
           title: `${lastEntry.active_installations} Active Home Assistant Installations`,
-          chartArea: { width: this.isMobile ? "100%" : "70%", height: "80%" },
-          backgroundColor: this.isDarkMode ? "#111111" : "#fafafa",
           series: {
             0: { color: "#3366cc" },
             1: { color: "#dc3912" },
             2: { color: "#ff9900" },
             3: { color: "#109618" },
             4: { color: "#990099" },
-          },
-          titleTextStyle: {
-            color: this.isDarkMode ? "#e1e1e1" : "#212121",
-          },
-          legend: {
-            position: this.isMobile ? "top" : "right",
-            alignment: "start",
-            textStyle: {
-              color: this.isDarkMode ? "#e1e1e1" : "#212121",
-            },
           },
           hAxis: {
             title: "Date",
@@ -105,9 +76,10 @@ export class AnalyticsActiveInstallations extends LitElement {
             },
           },
         }}
-        .rows=${rows}
+        .isDarkMode=${this.isDarkMode}
+        .isMobile=${this.isMobile}
       >
-      </google-chart>
+      </analytics-chart>
     `;
   }
 
@@ -120,10 +92,7 @@ export class AnalyticsActiveInstallations extends LitElement {
       display: block;
       position: relative;
     }
-    google-chart {
-      height: 500px;
-      width: 100%;
-    }
+
     mwc-formfield {
       position: absolute;
       right: 16px;
