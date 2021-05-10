@@ -15,7 +15,7 @@ const friendlyBoardName: Record<string, string> = {
   rpi2: "Raspberry Pi 2",
   rpi3: "Raspberry Pi 3",
   rpi4: "Raspberry Pi 4",
-  tinker: "Asus TinkerBoard",
+  tinker: "ASUS Tinker Board",
 };
 
 @customElement("analytics-os-boards")
