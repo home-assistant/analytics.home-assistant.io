@@ -10,7 +10,9 @@ import {
 import "./analytics-active-installations";
 import "./analytics-average";
 import "./analytics-integrations";
-import "./analytics-versions";
+import "./analytics-core-versions";
+import "./analytics-os-boards";
+import "./analytics-os-versions";
 import "./analytics-header";
 import "./analytics-installation-types";
 import "./analytics-map";
@@ -72,18 +74,32 @@ export class AnalyticsElement extends LitElement {
               </p>
 
               <div class="half">
-                <analytics-versions
+                <analytics-core-versions
                   .currentData=${this._data.current}
                   .isMobile=${this._isMobile}
                   .isDarkMode=${this._isDarkMode}
                 >
-                </analytics-versions>
+                </analytics-core-versions>
                 <analytics-installation-types
                   .currentData=${this._data.current}
                   .isMobile=${this._isMobile}
                   .isDarkMode=${this._isDarkMode}
                 >
                 </analytics-installation-types>
+              </div>
+              <div class="half">
+                <analytics-os-versions
+                  .currentData=${this._data.current}
+                  .isMobile=${this._isMobile}
+                  .isDarkMode=${this._isDarkMode}
+                >
+                </analytics-os-versions>
+                <analytics-os-boards
+                  .currentData=${this._data.current}
+                  .isMobile=${this._isMobile}
+                  .isDarkMode=${this._isDarkMode}
+                >
+                </analytics-os-boards>
               </div>
             `
           : this._currentPage === "statistics"
@@ -153,8 +169,7 @@ export class AnalyticsElement extends LitElement {
       text-align: center;
     }
 
-    analytics-versions,
-    analytics-installation-types {
+    .half > * {
       flex: 1;
     }
 

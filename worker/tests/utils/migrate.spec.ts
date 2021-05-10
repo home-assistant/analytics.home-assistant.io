@@ -38,4 +38,12 @@ describe("migrateAnalyticsData", function () {
       SCHEMA_VERSION_ANALYTICS
     );
   });
+  it("migrate from lower than 2", function () {
+    expect(
+      migrateAnalyticsData({}).current.operating_system.versions
+    ).toBeDefined();
+    expect(
+      migrateAnalyticsData({}).current.operating_system.boards
+    ).toBeDefined();
+  });
 });

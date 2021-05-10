@@ -6,11 +6,11 @@ export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 850;
 
+export const SCHEMA_VERSION_QUEUE = 3;
+export const SCHEMA_VERSION_ANALYTICS = 2;
+
 export const BRANDS_DOMAINS_URL =
   "https://brands.home-assistant.io/domains.json";
-
-export const SCHEMA_VERSION_QUEUE = 2;
-export const SCHEMA_VERSION_ANALYTICS = 1;
 
 export enum UuidMetadataKey {
   ADDED = "a",
@@ -83,6 +83,10 @@ export interface QueueData {
     supervised: number;
     unknown: number;
   };
+  operating_system: {
+    boards: Record<string, number>;
+    versions: Record<string, number>;
+  };
   integrations: Record<string, number>;
   count_addons: number[];
   count_automations: number[];
@@ -124,6 +128,10 @@ export interface AnalyticsDataCurrent {
   reports_statistics: number;
   versions: Record<string, number>;
   active_installations: number;
+  operating_system: {
+    versions: Record<string, number>;
+    boards: Record<string, number>;
+  };
   installation_types: {
     os: number;
     container: number;
@@ -151,6 +159,7 @@ export interface IncomingPayload {
   country?: string;
   region?: string;
   custom_integrations?: { domain: string; version?: string | null }[];
+  operating_system?: { board: string; version?: string | null };
   installation_type: string;
   integration_count?: number;
   integrations?: string[];
@@ -183,6 +192,7 @@ export const createQueueData = (): QueueData => ({
   reports_statistics: 0,
   versions: {},
   countries: {},
+  operating_system: { boards: {}, versions: {} },
   installation_types: {
     os: 0,
     container: 0,
