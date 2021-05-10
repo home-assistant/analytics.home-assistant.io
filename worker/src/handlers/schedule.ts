@@ -236,16 +236,18 @@ async function processQueue(sentry: Toucan): Promise<void> {
     }
 
     sentry.addBreadcrumb({ message: "Store data" });
-    await KV.put(
-      `${KV_PREFIX_HISTORY}:${timestampString}`,
-      JSON.stringify(queue_data)
-    );
-    await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(storedAnalytics));
-    await KV.put(
-      KV_KEY_CUSTOM_INTEGRATIONS,
-      JSON.stringify(queue.data.custom_integrations)
-    );
-    await KV.put(KV_KEY_ADDONS, JSON.stringify(queue.data.addons));
+    await Promise.all([
+      KV.put(
+        `${KV_PREFIX_HISTORY}:${timestampString}`,
+        JSON.stringify(queue_data)
+      ),
+      KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(storedAnalytics)),
+      KV.put(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        JSON.stringify(queue.data.custom_integrations)
+      ),
+      KV.put(KV_KEY_ADDONS, JSON.stringify(queue.data.addons)),
+    ]);
 
     queue = createQueueDefaults();
     queue.process_complete = true;
