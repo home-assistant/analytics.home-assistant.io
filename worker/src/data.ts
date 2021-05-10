@@ -1,11 +1,16 @@
 export const KV_KEY_QUEUE = "queue";
 export const KV_KEY_CORE_ANALYTICS = "core_analytics";
+export const KV_KEY_CUSTOM_INTEGRATIONS = "custom_integrations";
+export const KV_KEY_ADDONS = "addons";
 export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 850;
 
 export const SCHEMA_VERSION_QUEUE = 3;
 export const SCHEMA_VERSION_ANALYTICS = 2;
+
+export const BRANDS_DOMAINS_URL =
+  "https://brands.home-assistant.io/domains.json";
 
 export enum UuidMetadataKey {
   ADDED = "a",
@@ -54,6 +59,19 @@ export interface ListEntry {
 }
 
 export interface QueueData {
+  addons: Record<
+    string,
+    {
+      total: number;
+      versions: Record<string, number>;
+      protected: number;
+      auto_update: 0;
+    }
+  >;
+  custom_integrations: Record<
+    string,
+    { total: number; versions: Record<string, number> }
+  >;
   reports_integrations: number;
   reports_statistics: number;
   versions: Record<string, number>;
@@ -168,6 +186,8 @@ export const createQueueDefaults = (): Queue => ({
 });
 
 export const createQueueData = (): QueueData => ({
+  addons: {},
+  custom_integrations: {},
   reports_integrations: 0,
   reports_statistics: 0,
   versions: {},

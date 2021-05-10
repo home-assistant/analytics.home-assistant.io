@@ -1,8 +1,19 @@
-#! /bin/sh
+#! /bin/bash
 # Build the site
+
+declare addons
+declare custom_integrations
+declare data
+declare integration_details
+
+declare addons_path="${PWD}/site/public/addons.json"
+declare custom_integrations_path="${PWD}/site/public/custom_integrations.json"
+declare data_path="${PWD}/site/public/data.json"
+declare integration_details_path="${PWD}/site/public/integration_details.json"
 
 # Stop on errors
 set -e
+
 
 cd "$(dirname "$0")/.."
 
@@ -14,21 +25,41 @@ if [ -n "$CF_KV_TOKEN" ]; then
   fi
 
   if [ "$BRANCH" = "main" ]; then
-    curl -sSLf "$CF_KV_URL" \
+    addons=$(curl -sSLf "$CF_KV_URL_CUSTOM_INTEGRATIONS" \
       -H "Authorization: Bearer $CF_KV_TOKEN" \
-      -H "Content-Type:application/json" | jq . > ./site/public/data.json
-    curl -sSLf https://www.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
+      -H "Content-Type:application/json")
+    custom_integrations=$(curl -sSLf "$CF_KV_URL_ADDONS" \
+      -H "Authorization: Bearer $CF_KV_TOKEN" \
+      -H "Content-Type:application/json")
+    data=$(curl -sSLf "$CF_KV_URL" \
+      -H "Authorization: Bearer $CF_KV_TOKEN" \
+      -H "Content-Type:application/json")
+    integration_details=$(curl -sSLf https://www.home-assistant.io/integrations.json)
   else
-    curl -sSLf "$CF_KV_URL_DEV" \
+    addons=$(curl -sSLf "$CF_KV_URL_ADDONS_DEV" \
       -H "Authorization: Bearer $CF_KV_TOKEN" \
-      -H "Content-Type:application/json" | jq . > ./site/public/data.json
-    curl -sSLf https://rc.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
+      -H "Content-Type:application/json")
+    custom_integrations=$(curl -sSLf "$CF_KV_URL_CUSTOM_INTEGRATIONS_DEV" \
+      -H "Authorization: Bearer $CF_KV_TOKEN" \
+      -H "Content-Type:application/json")
+    data=$(curl -sSLf "$CF_KV_URL_DEV" \
+      -H "Authorization: Bearer $CF_KV_TOKEN" \
+      -H "Content-Type:application/json")
+    integration_details=$(curl -sSLf https://rc.home-assistant.io/integrations.json)
   fi
 
 else
-  curl -sSLf https://dev--home-assistant-analytics.netlify.app/data.json | jq . > ./site/public/data.json
-  curl -sSLf https://rc.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
+  addons=$(curl -sSLf https://dev--home-assistant-analytics.netlify.app/addons.json)
+  custom_integrations=$(curl -sSLf https://dev--home-assistant-analytics.netlify.app/custom_integrations.json)
+  data=$(curl -sSLf https://dev--home-assistant-analytics.netlify.app/data.json)
+  integration_details=$(curl -sSLf https://rc.home-assistant.io/integrations.json)
 fi
+
+# Export to files
+jq -n "$input" --argjson input "$addons" > "$addons_path"
+jq -n "$input" --argjson input "$custom_integrations" > "$custom_integrations_path"
+jq -n "$input" --argjson input "$data" > "$data_path"
+jq -n "$input" --argjson input "$integration_details" > "$integration_details_path"
 
 
 if [ ! -d node_modules ]; then
