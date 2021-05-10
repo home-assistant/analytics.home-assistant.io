@@ -1,7 +1,9 @@
 import {
   createQueueData,
   createQueueDefaults,
+  KV_KEY_ADDONS,
   KV_KEY_CORE_ANALYTICS,
+  KV_KEY_CUSTOM_INTEGRATIONS,
   KV_KEY_QUEUE,
   ScheduledTask,
   SCHEMA_VERSION_ANALYTICS,
@@ -24,7 +26,13 @@ describe("schedule handler", function () {
   beforeEach(() => {
     MockSentry = MockedSentry();
     (global as any).KV = MockKV = MockedKV();
-    (global as any).fetch = MockFetch = jest.fn(async () => ({ ok: true }));
+    (global as any).fetch = MockFetch = jest.fn(async () => ({
+      ok: true,
+      json: jest.fn(async () => ({
+        core: ["core_valid"],
+        custom: ["custom_valid"],
+      })),
+    }));
     (global as any).NETLIFY_BUILD_HOOK = "";
   });
 
@@ -238,7 +246,13 @@ describe("schedule handler", function () {
           };
         }
 
-        return {};
+        return {
+          integrations: ["core_invalid", "core_valid"],
+          custom_integrations: [
+            { domain: "custom_invalid", version: "1.2.3" },
+            { domain: "custom_valid", version: "1.2.3" },
+          ],
+        };
       });
 
       await handleSchedule(event, MockSentry);
@@ -256,14 +270,23 @@ describe("schedule handler", function () {
       );
       expect(MockKV.put).toBeCalledWith(
         KV_KEY_CORE_ANALYTICS,
-        expect.any(String)
+        expect.stringContaining("core_valid")
+      );
+      expect(MockKV.put).toBeCalledWith(
+        KV_KEY_CORE_ANALYTICS,
+        expect.not.stringContaining("core_invalid")
+      );
+      expect(MockKV.put).toBeCalledWith(KV_KEY_ADDONS, expect.any(String));
+      expect(MockKV.put).toBeCalledWith(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        '{"custom_valid":{"total":500,"versions":{"1.2.3":500}}}'
       );
       expect(MockKV.put).toBeCalledWith(
         expect.stringContaining("history:"),
         expect.any(String)
       );
-      expect(MockFetch).toBeCalledTimes(1);
-      expect(MockKV.put).toBeCalledTimes(3);
+      expect(MockFetch).toBeCalledTimes(2);
+      expect(MockKV.put).toBeCalledTimes(5);
     });
 
     it("Wait for reset", async () => {
