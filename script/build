@@ -56,10 +56,10 @@ else
 fi
 
 # Export to files
-jq -n "$addons" > "$addons_path"
-jq -n "$custom_integrations" > "$custom_integrations_path"
-jq -n "$data" > "$data_path"
-jq -n "$integration_details" > "$integration_details_path"
+echo "$addons" | jq . > "$addons_path"
+echo "$custom_integrations" > "$custom_integrations_path"
+echo "$data" | jq . > "$data_path"
+echo "$integration_details" | jq . > "$integration_details_path"
 
 
 if [ ! -d node_modules ]; then
