@@ -13,8 +13,10 @@ const friendlyBoardName: Record<string, string> = {
   rpi: "Raspberry Pi",
   rpi0: "Raspberry Pi Zero",
   rpi2: "Raspberry Pi 2",
-  rpi3: "Raspberry Pi 3",
-  rpi4: "Raspberry Pi 4",
+  rpi3: "Raspberry Pi 3 (32-bit)",
+  "rpi3-64": "Raspberry Pi 3",
+  rpi4: "Raspberry Pi 4 (32-bit)",
+  "rpi4-64": "Raspberry Pi 4",
   tinker: "ASUS Tinker Board",
 };
 
@@ -43,7 +45,7 @@ export class AnalyticsOsBoards extends LitElement {
     );
 
     const rows = sortedBoards.map((board) => [
-      friendlyBoardName[board],
+      friendlyBoardName[board] || board,
       this.currentData!.operating_system.boards[board],
     ]);
 
