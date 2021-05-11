@@ -1,11 +1,16 @@
 export const KV_KEY_QUEUE = "queue";
 export const KV_KEY_CORE_ANALYTICS = "core_analytics";
+export const KV_KEY_CUSTOM_INTEGRATIONS = "custom_integrations";
+export const KV_KEY_ADDONS = "addons";
 export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 850;
 
-export const SCHEMA_VERSION_QUEUE = 1;
-export const SCHEMA_VERSION_ANALYTICS = 1;
+export const SCHEMA_VERSION_QUEUE = 3;
+export const SCHEMA_VERSION_ANALYTICS = 2;
+
+export const BRANDS_DOMAINS_URL =
+  "https://brands.home-assistant.io/domains.json";
 
 export enum UuidMetadataKey {
   ADDED = "a",
@@ -54,6 +59,19 @@ export interface ListEntry {
 }
 
 export interface QueueData {
+  addons: Record<
+    string,
+    {
+      total: number;
+      versions: Record<string, number>;
+      protected: number;
+      auto_update: 0;
+    }
+  >;
+  custom_integrations: Record<
+    string,
+    { total: number; versions: Record<string, number> }
+  >;
   reports_integrations: number;
   reports_statistics: number;
   versions: Record<string, number>;
@@ -64,6 +82,10 @@ export interface QueueData {
     core: number;
     supervised: number;
     unknown: number;
+  };
+  operating_system: {
+    boards: Record<string, number>;
+    versions: Record<string, number>;
   };
   integrations: Record<string, number>;
   count_addons: number[];
@@ -106,6 +128,10 @@ export interface AnalyticsDataCurrent {
   reports_statistics: number;
   versions: Record<string, number>;
   active_installations: number;
+  operating_system: {
+    versions: Record<string, number>;
+    boards: Record<string, number>;
+  };
   installation_types: {
     os: number;
     container: number;
@@ -133,6 +159,7 @@ export interface IncomingPayload {
   country?: string;
   region?: string;
   custom_integrations?: { domain: string; version?: string | null }[];
+  operating_system?: { board: string; version?: string | null };
   installation_type: string;
   integration_count?: number;
   integrations?: string[];
@@ -159,10 +186,13 @@ export const createQueueDefaults = (): Queue => ({
 });
 
 export const createQueueData = (): QueueData => ({
+  addons: {},
+  custom_integrations: {},
   reports_integrations: 0,
   reports_statistics: 0,
   versions: {},
   countries: {},
+  operating_system: { boards: {}, versions: {} },
   installation_types: {
     os: 0,
     container: 0,

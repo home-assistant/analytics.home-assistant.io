@@ -1,6 +1,14 @@
 import { css, customElement, html, LitElement, property } from "lit-element";
 import { AnalyticsDataCurrent } from "../../worker/src/data";
 
+const AVERAGE_METRICS = {
+  addons: "Add-ons",
+  automations: "Automations",
+  integrations: "Integrations",
+  states: "States",
+  users: "Users",
+};
+
 @customElement("analytics-average")
 export class AnalyticsAverage extends LitElement {
   @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
@@ -9,31 +17,21 @@ export class AnalyticsAverage extends LitElement {
     if (this.currentData === undefined) {
       return html``;
     }
-
-    const integrations = this.currentData.avg_integrations.toFixed(2);
-    const entities = this.currentData.avg_states.toFixed(2);
-    const automations = this.currentData.avg_automations.toFixed(2);
-    const users = this.currentData.avg_users.toFixed(2);
-
     return html`<div class="grid">
-        <div class="metric">
-          <span>Average integrations</span>
-          <span .title=${integrations}
-            >${Math.round(Number(integrations))}</span
-          >
-        </div>
-        <div class="metric">
-          <span>Average entities</span>
-          <span .title=${entities}>${Math.round(Number(entities))}</span>
-        </div>
-        <div class="metric">
-          <span>Average automations</span>
-          <span .title=${automations}>${Math.round(Number(automations))}</span>
-        </div>
-        <div class="metric">
-          <span>Average users</span>
-          <span .title=${users}>${Number(users)}</span>
-        </div>
+        ${Object.keys(this.currentData)
+          .filter((entry) => entry.startsWith("avg_"))
+          .sort((a, b) => a.localeCompare(b))
+          .map((entry) => {
+            const key = entry.slice(4);
+            const value = this.currentData[entry].toFixed(2);
+            const numericValue = Number(value);
+            return html`<div class="metric">
+              <span>Average ${AVERAGE_METRICS[key] || key}</span>
+              <span .title=${value}>
+                ${numericValue < 10 ? numericValue : Math.round(numericValue)}
+              </span>
+            </div>`;
+          })}
       </div>
       <div class="footer">
         ${this.currentData.reports_statistics || "Unkown"} of
@@ -45,8 +43,7 @@ export class AnalyticsAverage extends LitElement {
   static styles = css`
     .grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: 1;
+      grid-template-columns: repeat(3, 1fr);
       grid-gap: 16px;
       height: 100%;
       width: 100%;

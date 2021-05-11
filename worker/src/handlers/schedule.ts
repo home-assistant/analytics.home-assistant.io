@@ -20,6 +20,9 @@ import {
   UuidMetadataKey,
   AnalyticsData,
   generateUuidMetadata,
+  KV_KEY_ADDONS,
+  KV_KEY_CUSTOM_INTEGRATIONS,
+  BRANDS_DOMAINS_URL,
 } from "../data";
 import { average } from "../utils/average";
 import { migrateAnalyticsData } from "../utils/migrate";
@@ -180,12 +183,27 @@ async function processQueue(sentry: Toucan): Promise<void> {
     }
   }
 
+  sentry.addBreadcrumb({ message: "Fetching domain list from brands" });
+  const brandsDomainsResponse = await fetch(BRANDS_DOMAINS_URL);
+  if (!brandsDomainsResponse.ok) {
+    throw Error("Could not get domain list from brands");
+  }
+
+  const brandsDomainsJson: {
+    core: string[];
+    custom: string[];
+  } = await brandsDomainsResponse.json();
+
+  const brandsDomains: Set<string> = new Set(
+    brandsDomainsJson.custom.concat(brandsDomainsJson.core)
+  );
+
   async function handleEntry(entryKey: string) {
     let entryData;
     entryData = await KV.get<IncomingPayload>(entryKey, "json");
 
     if (entryData !== undefined && entryData !== null) {
-      queue.data = combineEntryData(queue.data, entryData);
+      queue.data = combineEntryData(queue.data, entryData, brandsDomains);
     }
   }
 
@@ -218,11 +236,19 @@ async function processQueue(sentry: Toucan): Promise<void> {
     }
 
     sentry.addBreadcrumb({ message: "Store data" });
-    await KV.put(
-      `${KV_PREFIX_HISTORY}:${timestampString}`,
-      JSON.stringify(queue_data)
-    );
-    await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(storedAnalytics));
+    await Promise.all([
+      KV.put(
+        `${KV_PREFIX_HISTORY}:${timestampString}`,
+        JSON.stringify(queue_data)
+      ),
+      KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(storedAnalytics)),
+      KV.put(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        JSON.stringify(queue.data.custom_integrations)
+      ),
+      KV.put(KV_KEY_ADDONS, JSON.stringify(queue.data.addons)),
+    ]);
+
     queue = createQueueDefaults();
     queue.process_complete = true;
   }
@@ -287,9 +313,12 @@ function combineMetadataEntryData(
 
 function combineEntryData(
   data: QueueData,
-  entrydata: IncomingPayload
+  entrydata: IncomingPayload,
+  brandsDomains: Set<string>
 ): QueueData {
   const reported_integrations = entrydata.integrations || [];
+  const reported_custom_integrations = entrydata.custom_integrations || [];
+  const reported_addons = entrydata.addons || [];
 
   data.versions[entrydata.version] = bumpValue(
     data.versions[entrydata.version]
@@ -299,6 +328,19 @@ function combineEntryData(
     data.countries[entrydata.country] = bumpValue(
       data.countries[entrydata.country]
     );
+  }
+
+  if (entrydata.operating_system) {
+    data.operating_system.boards[entrydata.operating_system.board] = bumpValue(
+      data.operating_system.boards[entrydata.operating_system.board]
+    );
+    if (entrydata.operating_system.version) {
+      data.operating_system.versions[
+        entrydata.operating_system.version
+      ] = bumpValue(
+        data.operating_system.versions[entrydata.operating_system.version]
+      );
+    }
   }
 
   if (entrydata.installation_type === "Home Assistant OS") {
@@ -328,9 +370,65 @@ function combineEntryData(
     data.count_users.push(entrydata.user_count);
   }
 
+  if (reported_addons.length) {
+    for (const addon of reported_addons) {
+      if (!data.addons[addon.slug]) {
+        data.addons[addon.slug] = {
+          total: 0,
+          versions: {},
+          protected: 0,
+          auto_update: 0,
+        };
+      }
+      data.addons[addon.slug].total++;
+
+      if (addon.auto_update) {
+        data.addons[addon.slug].auto_update++;
+      }
+
+      if (addon.protected) {
+        data.addons[addon.slug].protected++;
+      }
+
+      if (addon.version) {
+        data.addons[addon.slug].versions[addon.version] = bumpValue(
+          data.addons[addon.slug].versions[addon.version]
+        );
+      }
+    }
+  }
+
+  if (reported_custom_integrations.length) {
+    for (const custom_integration of reported_custom_integrations) {
+      if (!brandsDomains.has(custom_integration.domain)) {
+        continue;
+      }
+
+      if (!data.custom_integrations[custom_integration.domain]) {
+        data.custom_integrations[custom_integration.domain] = {
+          total: 0,
+          versions: {},
+        };
+      }
+      data.custom_integrations[custom_integration.domain].total++;
+      if (custom_integration.version) {
+        data.custom_integrations[custom_integration.domain].versions[
+          custom_integration.version
+        ] = bumpValue(
+          data.custom_integrations[custom_integration.domain].versions[
+            custom_integration.version
+          ]
+        );
+      }
+    }
+  }
+
   if (reported_integrations.length) {
     data.reports_integrations++;
     for (const integration of reported_integrations) {
+      if (!brandsDomains.has(integration)) {
+        continue;
+      }
       data.integrations[integration] = bumpValue(
         data.integrations[integration]
       );
@@ -357,6 +455,7 @@ const processQueueData = (data: QueueData) => {
     avg_addons: average(data.count_addons),
     avg_states: average(data.count_states),
     integrations: data.integrations,
+    operating_system: data.operating_system,
     reports_integrations: data.reports_integrations,
     reports_statistics: data.reports_statistics,
     versions: data.versions,

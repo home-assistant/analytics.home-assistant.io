@@ -8,12 +8,9 @@ import {
   nullable,
   number,
   object,
-  omit,
   optional,
-  pick,
   size,
   string,
-  Struct,
   StructError,
 } from "superstruct";
 import { IncomingPayload, InstallationTypes } from "../data";

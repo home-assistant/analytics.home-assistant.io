@@ -6,14 +6,23 @@ import {
   html,
   LitElement,
   property,
-  PropertyValues,
   query,
 } from "lit-element";
-import { AnalyticsDataCurrent } from "../../worker/src/data";
 
-@customElement("analytics-versions")
-export class AnalyticsVersions extends LitElement {
-  @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
+@customElement("analytics-chart")
+export class AnalyticsChart extends LitElement {
+  @property() public chartType!: string;
+
+  @property({ attribute: false }) public columns!: {
+    label: string;
+    type: string;
+  }[];
+
+  @property({ attribute: false }) public options: any;
+
+  @property({ attribute: false }) public rows:
+    | (string | number)[][]
+    | (number | Date)[][] = [];
 
   @property({ type: Boolean }) public isMobile = false;
 
@@ -21,46 +30,26 @@ export class AnalyticsVersions extends LitElement {
 
   @query("google-chart") private _chart?: GoogleChart;
 
-  protected firstUpdated(_changedProperties: PropertyValues) {
-    super.firstUpdated(_changedProperties);
-    window.addEventListener("resize", () => {
-      this._chart?.redraw();
-    });
+  public connectedCallback(): void {
+    super.connectedCallback();
+    window.addEventListener("resize", this._handleResize);
   }
 
+  public disconnectedCallback(): void {
+    super.disconnectedCallback();
+    window.removeEventListener("resize", this._handleResize);
+  }
+
+  private _handleResize = () => {
+    this._chart?.redraw();
+  };
+
   render() {
-    if (this.currentData === undefined) {
-      return html``;
-    }
-
-    const sortedVersions = Object.keys(this.currentData.versions).sort(
-      (a, b) => this.currentData!.versions[b] - this.currentData!.versions[a]
-    );
-
-    const rows = sortedVersions
-      .slice(0, 5)
-      .map((version) => [version, this.currentData!.versions[version]]);
-
-    rows.push([
-      "Other",
-      sortedVersions
-        .slice(5)
-        .reduce(
-          (accumulator, currentValue) =>
-            accumulator + this.currentData!.versions[currentValue],
-          0
-        ),
-    ]);
-
     return html`
       <google-chart
-        type="pie"
-        .cols=${[
-          { label: "Version", type: "string" },
-          { label: "Count", type: "number" },
-        ]}
+        .type=${this.chartType}
+        .cols=${this.columns}
         .options=${{
-          title: "Top 5 used versions",
           chartArea: {
             width: this.isMobile ? "100%" : "70%",
             height: this.isMobile ? "80%" : "70%",
@@ -77,8 +66,9 @@ export class AnalyticsVersions extends LitElement {
               color: this.isDarkMode ? "#e1e1e1" : "#212121",
             },
           },
+          ...this.options,
         }}
-        .rows=${rows}
+        .rows=${this.rows}
       >
       </google-chart>
     `;
@@ -102,6 +92,6 @@ export class AnalyticsVersions extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "analytics-versions": AnalyticsVersions;
+    "analytics-chart": AnalyticsChart;
   }
 }

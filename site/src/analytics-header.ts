@@ -1,9 +1,5 @@
 import "@google-web-components/google-chart";
 import { css, customElement, html, LitElement, property } from "lit-element";
-import "./analytics-active-installations";
-import "./analytics-average";
-import "./analytics-integrations";
-import "./analytics-versions";
 import { AnalyticsPages } from "./data";
 
 @customElement("analytics-header")

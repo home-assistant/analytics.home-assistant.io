@@ -1,15 +1,6 @@
-import "@google-web-components/google-chart";
-import { GoogleChart } from "@google-web-components/google-chart";
-import {
-  css,
-  customElement,
-  html,
-  LitElement,
-  property,
-  PropertyValues,
-  query,
-} from "lit-element";
+import { customElement, html, LitElement, property } from "lit-element";
 import { AnalyticsDataCurrent } from "../../worker/src/data";
+import "./components/analytics-chart";
 
 @customElement("analytics-installation-types")
 export class AnalyticsInstallationTypes extends LitElement {
@@ -18,15 +9,6 @@ export class AnalyticsInstallationTypes extends LitElement {
   @property({ type: Boolean }) public isMobile = false;
 
   @property({ type: Boolean }) public isDarkMode = false;
-
-  @query("google-chart") private _chart?: GoogleChart;
-
-  protected firstUpdated(_changedProperties: PropertyValues) {
-    super.firstUpdated(_changedProperties);
-    window.addEventListener("resize", () => {
-      this._chart?.redraw();
-    });
-  }
 
   render() {
     if (this.currentData === undefined) {
@@ -41,56 +23,28 @@ export class AnalyticsInstallationTypes extends LitElement {
     ];
 
     return html`
-      <google-chart
-        type="pie"
-        .cols=${[
+      <analytics-chart
+        chartType="pie"
+        .columns=${[
           { label: "Installation type", type: "string" },
           { label: "Count", type: "number" },
         ]}
+        .rows=${rows}
         .options=${{
           title: "Installation types",
-          chartArea: {
-            width: this.isMobile ? "100%" : "70%",
-            height: this.isMobile ? "80%" : "70%",
-          },
           slices: {
             0: { color: "#dc3912" },
             1: { color: "#ff9900" },
             2: { color: "#109618" },
             3: { color: "#990099" },
           },
-          backgroundColor: this.isDarkMode ? "#111111" : "#fafafa",
-          titleTextStyle: {
-            color: this.isDarkMode ? "#e1e1e1" : "#212121",
-          },
-          legend: {
-            position: this.isMobile ? "top" : "right",
-            alignment: "start",
-            textStyle: {
-              color: this.isDarkMode ? "#e1e1e1" : "#212121",
-            },
-          },
         }}
-        .rows=${rows}
+        .isDarkMode=${this.isDarkMode}
+        .isMobile=${this.isMobile}
       >
-      </google-chart>
+      </analytics-chart>
     `;
   }
-
-  static styles = css`
-    :host {
-      display: block;
-    }
-    google-chart {
-      height: 500px;
-      width: 100%;
-    }
-    @media only screen and (max-width: 1000px) and (min-width: 600px) {
-      google-chart {
-        height: 300px;
-      }
-    }
-  `;
 }
 
 declare global {
