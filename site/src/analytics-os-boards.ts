@@ -5,7 +5,7 @@ import "./components/analytics-chart";
 const friendlyBoardName: Record<string, string> = {
   "intel-nuc": "Intel NUC",
   "generic-x86-64": "Generic x86-64",
-  ova: "OVA",
+  ova: "Virtual Machine",
   "odroid-c2": "ODROID C2",
   "odroid-c4": "ODROID C4",
   "odroid-n2": "ODROID N2",
