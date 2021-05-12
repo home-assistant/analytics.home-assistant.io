@@ -23,6 +23,7 @@ import {
   KV_KEY_ADDONS,
   KV_KEY_CUSTOM_INTEGRATIONS,
   BRANDS_DOMAINS_URL,
+  VERSION_URL,
 } from "../data";
 import { average } from "../utils/average";
 import { migrateAnalyticsData } from "../utils/migrate";
@@ -183,9 +184,17 @@ async function processQueue(sentry: Toucan): Promise<void> {
     }
   }
 
-  sentry.addBreadcrumb({ message: "Fetching domain list from brands" });
-  const brandsDomainsResponse = await fetch(BRANDS_DOMAINS_URL);
+  sentry.addBreadcrumb({
+    message: "Fetching external data from brands and version",
+  });
+  const [brandsDomainsResponse, versionResponse] = await Promise.all([
+    fetch(BRANDS_DOMAINS_URL),
+    fetch(VERSION_URL),
+  ]);
   if (!brandsDomainsResponse.ok) {
+    throw Error("Could not get domain list from brands");
+  }
+  if (!versionResponse.ok) {
     throw Error("Could not get domain list from brands");
   }
 
@@ -194,16 +203,25 @@ async function processQueue(sentry: Toucan): Promise<void> {
     custom: string[];
   } = await brandsDomainsResponse.json();
 
+  const osBoardsJson = await versionResponse.json();
+
   const brandsDomains: Set<string> = new Set(
     brandsDomainsJson.custom.concat(brandsDomainsJson.core)
   );
+
+  const osBoards: Set<string> = new Set(Object.keys(osBoardsJson.hassos));
 
   async function handleEntry(entryKey: string) {
     let entryData;
     entryData = await KV.get<IncomingPayload>(entryKey, "json");
 
     if (entryData !== undefined && entryData !== null) {
-      queue.data = combineEntryData(queue.data, entryData, brandsDomains);
+      queue.data = combineEntryData(
+        queue.data,
+        entryData,
+        brandsDomains,
+        osBoards
+      );
     }
   }
 
@@ -314,7 +332,8 @@ function combineMetadataEntryData(
 function combineEntryData(
   data: QueueData,
   entrydata: IncomingPayload,
-  brandsDomains: Set<string>
+  brandsDomains: Set<string>,
+  osBoards: Set<string>
 ): QueueData {
   const reported_integrations = entrydata.integrations || [];
   const reported_custom_integrations = entrydata.custom_integrations || [];
@@ -331,15 +350,17 @@ function combineEntryData(
   }
 
   if (entrydata.operating_system) {
-    data.operating_system.boards[entrydata.operating_system.board] = bumpValue(
-      data.operating_system.boards[entrydata.operating_system.board]
-    );
-    if (entrydata.operating_system.version) {
-      data.operating_system.versions[
-        entrydata.operating_system.version
-      ] = bumpValue(
-        data.operating_system.versions[entrydata.operating_system.version]
-      );
+    if (osBoards.has(entrydata.operating_system.board)) {
+      data.operating_system.boards[entrydata.operating_system.board] =
+        bumpValue(
+          data.operating_system.boards[entrydata.operating_system.board]
+        );
+      if (entrydata.operating_system.version) {
+        data.operating_system.versions[entrydata.operating_system.version] =
+          bumpValue(
+            data.operating_system.versions[entrydata.operating_system.version]
+          );
+      }
     }
   }
 
