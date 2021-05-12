@@ -31,6 +31,7 @@ describe("schedule handler", function () {
       json: jest.fn(async () => ({
         core: ["core_valid"],
         custom: ["custom_valid"],
+        hassos: { rpi: "" },
       })),
     }));
     (global as any).NETLIFY_BUILD_HOOK = "";
@@ -252,6 +253,10 @@ describe("schedule handler", function () {
             { domain: "custom_invalid", version: "1.2.3" },
             { domain: "custom_valid", version: "1.2.3" },
           ],
+          operating_system: {
+            board: "invalid_board",
+            version: "1.2.3",
+          },
         };
       });
 
@@ -276,6 +281,10 @@ describe("schedule handler", function () {
         KV_KEY_CORE_ANALYTICS,
         expect.not.stringContaining("core_invalid")
       );
+      expect(MockKV.put).toBeCalledWith(
+        KV_KEY_CORE_ANALYTICS,
+        expect.not.stringContaining("invalid_board")
+      );
       expect(MockKV.put).toBeCalledWith(KV_KEY_ADDONS, expect.any(String));
       expect(MockKV.put).toBeCalledWith(
         KV_KEY_CUSTOM_INTEGRATIONS,
@@ -285,7 +294,7 @@ describe("schedule handler", function () {
         expect.stringContaining("history:"),
         expect.any(String)
       );
-      expect(MockFetch).toBeCalledTimes(2);
+      expect(MockFetch).toBeCalledTimes(3);
       expect(MockKV.put).toBeCalledTimes(5);
     });
 

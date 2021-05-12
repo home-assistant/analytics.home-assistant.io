@@ -12,6 +12,7 @@ const friendlyBoardName: Record<string, string> = {
   "odroid-xu4": "ODROID XU4",
   rpi: "Raspberry Pi",
   rpi0: "Raspberry Pi Zero",
+  "rpi0-w": "Raspberry Pi Zero W",
   rpi2: "Raspberry Pi 2",
   rpi3: "Raspberry Pi 3 (32-bit)",
   "rpi3-64": "Raspberry Pi 3",

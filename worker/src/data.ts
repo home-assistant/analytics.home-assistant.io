@@ -11,6 +11,7 @@ export const SCHEMA_VERSION_ANALYTICS = 2;
 
 export const BRANDS_DOMAINS_URL =
   "https://brands.home-assistant.io/domains.json";
+export const VERSION_URL = "https://version.home-assistant.io/dev.json";
 
 export enum UuidMetadataKey {
   ADDED = "a",
