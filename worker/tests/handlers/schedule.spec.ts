@@ -248,7 +248,7 @@ describe("schedule handler", function () {
         }
 
         return {
-          integrations: ["core_invalid", "core_valid"],
+          integrations: ["core_valid"],
           custom_integrations: [
             { domain: "custom_invalid", version: "1.2.3" },
             { domain: "custom_valid", version: "1.2.3" },
@@ -276,10 +276,6 @@ describe("schedule handler", function () {
       expect(MockKV.put).toBeCalledWith(
         KV_KEY_CORE_ANALYTICS,
         expect.stringContaining("core_valid")
-      );
-      expect(MockKV.put).toBeCalledWith(
-        KV_KEY_CORE_ANALYTICS,
-        expect.not.stringContaining("core_invalid")
       );
       expect(MockKV.put).toBeCalledWith(
         KV_KEY_CORE_ANALYTICS,
