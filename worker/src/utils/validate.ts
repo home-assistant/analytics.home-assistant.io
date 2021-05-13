@@ -22,9 +22,15 @@ class ValidationError extends Error {
   }
 }
 
-const is_ha_installation_type = define<string>("HA_INSTALLATION_TYPE", (
-  value
-) => is(value, string()) && value in InstallationTypes);
+const is_ha_installation_type = define<string>(
+  "HA_INSTALLATION_TYPE",
+  (value) => is(value, string()) && value in InstallationTypes
+);
+
+const integrations = define<Array<string>>(
+  "INTEGRATIONS",
+  (value) => is(value, array(string())) && value.length < 1000
+);
 
 const defaultFalse = coerce(boolean(), nullable(boolean()), (value) =>
   value === null ? false : value
@@ -54,7 +60,7 @@ export const IncomingPayloadStruct = object({
   ),
   installation_type: is_ha_installation_type,
   integration_count: optional(number()),
-  integrations: optional(array(string())),
+  integrations: optional(integrations),
   state_count: optional(number()),
   supervisor: optional(object({ supported: boolean(), healthy: boolean() })),
   operating_system: optional(
