@@ -187,8 +187,12 @@ export class AnalyticsIntegrations extends LitElement {
       </div>
       <div class="footer">
         ${this.currentData.reports_integrations || "Unkown"} of
-        ${this.currentData.extended_data_from} installations have chosen to
-        share their used integrations
+        ${this.currentData.extended_data_from}
+        (${+(
+          (100 * this.currentData.reports_integrations || 0) /
+          this.currentData.extended_data_from
+        ).toFixed(2)}%)
+        installations have chosen to share their used integrations
       </div>
     `;
   }
