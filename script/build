@@ -25,10 +25,10 @@ if [ -n "$CF_KV_TOKEN" ]; then
   fi
 
   if [ "$BRANCH" = "main" ]; then
-    addons=$(curl -sSLf "$CF_KV_URL_CUSTOM_INTEGRATIONS" \
+    addons=$(curl -sSLf "$CF_KV_URL_ADDONS" \
       -H "Authorization: Bearer $CF_KV_TOKEN" \
       -H "Content-Type:application/json")
-    custom_integrations=$(curl -sSLf "$CF_KV_URL_ADDONS" \
+    custom_integrations=$(curl -sSLf "$CF_KV_URL_CUSTOM_INTEGRATIONS" \
       -H "Authorization: Bearer $CF_KV_TOKEN" \
       -H "Content-Type:application/json")
     data=$(curl -sSLf "$CF_KV_URL" \
