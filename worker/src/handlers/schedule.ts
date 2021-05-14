@@ -447,9 +447,6 @@ function combineEntryData(
   if (reported_integrations.length) {
     data.reports_integrations++;
     for (const integration of reported_integrations) {
-      if (!brandsDomains.has(integration)) {
-        continue;
-      }
       data.integrations[integration] = bumpValue(
         data.integrations[integration]
       );

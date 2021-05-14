@@ -1,3 +1,4 @@
+import { string } from "superstruct";
 import { createIncomingPayload } from "../../src/utils/validate";
 
 describe("createIncomingPayload", function () {
@@ -40,6 +41,17 @@ describe("createIncomingPayload", function () {
       createIncomingPayload({ ...BASE_PAYLOAD, installation_type: "wrong" });
     }).toThrow(
       'At path: installation_type -- Expected a value of type `HA_INSTALLATION_TYPE`, but received: `"wrong"`'
+    );
+  });
+
+  it("Too many integrations", function () {
+    expect(() => {
+      createIncomingPayload({
+        ...BASE_PAYLOAD,
+        integrations: Array.from({ length: 1000 }, (_, i) => String(i)),
+      });
+    }).toThrow(
+      /At path: integrations -- Expected a value of type `INTEGRATIONS`/
     );
   });
 
