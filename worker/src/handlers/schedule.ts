@@ -393,6 +393,9 @@ function combineEntryData(
 
   if (reported_addons.length) {
     for (const addon of reported_addons) {
+      if (addon.slug.startsWith("local_")) {
+        continue;
+      }
       if (!data.addons[addon.slug]) {
         data.addons[addon.slug] = {
           total: 0,
