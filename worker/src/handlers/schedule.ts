@@ -364,6 +364,20 @@ function combineEntryData(
     }
   }
 
+  if (entrydata.supervisor) {
+    if (entrydata.supervisor.arch) {
+      data.supervisor.arch[entrydata.supervisor.arch] = bumpValue(
+        data.supervisor.arch[entrydata.supervisor.arch]
+      );
+    }
+    if (!entrydata.supervisor.supported) {
+      data.supervisor.unsupported++;
+    }
+    if (!entrydata.supervisor.healthy) {
+      data.supervisor.unhealthy++;
+    }
+  }
+
   if (entrydata.installation_type === "Home Assistant OS") {
     data.installation_types.os++;
   } else if (entrydata.installation_type === "Home Assistant Container") {
@@ -477,6 +491,7 @@ const processQueueData = (data: QueueData) => {
     avg_states: average(data.count_states),
     integrations: data.integrations,
     operating_system: data.operating_system,
+    supervisor: data.supervisor,
     reports_integrations: data.reports_integrations,
     reports_statistics: data.reports_statistics,
     versions: data.versions,

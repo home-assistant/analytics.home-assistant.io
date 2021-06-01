@@ -63,7 +63,7 @@ describe("createIncomingPayload", function () {
   });
 
   it("Valid full payload", function () {
-    const payload = createIncomingPayload({
+    const payload = {
       ...BASE_PAYLOAD,
       addon_count: 1,
       addons: [ADDON],
@@ -75,12 +75,20 @@ describe("createIncomingPayload", function () {
       operating_system: { board: "blue", version: "123" },
       region: "XX",
       state_count: 1,
-      supervisor: { healthy: false, supported: true },
+      supervisor: { healthy: false, supported: true, arch: "amd64" },
       user_count: 1,
+    };
+    const fullPayload = createIncomingPayload(payload);
+    expect(fullPayload.uuid).toBe(BASE_PAYLOAD.uuid);
+    expect(fullPayload.installation_type).toBe(BASE_PAYLOAD.installation_type);
+    expect(fullPayload.version).toBe(BASE_PAYLOAD.version);
+
+    const payloadWithoutArch = createIncomingPayload({
+      ...payload,
+      supervisor: { healthy: false, supported: true },
     });
-    expect(payload.uuid).toBe(BASE_PAYLOAD.uuid);
-    expect(payload.installation_type).toBe(BASE_PAYLOAD.installation_type);
-    expect(payload.version).toBe(BASE_PAYLOAD.version);
+
+    expect(payloadWithoutArch.supervisor.arch).not.toBeDefined();
   });
 
   it("Default true", function () {
