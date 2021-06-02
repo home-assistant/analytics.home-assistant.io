@@ -62,7 +62,13 @@ export const IncomingPayloadStruct = object({
   integration_count: optional(number()),
   integrations: optional(integrations),
   state_count: optional(number()),
-  supervisor: optional(object({ supported: boolean(), healthy: boolean() })),
+  supervisor: optional(
+    object({
+      supported: boolean(),
+      healthy: boolean(),
+      arch: optional(string()),
+    })
+  ),
   operating_system: optional(
     object({ board: string(), version: optional(nullable(string())) })
   ),
