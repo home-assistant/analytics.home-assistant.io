@@ -58,7 +58,7 @@ export class AnalyticsReleases extends LitElement {
           { label: "Count", type: "number" },
         ]}
         .rows=${rows}
-        .options=${{ title: "Last 5 releases" }}
+        .options=${{ title: "Last releases" }}
         .isDarkMode=${this.isDarkMode}
         .isMobile=${this.isMobile}
       >
