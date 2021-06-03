@@ -11,6 +11,7 @@ import "./analytics-active-installations";
 import "./analytics-average";
 import "./analytics-integrations";
 import "./analytics-core-versions";
+import "./analytics-releases";
 import "./analytics-os-boards";
 import "./analytics-os-versions";
 import "./analytics-header";
@@ -80,20 +81,28 @@ export class AnalyticsElement extends LitElement {
                   .isDarkMode=${this._isDarkMode}
                 >
                 </analytics-core-versions>
+                <analytics-releases
+                  .currentData=${this._data.current}
+                  .isMobile=${this._isMobile}
+                  .isDarkMode=${this._isDarkMode}
+                >
+                </analytics-releases>
+              </div>
+              <div class="half">
                 <analytics-installation-types
                   .currentData=${this._data.current}
                   .isMobile=${this._isMobile}
                   .isDarkMode=${this._isDarkMode}
                 >
                 </analytics-installation-types>
-              </div>
-              <div class="half">
                 <analytics-os-versions
                   .currentData=${this._data.current}
                   .isMobile=${this._isMobile}
                   .isDarkMode=${this._isDarkMode}
                 >
                 </analytics-os-versions>
+              </div>
+              <div class="half">
                 <analytics-os-boards
                   .currentData=${this._data.current}
                   .isMobile=${this._isMobile}
