@@ -18,7 +18,6 @@ export class AnalyticsReleases extends LitElement {
     const releases = Object();
 
     Object.keys(this.currentData.versions)
-      .filter((key) => key.split(".").length === 3)
       .forEach((version) => {
         const key: string = version.split(".").slice(0, 2).join(".");
         releases[key] =
