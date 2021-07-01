@@ -118,6 +118,7 @@ export interface AnalyticsDataHistory {
     supervised: number;
     unknown: number;
   };
+  versions?: Record<string, number>;
 }
 
 export interface AnalyticsDataCurrent {
