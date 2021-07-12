@@ -125,7 +125,6 @@ async function updateHistory(sentry: Toucan): Promise<void> {
     data.installation_types.os +
     data.installation_types.supervised +
     data.installation_types.unknown;
-  const grouped_versions = groupVersions(data.versions);
 
   analyticsData.current.installation_types = data.installation_types;
   analyticsData.current.active_installations = active_installations;
@@ -135,7 +134,7 @@ async function updateHistory(sentry: Toucan): Promise<void> {
     timestamp: timestampString,
     active_installations,
     installation_types: data.installation_types,
-    versions: grouped_versions,
+    versions: groupVersions(data.versions),
   });
 
   sentry.addBreadcrumb({ message: "Trigger Netlify build" });
