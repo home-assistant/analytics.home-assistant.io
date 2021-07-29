@@ -27,6 +27,9 @@ export class AnalyticsVersionHistory extends LitElement {
 
     const versionHistoryData = this.historyData
       .filter((data) => data.versions !== undefined);
+    if (versionHistoryData.length < 2) {
+      return html``;
+    }
 
     const allVersions: Set<string> = new Set();
     versionHistoryData.forEach((entry) => {
@@ -34,10 +37,6 @@ export class AnalyticsVersionHistory extends LitElement {
         Object.keys(entry.versions).forEach((version) => allVersions.add(version));
       }
     });
-
-    if (versionHistoryData.length < 2) {
-      return html``;
-    }
 
     const versionsOrdered: string[] = Array.from(allVersions)
       .sort((a, b) => {
