@@ -26,6 +26,7 @@ import {
   VERSION_URL,
 } from "../data";
 import { average } from "../utils/average";
+import { groupVersions } from "../utils/group-versions";
 import { migrateAnalyticsData } from "../utils/migrate";
 
 export async function handleSchedule(
@@ -133,6 +134,7 @@ async function updateHistory(sentry: Toucan): Promise<void> {
     timestamp: timestampString,
     active_installations,
     installation_types: data.installation_types,
+    versions: groupVersions(data.versions),
   });
 
   sentry.addBreadcrumb({ message: "Trigger Netlify build" });
