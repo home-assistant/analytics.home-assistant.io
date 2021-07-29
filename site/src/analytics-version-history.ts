@@ -32,6 +32,10 @@ export class AnalyticsVersionHistory extends LitElement {
       }
     });
 
+    if (allVersions.size === 0) {
+      return html``;
+    }
+
     const versionsOrdered: string[] = Array.from(allVersions)
       .sort((a, b) => {
         const mainVersionCmp =
