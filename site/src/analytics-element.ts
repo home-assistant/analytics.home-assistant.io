@@ -16,6 +16,7 @@ import "./analytics-os-versions";
 import "./analytics-header";
 import "./analytics-installation-types";
 import "./analytics-map";
+import "./analytics-version-history";
 import { fetchData } from "./data";
 import { migrateAnalyticsData } from "../../worker/src/utils/migrate";
 import { AnalyticsData } from "../../worker/src/data";
@@ -72,6 +73,13 @@ export class AnalyticsElement extends LitElement {
                   See the differences between our installation types here
                 </a>
               </p>
+
+              <analytics-version-history
+                .historyData=${this._data.history}
+                .isMobile=${this._isMobile}
+                .isDarkMode=${this._isDarkMode}
+              >
+              </analytics-version-history>
 
               <div class="half">
                 <analytics-releases
