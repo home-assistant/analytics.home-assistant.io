@@ -32,7 +32,7 @@ export class AnalyticsVersionHistory extends LitElement {
       }
     });
 
-    if (allVersions.size === 0) {
+    if (allVersions.size < 2) {
       return html``;
     }
 
