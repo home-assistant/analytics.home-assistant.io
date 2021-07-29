@@ -25,14 +25,17 @@ export class AnalyticsVersionHistory extends LitElement {
       return html``;
     }
 
+    const versionHistoryData = this.historyData
+      .filter((data) => data.versions !== undefined);
+
     const allVersions: Set<string> = new Set();
-    this.historyData.forEach((entry) => {
+    versionHistoryData.forEach((entry) => {
       if (entry.versions) {
         Object.keys(entry.versions).forEach((version) => allVersions.add(version));
       }
     });
 
-    if (allVersions.size < 2) {
+    if (versionHistoryData.length < 2) {
       return html``;
     }
 
@@ -46,8 +49,7 @@ export class AnalyticsVersionHistory extends LitElement {
         return parseInt(a.split(".")[1]) - parseInt(b.split(".")[1]);
       });
 
-    const rows = this.historyData
-      .filter((data) => data.versions !== undefined)
+    const rows = versionHistoryData
       .map((entry) => {
         const result = [];
         result.push(new Date(Number(entry.timestamp)));
