@@ -41,11 +41,11 @@ export class AnalyticsVersionHistory extends LitElement {
     const versionsOrdered: string[] = Array.from(allVersions)
       .sort((a, b) => {
         const mainVersionCmp =
-          parseInt(a.split(".")[0]) - parseInt(b.split(".")[0]);
+          parseInt(b.split(".")[0]) - parseInt(a.split(".")[0]);
         if (mainVersionCmp !== 0) {
           return mainVersionCmp;
         }
-        return parseInt(a.split(".")[1]) - parseInt(b.split(".")[1]);
+        return parseInt(b.split(".")[1]) - parseInt(a.split(".")[1]);
       });
 
     const rows = versionHistoryData
