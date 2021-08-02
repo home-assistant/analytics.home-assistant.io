@@ -75,6 +75,7 @@ describe("createIncomingPayload", function () {
       operating_system: { board: "blue", version: "123" },
       region: "XX",
       state_count: 1,
+      energy: { configured: true },
       supervisor: { healthy: false, supported: true, arch: "amd64" },
       user_count: 1,
     };
@@ -82,6 +83,7 @@ describe("createIncomingPayload", function () {
     expect(fullPayload.uuid).toBe(BASE_PAYLOAD.uuid);
     expect(fullPayload.installation_type).toBe(BASE_PAYLOAD.installation_type);
     expect(fullPayload.version).toBe(BASE_PAYLOAD.version);
+    expect(fullPayload.energy.configured).toBeTruthy();
 
     const payloadWithoutArch = createIncomingPayload({
       ...payload,

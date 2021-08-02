@@ -472,6 +472,10 @@ function combineEntryData(
     }
   }
 
+  if (entrydata.energy && entrydata.energy.configured) {
+    data.energy.count_configured++;
+  }
+
   return data;
 }
 
