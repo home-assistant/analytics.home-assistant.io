@@ -501,5 +501,8 @@ const processQueueData = (data: QueueData) => {
     reports_integrations: data.reports_integrations,
     reports_statistics: data.reports_statistics,
     versions: data.versions,
+    energy: {
+      count_configured: data.energy.count_configured,
+    },
   };
 };
