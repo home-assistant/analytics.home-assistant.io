@@ -72,6 +72,7 @@ export const IncomingPayloadStruct = object({
   operating_system: optional(
     object({ board: string(), version: optional(nullable(string())) })
   ),
+  energy: optional(object({ configured: boolean() })),
   user_count: optional(number()),
   uuid: size(string(), 32, 32),
   version: size(string(), 7, 22),
