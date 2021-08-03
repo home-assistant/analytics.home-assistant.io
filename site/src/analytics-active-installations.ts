@@ -67,12 +67,18 @@ export class AnalyticsActiveInstallations extends LitElement {
             titleTextStyle: {
               color: this.isDarkMode ? "#e1e1e1" : "#212121",
             },
+            gridlines: {
+              color: this.isDarkMode ? "#444444" : undefined,
+            },
           },
           vAxis: {
             title: "Active installations",
             logScale: this._logScale,
             titleTextStyle: {
               color: this.isDarkMode ? "#e1e1e1" : "#212121",
+            },
+            gridlines: {
+              color: this.isDarkMode ? "#444444" : undefined,
             },
           },
         }}

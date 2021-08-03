@@ -25,8 +25,9 @@ export class AnalyticsVersionHistory extends LitElement {
       return html``;
     }
 
-    const versionHistoryData = this.historyData
-      .filter((data) => data.versions !== undefined);
+    const versionHistoryData = this.historyData.filter(
+      (data) => data.versions !== undefined
+    );
     if (versionHistoryData.length < 2) {
       return html``;
     }
@@ -34,34 +35,34 @@ export class AnalyticsVersionHistory extends LitElement {
     const allVersions: Set<string> = new Set();
     versionHistoryData.forEach((entry) => {
       if (entry.versions) {
-        Object.keys(entry.versions).forEach((version) => allVersions.add(version));
+        Object.keys(entry.versions).forEach((version) =>
+          allVersions.add(version)
+        );
       }
     });
 
-    const versionsOrdered: string[] = Array.from(allVersions)
-      .sort((a, b) => {
-        const mainVersionCmp =
-          parseInt(b.split(".")[0]) - parseInt(a.split(".")[0]);
-        if (mainVersionCmp !== 0) {
-          return mainVersionCmp;
-        }
-        return parseInt(b.split(".")[1]) - parseInt(a.split(".")[1]);
-      });
+    const versionsOrdered: string[] = Array.from(allVersions).sort((a, b) => {
+      const mainVersionCmp =
+        parseInt(b.split(".")[0]) - parseInt(a.split(".")[0]);
+      if (mainVersionCmp !== 0) {
+        return mainVersionCmp;
+      }
+      return parseInt(b.split(".")[1]) - parseInt(a.split(".")[1]);
+    });
 
-    const rows = versionHistoryData
-      .map((entry) => {
-        const result = [];
-        result.push(new Date(Number(entry.timestamp)));
-        versionsOrdered.forEach((version) => {
-          // @ts-ignore: undefined version entries already filtered
-          result.push(entry.versions[version] || 0);
-        });
-        return result
+    const rows = versionHistoryData.map((entry) => {
+      const result = [];
+      result.push(new Date(Number(entry.timestamp)));
+      versionsOrdered.forEach((version) => {
+        // @ts-ignore: undefined version entries already filtered
+        result.push(entry.versions[version] || 0);
       });
+      return result;
+    });
 
     const columns = [{ label: "Date", type: "date" }];
     versionsOrdered.forEach((version) => {
-      columns.push({ "label": version, type: "number" });
+      columns.push({ label: version, type: "number" });
     });
 
     return html`
@@ -81,12 +82,18 @@ export class AnalyticsVersionHistory extends LitElement {
             titleTextStyle: {
               color: this.isDarkMode ? "#e1e1e1" : "#212121",
             },
+            gridlines: {
+              color: this.isDarkMode ? "#444444" : undefined,
+            },
           },
           vAxis: {
             title: "Active installations",
             logScale: this._logScale,
             titleTextStyle: {
               color: this.isDarkMode ? "#e1e1e1" : "#212121",
+            },
+            gridlines: {
+              color: this.isDarkMode ? "#444444" : undefined,
             },
           },
         }}
