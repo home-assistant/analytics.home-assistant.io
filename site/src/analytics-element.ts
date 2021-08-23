@@ -146,7 +146,7 @@ export class AnalyticsElement extends LitElement {
 
   private _pageChanged() {
     this._currentPage =
-      window.location.hash.replace("#", "") || "installations";
+      window.location.hash.replace("#", "").split("?")[0] || "installations";
   }
 
   static styles = css`

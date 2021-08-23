@@ -52,6 +52,9 @@ export class AnalyticsIntegrations extends LitElement {
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
 
+    const query = new URLSearchParams(window.location.hash.split("?")[1]);
+    this._filter = query.get("search")?.toLowerCase() || "";
+
     this.getData();
   }
 
