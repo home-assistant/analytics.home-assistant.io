@@ -11,14 +11,12 @@ export class AnalyticsHeader extends LitElement {
       <div class="pages">
         ${AnalyticsPages.map(
           (page) =>
-            html`<a href="/#${page}">
-              <div
-                .page=${page}
-                class="page"
-                ?selected=${page === this.currentPage}
-              >
-                ${page}
-              </div>
+            html`<a
+              class="page"
+              href="/#${page}"
+              ?selected=${page === this.currentPage}
+            >
+              ${page}
             </a>`
         )}
       </div>`;
@@ -35,10 +33,6 @@ export class AnalyticsHeader extends LitElement {
       padding: 0 16px;
       margin: 0;
     }
-    a {
-      text-decoration: none;
-      color: var(--primary-color);
-    }
     .pages {
       display: flex;
     }
@@ -46,6 +40,7 @@ export class AnalyticsHeader extends LitElement {
       cursor: pointer;
       color: var(--primary-color);
       text-transform: uppercase;
+      text-decoration: none;
       display: flex;
       align-items: flex-end;
       line-height: 40px;
