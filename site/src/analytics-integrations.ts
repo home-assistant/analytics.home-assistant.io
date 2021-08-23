@@ -47,7 +47,7 @@ export class AnalyticsIntegrations extends LitElement {
 
   @internalProperty() private _currentTableSize = 30;
   @internalProperty() private _currentTablePage = 0;
-  @internalProperty() private _showDefaultAndInternal = false;
+  @internalProperty() private _showDefaultAndInternal = true;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
@@ -143,11 +143,14 @@ export class AnalyticsIntegrations extends LitElement {
                 </a>
               </td>
               <td class="installations">
-                ${entry.installations}
-                (${+(
-                  (100 * entry.installations) /
-                  this.currentData!.reports_integrations
-                ).toFixed(1)}%)
+                <span>${entry.installations}</span>
+                <span
+                  >(${(
+                    (100 * entry.installations) /
+                    this.currentData!.reports_integrations
+                  ).toFixed(1)}
+                  %)
+                </span>
               </td>
             </tr>
           `
