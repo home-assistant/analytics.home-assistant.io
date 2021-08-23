@@ -142,11 +142,14 @@ export class AnalyticsIntegrations extends LitElement {
                 </a>
               </td>
               <td class="installations">
-                ${entry.installations}
-                (${+(
-                  (100 * entry.installations) /
-                  this.currentData!.reports_integrations
-                ).toFixed(1)}%)
+                <span>${entry.installations}</span>
+                <span
+                  >(${(
+                    (100 * entry.installations) /
+                    this.currentData!.reports_integrations
+                  ).toFixed(1)}
+                  %)
+                </span>
               </td>
             </tr>
           `
