@@ -23,7 +23,6 @@ import { AnalyticsDataCurrent } from "../../worker/src/data";
 
 // Default non internal domains
 const DEFAULT_DOMAINS: string[] = [
-  "alexa",
   "cloud",
   "google_translate",
   "met",
