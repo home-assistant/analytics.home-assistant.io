@@ -36,6 +36,8 @@ export class AnalyticsIntegrations extends LitElement {
 
   @property({ type: Boolean }) public isMobile = false;
 
+  @property() public domain: string | null = null;
+
   @internalProperty() private _filter: string = "";
 
   @internalProperty() private _integrationDetails: Record<
@@ -52,8 +54,8 @@ export class AnalyticsIntegrations extends LitElement {
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
 
-    const query = new URLSearchParams(window.location.search);
-    this._filter = query.get("search")?.toLowerCase() || "";
+    this._filter = this.domain || "";
+
     this.getData().then(() => {
       if (
         this._filter !== "" &&
@@ -218,7 +220,10 @@ export class AnalyticsIntegrations extends LitElement {
   private _clearFilter() {
     this._currentTablePage = 0;
     this._filter = "";
-    window.location.search = "";
+    if (this.domain) {
+      this.domain = null;
+      window.location.search = "";
+    }
   }
 
   private _toggleDefaultAndInternal(ev: CustomEvent) {
