@@ -7,7 +7,7 @@ on:
       - dev
 
 env:
-  NODE_VERSION: "14.2.0"
+  NODE_VERSION: "14.17.5"
 
 jobs:
   worker:
