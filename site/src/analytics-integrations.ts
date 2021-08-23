@@ -23,7 +23,6 @@ import { AnalyticsDataCurrent } from "../../worker/src/data";
 
 // Default non internal domains
 const DEFAULT_DOMAINS: string[] = [
-  "alexa",
   "cloud",
   "google_translate",
   "met",
@@ -35,6 +34,8 @@ export class AnalyticsIntegrations extends LitElement {
   @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
 
   @property({ type: Boolean }) public isMobile = false;
+
+  @property() public domain: string | null = null;
 
   @internalProperty() private _filter: string = "";
 
@@ -52,7 +53,17 @@ export class AnalyticsIntegrations extends LitElement {
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
 
-    this.getData();
+    this._filter = this.domain || "";
+
+    this.getData().then(() => {
+      if (
+        this._filter !== "" &&
+        (DEFAULT_DOMAINS.includes(this._filter) ||
+          this._integrationDetails[this._filter].quality_scale === "internal")
+      ) {
+        this._showDefaultAndInternal = true;
+      }
+    });
   }
 
   render() {
@@ -114,7 +125,10 @@ export class AnalyticsIntegrations extends LitElement {
           : ""}
       </div>
       <mwc-formfield label="Show default and internal integrations">
-        <mwc-checkbox @change=${this._toggleDefaultAndInternal}></mwc-checkbox>
+        <mwc-checkbox
+          .checked=${this._showDefaultAndInternal}
+          @change=${this._toggleDefaultAndInternal}
+        ></mwc-checkbox>
       </mwc-formfield>
 
       <table>
@@ -143,11 +157,14 @@ export class AnalyticsIntegrations extends LitElement {
                 </a>
               </td>
               <td class="installations">
-                ${entry.installations}
-                (${+(
-                  (100 * entry.installations) /
-                  this.currentData!.reports_integrations
-                ).toFixed(1)}%)
+                <span>${entry.installations}</span>
+                <span
+                  >(${(
+                    (100 * entry.installations) /
+                    this.currentData!.reports_integrations
+                  ).toFixed(1)}
+                  %)
+                </span>
               </td>
             </tr>
           `
@@ -205,6 +222,10 @@ export class AnalyticsIntegrations extends LitElement {
   private _clearFilter() {
     this._currentTablePage = 0;
     this._filter = "";
+    if (this.domain) {
+      this.domain = null;
+      window.location.search = "";
+    }
   }
 
   private _toggleDefaultAndInternal(ev: CustomEvent) {

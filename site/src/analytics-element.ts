@@ -54,6 +54,8 @@ export class AnalyticsElement extends LitElement {
       return html`Loading…`;
     }
 
+    const query = new URLSearchParams(window.location.search);
+
     return html`
       <analytics-header .currentPage=${this._currentPage}> </analytics-header>
       <div class="content">
@@ -118,6 +120,7 @@ export class AnalyticsElement extends LitElement {
           ? html`<analytics-integrations
               .currentData=${this._data.current}
               .isMobile=${this._isMobile}
+              .domain=${query.get("domain")}
             >
             </analytics-integrations>`
           : ""}
