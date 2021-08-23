@@ -47,7 +47,7 @@ export class AnalyticsIntegrations extends LitElement {
 
   @internalProperty() private _currentTableSize = 30;
   @internalProperty() private _currentTablePage = 0;
-  @internalProperty() private _showDefaultAndInternal = true;
+  @internalProperty() private _showDefaultAndInternal = false;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
