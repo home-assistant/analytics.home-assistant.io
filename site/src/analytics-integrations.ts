@@ -52,10 +52,17 @@ export class AnalyticsIntegrations extends LitElement {
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
 
-    const query = new URLSearchParams(window.location.hash.split("?")[1]);
+    const query = new URLSearchParams(window.location.search);
     this._filter = query.get("search")?.toLowerCase() || "";
-
-    this.getData();
+    this.getData().then(() => {
+      if (
+        this._filter !== "" &&
+        (DEFAULT_DOMAINS.includes(this._filter) ||
+          this._integrationDetails[this._filter].quality_scale === "internal")
+      ) {
+        this._showDefaultAndInternal = true;
+      }
+    });
   }
 
   render() {
@@ -117,7 +124,10 @@ export class AnalyticsIntegrations extends LitElement {
           : ""}
       </div>
       <mwc-formfield label="Show default and internal integrations">
-        <mwc-checkbox @change=${this._toggleDefaultAndInternal}></mwc-checkbox>
+        <mwc-checkbox
+          .checked=${this._showDefaultAndInternal}
+          @change=${this._toggleDefaultAndInternal}
+        ></mwc-checkbox>
       </mwc-formfield>
 
       <table>
@@ -208,6 +218,7 @@ export class AnalyticsIntegrations extends LitElement {
   private _clearFilter() {
     this._currentTablePage = 0;
     this._filter = "";
+    window.location.search = "";
   }
 
   private _toggleDefaultAndInternal(ev: CustomEvent) {
