@@ -5,7 +5,7 @@
     "@material/mwc-formfield": "^0.22.1",
     "@material/mwc-icon-button": "^0.22.1",
     "@material/mwc-list": "^0.22.1",
-    "@material/mwc-select": "^0.22.1",
+    "@material/mwc-select": "^0.23.0",
     "@material/mwc-textfield": "^0.22.1",
     "@mdi/font": "^6.1.95",
     "@mdi/js": "^6.1.95",
