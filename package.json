@@ -3,7 +3,7 @@
     "@google-web-components/google-chart": "^4.0.2",
     "@material/mwc-checkbox": "^0.22.1",
     "@material/mwc-formfield": "^0.22.1",
-    "@material/mwc-icon-button": "^0.22.1",
+    "@material/mwc-icon-button": "^0.23.0",
     "@material/mwc-list": "^0.22.1",
     "@material/mwc-select": "^0.22.1",
     "@material/mwc-textfield": "^0.22.1",
