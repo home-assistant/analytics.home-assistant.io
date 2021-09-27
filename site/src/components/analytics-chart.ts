@@ -1,13 +1,6 @@
 import "@google-web-components/google-chart";
 import { GoogleChart } from "@google-web-components/google-chart";
-import {
-  css,
-  customElement,
-  html,
-  LitElement,
-  property,
-  query,
-} from "lit-element";
+import { css, customElement, html, LitElement, property, query } from "lit";
 
 @customElement("analytics-chart")
 export class AnalyticsChart extends LitElement {

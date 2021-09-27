@@ -1,6 +1,7 @@
 import svgMap from "svgmap";
 import "svgmap/dist/svgMap.min.css";
-import { customElement, UpdatingElement, property } from "lit-element";
+import { UpdatingElement } from "lit";
+import { customElement, property } from "lit/decorators.js";
 import { AnalyticsDataCurrent } from "../../worker/src/data";
 
 @customElement("analytics-map")

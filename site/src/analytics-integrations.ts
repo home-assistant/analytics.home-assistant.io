@@ -5,15 +5,8 @@ import "@material/mwc-textfield";
 import "@material/mwc-list/mwc-list-item";
 import "@material/mwc-select";
 import { mdiChevronLeft, mdiChevronRight, mdiClose } from "@mdi/js";
-import {
-  css,
-  customElement,
-  html,
-  internalProperty,
-  LitElement,
-  property,
-  PropertyValues,
-} from "lit-element";
+import { css, html, LitElement, PropertyValues } from "lit";
+import { customElement, state, property } from "lit/decorators.js";
 import {
   fetchIntegrationDetails,
   IntegrationData,
@@ -37,18 +30,15 @@ export class AnalyticsIntegrations extends LitElement {
 
   @property() public domain: string | null = null;
 
-  @internalProperty() private _filter: string = "";
+  @state() private _filter: string = "";
 
-  @internalProperty() private _integrationDetails: Record<
-    string,
-    IntegrationDetails
-  > = {};
+  @state() private _integrationDetails: Record<string, IntegrationDetails> = {};
 
-  @internalProperty() private _integrations?: IntegrationData[];
+  @state() private _integrations?: IntegrationData[];
 
-  @internalProperty() private _currentTableSize = 30;
-  @internalProperty() private _currentTablePage = 0;
-  @internalProperty() private _showDefaultAndInternal = false;
+  @state() private _currentTableSize = 30;
+  @state() private _currentTablePage = 0;
+  @state() private _showDefaultAndInternal = false;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
