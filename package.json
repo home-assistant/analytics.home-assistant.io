@@ -10,7 +10,7 @@
     "@material/mwc-textfield": "^0.25.1",
     "@mdi/font": "^6.1.95",
     "@mdi/js": "^6.1.95",
-    "lit-element": "^2.5.1",
+    "lit-element": "^3.0.0",
     "lit-html": "^1.4.1",
     "superstruct": "^0.15.2",
     "svgmap": "^2.7.1",
