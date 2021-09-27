@@ -104,25 +104,33 @@ export class AnalyticsIntegrations extends LitElement {
     return html`
       <div class="header">
         <h3>Integration usage</h3>
-        ${!this.isMobile
-          ? html`
-              <mwc-textfield
-                .value=${this._filter}
-                @input=${this._filterChange}
-                placeholder="Search"
-                .suffix=${this._filter
-                  ? html`<mwc-icon-button
-                      style="position: relative; top: -16px; right: -12px; color: var(--secondary-text-color);"
-                      @click=${() => this._clearFilter()}
-                    >
-                      <svg>
-                        <path d=${mdiClose} />
-                      </svg>
-                    </mwc-icon-button>`
-                  : undefined}
-              ></mwc-textfield>
-            `
-          : ""}
+        ${
+          !this.isMobile
+            ? html`
+                <div>
+                  <mwc-textfield
+                    .value=${this._filter}
+                    @input=${this._filterChange}
+                    placeholder="Search"
+                  >
+                  </mwc-textfield>
+                  ${this._filter
+                    ? html`
+                        <mwc-icon-button
+                          class="clear-button"
+                          @click=${this._clearFilter}
+                        >
+                          <svg>
+                            <path d=${mdiClose} />
+                          </svg>
+                        </mwc-icon-button>
+                      `
+                    : undefined}
+                </div>
+              `
+            : ""
+        }
+          </div>
       </div>
       <mwc-formfield label="Show default and internal integrations">
         <mwc-checkbox
@@ -323,6 +331,14 @@ export class AnalyticsIntegrations extends LitElement {
         justify-content: space-between;
       }
     }
+
+    .clear-button {
+      position: absolute;
+      color: var(--secondary-text-color);
+      margin-left: -42px;
+      margin-top: 4px;
+    }
+
     .footer-controls {
       display: flex;
       align-items: center;
