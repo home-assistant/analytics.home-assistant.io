@@ -1,12 +1,6 @@
 import "@google-web-components/google-chart";
-import {
-  css,
-  customElement,
-  html,
-  LitElement,
-  internalProperty,
-  PropertyValues,
-} from "lit-element";
+import { css, html, LitElement, PropertyValues } from "lit";
+import { customElement, state } from "lit/decorators.js";
 import "./analytics-active-installations";
 import "./analytics-average";
 import "./analytics-integrations";
@@ -26,15 +20,15 @@ const mqlDarkMode = matchMedia("(prefers-color-scheme: dark)");
 
 @customElement("analytics-element")
 export class AnalyticsElement extends LitElement {
-  @internalProperty() private _data?: AnalyticsData;
+  @state() private _data?: AnalyticsData;
 
-  @internalProperty() private _currentPage = "installations";
+  @state() private _currentPage = "installations";
 
-  @internalProperty() private _error: boolean = false;
+  @state() private _error: boolean = false;
 
-  @internalProperty() private _isMobile: boolean = mqlMobile.matches;
+  @state() private _isMobile: boolean = mqlMobile.matches;
 
-  @internalProperty() private _isDarkMode: boolean = mqlDarkMode.matches;
+  @state() private _isDarkMode: boolean = mqlDarkMode.matches;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
