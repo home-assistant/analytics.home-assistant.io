@@ -10,6 +10,7 @@
     "@material/mwc-textfield": "^0.25.1",
     "@mdi/font": "^6.1.95",
     "@mdi/js": "^6.1.95",
+    "lit": "^2.0.0",
     "superstruct": "^0.15.2",
     "svgmap": "^2.7.1",
     "toucan-js": "^2.5.0"
@@ -33,9 +34,6 @@
     },
     "testEnvironment": "node",
     "testRegex": "/worker/tests/.*\\.spec\\.ts$",
-    "moduleFileExtensions": [
-      "js",
-      "ts"
-    ]
+    "moduleFileExtensions": ["js", "ts"]
   }
 }
