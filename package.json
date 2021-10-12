@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@google-web-components/google-chart": "^4.0.2",
-    "@material/mwc-checkbox": "^0.25.1",
+    "@material/mwc-checkbox": "^0.25.2",
     "@material/mwc-formfield": "^0.25.1",
     "@material/mwc-icon": "^0.25.1",
     "@material/mwc-icon-button": "^0.25.1",
