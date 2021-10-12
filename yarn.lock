@@ -713,12 +713,12 @@
     lit-element "^3.0.0"
     tslib "^2.0.1"
 
-"@material/mwc-icon@^0.25.1":
-  version "0.25.1"
-  resolved "https://registry.yarnpkg.com/@material/mwc-icon/-/mwc-icon-0.25.1.tgz#a0bf7b6dffddf3ab5e3a6cf3645e50ef0963742b"
-  integrity sha512-vOftTvOYNN4H+p/4/RddaS6facGQIMUoaE0tl5PrGsxqCilZNFMyHNShu/wZ0OfVHJmv32I14kfTGIf6kJZx4g==
+"@material/mwc-icon@^0.25.1", "@material/mwc-icon@^0.25.2":
+  version "0.25.2"
+  resolved "https://registry.yarnpkg.com/@material/mwc-icon/-/mwc-icon-0.25.2.tgz#6f491d5c3acadbbf4a91ea04e97e92f6a65af897"
+  integrity sha512-W0qJRUE7Q2nFkOwV+8rlDXaRgZtH0FaWr1C2nUykv4IqXLeAGIb9u6XSuDCbBxuvHeqG2hFmEbfQ5zJoWU21kw==
   dependencies:
-    lit-element "^3.0.0"
+    lit "^2.0.0"
     tslib "^2.0.1"
 
 "@material/mwc-line-ripple@^0.25.1":
@@ -3486,7 +3486,7 @@ lit-html@^2.0.0:
   dependencies:
     "@types/trusted-types" "^2.0.2"
 
-lit@^2.0.2:
+lit@^2.0.0, lit@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/lit/-/lit-2.0.2.tgz#5e6f422924e0732258629fb379556b6d23f7179c"
   integrity sha512-hKA/1YaSB+P+DvKWuR2q1Xzy/iayhNrJ3aveD0OQ9CKn6wUjsdnF/7LavDOJsKP/K5jzW/kXsuduPgRvTFrFJw==
