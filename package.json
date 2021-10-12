@@ -11,7 +11,7 @@
     "@mdi/font": "^6.2.95",
     "@mdi/js": "^6.2.95",
     "lit": "^2.0.2",
-    "superstruct": "^0.15.2",
+    "superstruct": "^0.15.3",
     "svgmap": "^2.7.1",
     "toucan-js": "^2.5.0"
   },
