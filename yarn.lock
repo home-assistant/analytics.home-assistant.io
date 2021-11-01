@@ -952,15 +952,15 @@
     "@material/theme" "14.0.0-canary.261f2db59.0"
     tslib "^2.1.0"
 
-"@mdi/font@^6.3.95":
-  version "6.3.95"
-  resolved "https://registry.yarnpkg.com/@mdi/font/-/font-6.3.95.tgz#5e22e0626ec652028a19aa541a20b28280399dd9"
-  integrity sha512-bbvnF7rNX9aMn7PeqDCa8ZQTPxEqerZeXo/lQQxE84Ka/7UrFcqvOO3XXVLtrCCtyA6uIqiG4oYFRPVJqv247Q==
+"@mdi/font@^6.4.95":
+  version "6.4.95"
+  resolved "https://registry.yarnpkg.com/@mdi/font/-/font-6.4.95.tgz#d3b7a615c4c82ba2a9c29b2b59b158dced4f9b0e"
+  integrity sha512-jCQdXCD339EXirWYFbZv1Ansthm9j6O3FSQLsfi/mKamnGYxqbUBm5D4UjcVr6HVYIPNwTQQ46HNHlswPD8RcQ==
 
-"@mdi/js@^6.3.95":
-  version "6.3.95"
-  resolved "https://registry.yarnpkg.com/@mdi/js/-/js-6.3.95.tgz#cffd5f04502fe5d8a65656e6c437d66963d3836d"
-  integrity sha512-/EI+ao3caXcYTWGYwwOylZKmO0ilywwE8CsEZl5L82Rgsv1eLUlCmLIrViE5A9pISsaTZELkzgbP1lQSGwRY8A==
+"@mdi/js@^6.4.95":
+  version "6.4.95"
+  resolved "https://registry.yarnpkg.com/@mdi/js/-/js-6.4.95.tgz#3ba2c04b702f1f7b71c41d5c86d2849868c866c8"
+  integrity sha512-b1/P//1D2KOzta8YRGyoSLGsAlWyUHfxzVBhV4e/ppnjM4DfBgay/vWz7Eg5Ee80JZ4zsQz8h54X+KOahtBk5Q==
 
 "@sentry/core@6.11.0":
   version "6.11.0"
