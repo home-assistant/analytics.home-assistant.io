@@ -17,6 +17,7 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
       avg_states: 0,
       avg_users: 0,
       countries: {},
+      energy: { count_configured: 0 },
       integrations: {},
       last_updated: 0,
       reports_integrations: 0,
