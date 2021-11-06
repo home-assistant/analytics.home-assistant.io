@@ -23,7 +23,7 @@ const DEFAULT_DOMAINS: string[] = [
 ];
 
 // Integrations without integration documentation pages
-const DOMAINS_WITHOUT_DETAILS: Record<string, Partial<IntegrationDetails>> = {
+const DOMAINS_WITHOUT_DETAILS: Record<string, IntegrationDetails> = {
   energy: { title: "Energy", quality_scale: "internal" },
 };
 
