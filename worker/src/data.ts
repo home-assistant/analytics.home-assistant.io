@@ -131,6 +131,7 @@ export interface AnalyticsDataCurrent {
   avg_states: number;
   avg_users: number;
   countries: Record<string, number>;
+  energy: { count_configured: number };
   integrations: Record<string, number>;
   last_updated: number;
   extended_data_from: number;

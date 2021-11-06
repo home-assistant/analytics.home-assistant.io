@@ -22,6 +22,11 @@ const DEFAULT_DOMAINS: string[] = [
   "rpi_power",
 ];
 
+// Integrations without integration documentation pages
+const DOMAINS_WITHOUT_DETAILS: Record<string, Partial<IntegrationDetails>> = {
+  energy: { title: "Energy", quality_scale: "internal" },
+};
+
 @customElement("analytics-integrations")
 export class AnalyticsIntegrations extends LitElement {
   @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
@@ -49,7 +54,10 @@ export class AnalyticsIntegrations extends LitElement {
       if (
         this._filter !== "" &&
         (DEFAULT_DOMAINS.includes(this._filter) ||
-          this._integrationDetails[this._filter].quality_scale === "internal")
+          [
+            this._integrationDetails[this._filter]?.quality_scale,
+            DOMAINS_WITHOUT_DETAILS[this._filter]?.quality_scale,
+          ].includes("internal"))
       ) {
         this._showDefaultAndInternal = true;
       }
@@ -69,8 +77,10 @@ export class AnalyticsIntegrations extends LitElement {
       .filter(
         (entry) =>
           (!DEFAULT_DOMAINS.includes(entry.domain) &&
-            this._integrationDetails[entry.domain].quality_scale !==
-              "internal") ||
+            ![
+              this._integrationDetails[entry.domain]?.quality_scale,
+              DOMAINS_WITHOUT_DETAILS[entry.domain]?.quality_scale,
+            ].includes("internal")) ||
           this._showDefaultAndInternal
       )
       .map((entry, idx) => {
@@ -239,15 +249,18 @@ export class AnalyticsIntegrations extends LitElement {
 
       this._integrationDetails = await response.json();
 
-      this._integrations = Object.keys(this._integrationDetails).map(
-        (domain) => {
+      this._integrations = Object.keys(this._integrationDetails)
+        .concat(Object.keys(DOMAINS_WITHOUT_DETAILS))
+        .map((domain) => {
           return {
             domain,
-            title: this._integrationDetails[domain].title || domain,
+            title:
+              this._integrationDetails[domain]?.title ||
+              DOMAINS_WITHOUT_DETAILS[domain]?.title ||
+              domain,
             installations: this.currentData?.integrations[domain] || 0,
           };
-        }
-      );
+        });
     } catch (err) {
       console.log(err);
     }

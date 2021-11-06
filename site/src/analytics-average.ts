@@ -33,6 +33,12 @@ export class AnalyticsAverage extends LitElement {
               </span>
             </div>`;
           })}
+        <div class="metric">
+          <span>Energy configured</span>
+          <span .title=${String(this.currentData.energy.count_configured)}>
+            ${this.currentData.energy.count_configured}
+          </span>
+        </div>
       </div>
       <div class="footer">
         ${this.currentData.reports_statistics || "Unkown"} of
