@@ -1,19 +1,19 @@
 import "@google-web-components/google-chart";
 import { css, html, LitElement, PropertyValues } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { AnalyticsData } from "../../worker/src/data";
+import { migrateAnalyticsData } from "../../worker/src/utils/migrate";
 import "./analytics-active-installations";
-import "./analytics-average";
-import "./analytics-integrations";
-import "./analytics-releases";
-import "./analytics-os-boards";
-import "./analytics-os-versions";
 import "./analytics-header";
 import "./analytics-installation-types";
+import "./analytics-integrations";
 import "./analytics-map";
+import "./analytics-median";
+import "./analytics-os-boards";
+import "./analytics-os-versions";
+import "./analytics-releases";
 import "./analytics-version-history";
 import { fetchData } from "./data";
-import { migrateAnalyticsData } from "../../worker/src/utils/migrate";
-import { AnalyticsData } from "../../worker/src/data";
 
 const mqlMobile = matchMedia("(max-width: 600px)");
 const mqlDarkMode = matchMedia("(prefers-color-scheme: dark)");
@@ -107,9 +107,9 @@ export class AnalyticsElement extends LitElement {
               </div>
             `
           : this._currentPage === "statistics"
-          ? html`<analytics-average
+          ? html`<analytics-median
               .currentData=${this._data.current}
-            ></analytics-average>`
+            ></analytics-median>`
           : this._currentPage === "integrations"
           ? html`<analytics-integrations
               .currentData=${this._data.current}
