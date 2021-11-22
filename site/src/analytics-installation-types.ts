@@ -1,4 +1,5 @@
-import { customElement, html, LitElement, property } from "lit-element";
+import { html, LitElement } from "lit";
+import { customElement, property } from "lit/decorators.js";
 import { AnalyticsDataCurrent } from "../../worker/src/data";
 import "./components/analytics-chart";
 

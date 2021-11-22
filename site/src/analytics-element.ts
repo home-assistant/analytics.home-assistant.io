@@ -1,40 +1,34 @@
 import "@google-web-components/google-chart";
-import {
-  css,
-  customElement,
-  html,
-  LitElement,
-  internalProperty,
-  PropertyValues,
-} from "lit-element";
+import { css, html, LitElement, PropertyValues } from "lit";
+import { customElement, state } from "lit/decorators.js";
+import { AnalyticsData } from "../../worker/src/data";
+import { migrateAnalyticsData } from "../../worker/src/utils/migrate";
 import "./analytics-active-installations";
-import "./analytics-average";
-import "./analytics-integrations";
-import "./analytics-releases";
-import "./analytics-os-boards";
-import "./analytics-os-versions";
 import "./analytics-header";
 import "./analytics-installation-types";
+import "./analytics-integrations";
 import "./analytics-map";
+import "./analytics-median";
+import "./analytics-os-boards";
+import "./analytics-os-versions";
+import "./analytics-releases";
 import "./analytics-version-history";
 import { fetchData } from "./data";
-import { migrateAnalyticsData } from "../../worker/src/utils/migrate";
-import { AnalyticsData } from "../../worker/src/data";
 
 const mqlMobile = matchMedia("(max-width: 600px)");
 const mqlDarkMode = matchMedia("(prefers-color-scheme: dark)");
 
 @customElement("analytics-element")
 export class AnalyticsElement extends LitElement {
-  @internalProperty() private _data?: AnalyticsData;
+  @state() private _data?: AnalyticsData;
 
-  @internalProperty() private _currentPage = "installations";
+  @state() private _currentPage = "installations";
 
-  @internalProperty() private _error: boolean = false;
+  @state() private _error: boolean = false;
 
-  @internalProperty() private _isMobile: boolean = mqlMobile.matches;
+  @state() private _isMobile: boolean = mqlMobile.matches;
 
-  @internalProperty() private _isDarkMode: boolean = mqlDarkMode.matches;
+  @state() private _isDarkMode: boolean = mqlDarkMode.matches;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
@@ -113,9 +107,9 @@ export class AnalyticsElement extends LitElement {
               </div>
             `
           : this._currentPage === "statistics"
-          ? html`<analytics-average
+          ? html`<analytics-median
               .currentData=${this._data.current}
-            ></analytics-average>`
+            ></analytics-median>`
           : this._currentPage === "integrations"
           ? html`<analytics-integrations
               .currentData=${this._data.current}

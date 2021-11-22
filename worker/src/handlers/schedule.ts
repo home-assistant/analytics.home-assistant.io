@@ -25,8 +25,8 @@ import {
   BRANDS_DOMAINS_URL,
   VERSION_URL,
 } from "../data";
-import { average } from "../utils/average";
 import { groupVersions } from "../utils/group-versions";
+import { median } from "../utils/median";
 import { migrateAnalyticsData } from "../utils/migrate";
 
 export async function handleSchedule(
@@ -490,11 +490,11 @@ const processQueueData = (data: QueueData) => {
       data.installation_types.os +
       data.installation_types.supervised +
       data.installation_types.unknown,
-    avg_users: average(data.count_users),
-    avg_automations: average(data.count_automations),
-    avg_integrations: average(data.count_integrations),
-    avg_addons: average(data.count_addons),
-    avg_states: average(data.count_states),
+    avg_users: median(data.count_users),
+    avg_automations: median(data.count_automations),
+    avg_integrations: median(data.count_integrations),
+    avg_addons: median(data.count_addons),
+    avg_states: median(data.count_states),
     integrations: data.integrations,
     operating_system: data.operating_system,
     supervisor: data.supervisor,

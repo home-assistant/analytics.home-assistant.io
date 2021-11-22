@@ -5,15 +5,8 @@ import "@material/mwc-textfield";
 import "@material/mwc-list/mwc-list-item";
 import "@material/mwc-select";
 import { mdiChevronLeft, mdiChevronRight, mdiClose } from "@mdi/js";
-import {
-  css,
-  customElement,
-  html,
-  internalProperty,
-  LitElement,
-  property,
-  PropertyValues,
-} from "lit-element";
+import { css, html, LitElement, PropertyValues } from "lit";
+import { customElement, state, property } from "lit/decorators.js";
 import {
   fetchIntegrationDetails,
   IntegrationData,
@@ -37,18 +30,15 @@ export class AnalyticsIntegrations extends LitElement {
 
   @property() public domain: string | null = null;
 
-  @internalProperty() private _filter: string = "";
+  @state() private _filter: string = "";
 
-  @internalProperty() private _integrationDetails: Record<
-    string,
-    IntegrationDetails
-  > = {};
+  @state() private _integrationDetails: Record<string, IntegrationDetails> = {};
 
-  @internalProperty() private _integrations?: IntegrationData[];
+  @state() private _integrations?: IntegrationData[];
 
-  @internalProperty() private _currentTableSize = 30;
-  @internalProperty() private _currentTablePage = 0;
-  @internalProperty() private _showDefaultAndInternal = false;
+  @state() private _currentTableSize = 30;
+  @state() private _currentTablePage = 0;
+  @state() private _showDefaultAndInternal = false;
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
@@ -104,25 +94,33 @@ export class AnalyticsIntegrations extends LitElement {
     return html`
       <div class="header">
         <h3>Integration usage</h3>
-        ${!this.isMobile
-          ? html`
-              <mwc-textfield
-                .value=${this._filter}
-                @input=${this._filterChange}
-                placeholder="Search"
-                .suffix=${this._filter
-                  ? html`<mwc-icon-button
-                      style="position: relative; top: -16px; right: -12px; color: var(--secondary-text-color);"
-                      @click=${() => this._clearFilter()}
-                    >
-                      <svg>
-                        <path d=${mdiClose} />
-                      </svg>
-                    </mwc-icon-button>`
-                  : undefined}
-              ></mwc-textfield>
-            `
-          : ""}
+        ${
+          !this.isMobile
+            ? html`
+                <div>
+                  <mwc-textfield
+                    .value=${this._filter}
+                    @input=${this._filterChange}
+                    placeholder="Search"
+                  >
+                  </mwc-textfield>
+                  ${this._filter
+                    ? html`
+                        <mwc-icon-button
+                          class="clear-button"
+                          @click=${this._clearFilter}
+                        >
+                          <svg>
+                            <path d=${mdiClose} />
+                          </svg>
+                        </mwc-icon-button>
+                      `
+                    : undefined}
+                </div>
+              `
+            : ""
+        }
+          </div>
       </div>
       <mwc-formfield label="Show default and internal integrations">
         <mwc-checkbox
@@ -323,6 +321,14 @@ export class AnalyticsIntegrations extends LitElement {
         justify-content: space-between;
       }
     }
+
+    .clear-button {
+      position: absolute;
+      color: var(--secondary-text-color);
+      margin-left: -42px;
+      margin-top: 4px;
+    }
+
     .footer-controls {
       display: flex;
       align-items: center;

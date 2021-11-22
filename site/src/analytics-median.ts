@@ -1,4 +1,5 @@
-import { css, customElement, html, LitElement, property } from "lit-element";
+import { css, html, LitElement } from "lit";
+import { customElement, property } from "lit/decorators.js";
 import { AnalyticsDataCurrent } from "../../worker/src/data";
 
 const AVERAGE_METRICS = {
@@ -9,8 +10,8 @@ const AVERAGE_METRICS = {
   users: "Users",
 };
 
-@customElement("analytics-average")
-export class AnalyticsAverage extends LitElement {
+@customElement("analytics-median")
+export class AnalyticsMedian extends LitElement {
   @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
 
   render() {
@@ -26,7 +27,7 @@ export class AnalyticsAverage extends LitElement {
             const value = this.currentData[entry].toFixed(2);
             const numericValue = Number(value);
             return html`<div class="metric">
-              <span>Average ${AVERAGE_METRICS[key] || key}</span>
+              <span>${AVERAGE_METRICS[key] || key}</span>
               <span .title=${value}>
                 ${numericValue < 10 ? numericValue : Math.round(numericValue)}
               </span>
@@ -93,6 +94,6 @@ export class AnalyticsAverage extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "analytics-average": AnalyticsAverage;
+    "analytics-median": AnalyticsMedian;
   }
 }

@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Build worker
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
 
-      - uses: actions/setup-node@v2.4.0
+      - uses: actions/setup-node@v2.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -30,9 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Build site
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
 
-      - uses: actions/setup-node@v2.4.0
+      - uses: actions/setup-node@v2.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -46,9 +46,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Test worker
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
 
-      - uses: actions/setup-node@v2.4.0
+      - uses: actions/setup-node@v2.4.1
         with:
           node-version: ${{ env.NODE_VERSION }}
 

@@ -1,12 +1,6 @@
 import { Checkbox } from "@material/mwc-checkbox";
-import {
-  css,
-  customElement,
-  html,
-  internalProperty,
-  LitElement,
-  property,
-} from "lit-element";
+import { css, html, LitElement } from "lit";
+import { customElement, state, property } from "lit/decorators.js";
 import { AnalyticsDataHistory } from "../../worker/src/data";
 import "./components/analytics-chart";
 
@@ -18,7 +12,7 @@ export class AnalyticsVersionHistory extends LitElement {
 
   @property({ type: Boolean }) public isDarkMode = false;
 
-  @internalProperty() private _logScale = false;
+  @state() private _logScale = false;
 
   render() {
     if (this.historyData === undefined) {

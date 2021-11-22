@@ -1,4 +1,5 @@
-import { css, customElement, html, LitElement, property } from "lit-element";
+import { css, html, LitElement } from "lit";
+import { customElement, property } from "lit/decorators.js";
 import { AnalyticsDataCurrent } from "../../worker/src/data";
 import "./components/analytics-chart";
 
@@ -17,12 +18,11 @@ export class AnalyticsReleases extends LitElement {
 
     const releases = Object();
 
-    Object.keys(this.currentData.versions)
-      .forEach((version) => {
-        const key: string = version.split(".").slice(0, 2).join(".");
-        releases[key] =
-          (releases[key] || 0) + this.currentData!.versions[version];
-      });
+    Object.keys(this.currentData.versions).forEach((version) => {
+      const key: string = version.split(".").slice(0, 2).join(".");
+      releases[key] =
+        (releases[key] || 0) + this.currentData!.versions[version];
+    });
 
     const allRows = Object.keys(releases)
       .filter((key) => releases[key] > 100)
@@ -42,10 +42,7 @@ export class AnalyticsReleases extends LitElement {
         "Other",
         allRows
           .slice(5)
-          .reduce(
-            (accumulator, item) => accumulator + item[1],
-            0
-          ),
+          .reduce((accumulator, item) => accumulator + item[1], 0),
       ]);
     }
 
