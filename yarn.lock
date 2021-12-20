@@ -314,10 +314,10 @@
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.5.2.tgz#8f03a22a04de437254e8ce8cc84ba39689288752"
   integrity sha512-HyYEUDeIj5rRQU2Hk5HTB2uHsbRQpF70nvMhVzi+VJR0X+xNEhjPui4/kBf3VeH/wqD28PT4sVOm8qqLjBrSZg==
 
-"@google-web-components/google-chart@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@google-web-components/google-chart/-/google-chart-5.0.0.tgz#1f89bba682064ae4d009d2f125613a9a61f1ad41"
-  integrity sha512-a6lS0u4A3p5K0NVy2bRjF0/XMRrEfJ+1l3eoL6VjTwPJsDAG79fzr9llGy7S+2HWeDpbDYNDLdI6iL8bRDPC/g==
+"@google-web-components/google-chart@^5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@google-web-components/google-chart/-/google-chart-5.0.1.tgz#daef930048298bc1f0bdc91c291245bc2e2f2752"
+  integrity sha512-vt9CrJdDjDskLKk0ya6DI5Msy9+yVKR3MwIDQRFxORs2KL9MseEcO4/T8rwdp3TnytU+8lptKFIkD3f0qiCeCg==
   dependencies:
     lit "^2.0.2"
 
