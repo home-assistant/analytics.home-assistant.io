@@ -53,6 +53,15 @@ export interface UuidMetadata {
   [UuidMetadataKey.EXTRA]: MetadataExtra[];
 }
 
+export interface VersionResponse {
+  channel: string;
+  hassos: Record<string, string>;
+}
+
+export interface CfRequest extends Request {
+  cf?: IncomingRequestCfProperties;
+}
+
 export interface ListEntry {
   metadata?: UuidMetadata;
   name: string;

@@ -24,6 +24,7 @@ import {
   KV_KEY_CUSTOM_INTEGRATIONS,
   BRANDS_DOMAINS_URL,
   VERSION_URL,
+  VersionResponse,
 } from "../data";
 import { groupVersions } from "../utils/group-versions";
 import { median } from "../utils/median";
@@ -33,7 +34,6 @@ export async function handleSchedule(
   event: ScheduledEvent,
   sentry: Toucan
 ): Promise<void> {
-  // @ts-expect-error Missing type for cron on ScheduledEvent https://github.com/cloudflare/workers-types/pull/86
   const scheduledTask = event.cron;
 
   try {
@@ -205,7 +205,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
     custom: string[];
   } = await brandsDomainsResponse.json();
 
-  const osBoardsJson = await versionResponse.json();
+  const osBoardsJson = await versionResponse.json<VersionResponse>();
 
   const brandsDomains: Set<string> = new Set(
     brandsDomainsJson.custom.concat(brandsDomainsJson.core)

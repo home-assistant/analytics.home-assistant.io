@@ -10,13 +10,7 @@ import {
   SCHEMA_VERSION_QUEUE,
 } from "../../src/data";
 import { handleSchedule } from "../../src/handlers/schedule";
-import { MockedKV, MockedSentry } from "../mock";
-
-const BaseEvent = {
-  type: "cron",
-  scheduledTime: 0,
-  waitUntil: () => ({}),
-};
+import { MockedKV, MockedScheduledEvent, MockedSentry } from "../mock";
 
 describe("schedule handler", function () {
   let MockSentry;
@@ -38,7 +32,9 @@ describe("schedule handler", function () {
   });
 
   describe("Unexpected task", function () {
-    const event = { ...BaseEvent, cron: "test" };
+    const event: ScheduledEvent = MockedScheduledEvent({
+      cron: "test",
+    });
     it("Unexpected cron trigger", async () => {
       await handleSchedule(event, MockSentry);
       expect(MockSentry.captureException).toBeCalledWith(
@@ -48,7 +44,9 @@ describe("schedule handler", function () {
   });
 
   describe("RESET_QUEUE", function () {
-    const event = { ...BaseEvent, cron: ScheduledTask.RESET_QUEUE };
+    const event: ScheduledEvent = MockedScheduledEvent({
+      cron: ScheduledTask.RESET_QUEUE,
+    });
     it("Not ready to reset", async () => {
       MockKV.get = jest.fn(async () => ({
         process_complete: false,
@@ -78,7 +76,9 @@ describe("schedule handler", function () {
   });
 
   describe("UPDATE_HISTORY", function () {
-    const event = { ...BaseEvent, cron: ScheduledTask.UPDATE_HISTORY };
+    const event: ScheduledEvent = MockedScheduledEvent({
+      cron: ScheduledTask.UPDATE_HISTORY,
+    });
     it("With migration", async () => {
       MockKV.get = jest.fn(async () => ({
         "1234": { active_installations: 3 },
@@ -177,7 +177,9 @@ describe("schedule handler", function () {
   });
 
   describe("PROCESS_QUEUE", function () {
-    const event = { ...BaseEvent, cron: ScheduledTask.PROCESS_QUEUE };
+    const event: ScheduledEvent = MockedScheduledEvent({
+      cron: ScheduledTask.PROCESS_QUEUE,
+    });
     it("No queue - list 2000 (with pagination)", async () => {
       MockKV.get = jest.fn(async () => createQueueDefaults());
 
