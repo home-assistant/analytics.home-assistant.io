@@ -1,6 +1,7 @@
 // Receive data from a Home Assistant installation
 import Toucan from "toucan-js";
 import {
+  CfRequest,
   generateUuidMetadata,
   IncomingPayload,
   KV_PREFIX_UUID,
@@ -15,7 +16,7 @@ const expirationTtl = 5184000;
 const withRegion = new Set(["US"]);
 
 export async function handlePostWrapper(
-  request: Request,
+  request: CfRequest,
   sentry: Toucan
 ): Promise<Response> {
   try {
@@ -27,15 +28,17 @@ export async function handlePostWrapper(
 }
 
 export async function handlePost(
-  request: Request,
+  request: CfRequest,
   sentry: Toucan
 ): Promise<Response> {
   let incomingPayload;
   sentry.addBreadcrumb({ message: "Process started" });
-  const request_json = await request.json();
-  request_json.country = request.cf.country;
-  if (withRegion.has(request_json.country)) {
-    request_json.region = request.cf.regionCode;
+  const request_json = await request.json<Record<string, any>>();
+  if (request.cf) {
+    request_json.country = request.cf.country;
+    if (withRegion.has(request_json.country)) {
+      request_json.region = request.cf.regionCode;
+    }
   }
 
   sentry.setUser({ id: request_json.uuid });
