@@ -4,6 +4,7 @@ import { customElement, state } from "lit/decorators.js";
 import { AnalyticsData } from "../../worker/src/data";
 import { migrateAnalyticsData } from "../../worker/src/utils/migrate";
 import "./analytics-active-installations";
+import "./analytics-addons";
 import "./analytics-header";
 import "./analytics-installation-types";
 import "./analytics-integrations";
@@ -117,6 +118,12 @@ export class AnalyticsElement extends LitElement {
               .domain=${query.get("domain")}
             >
             </analytics-integrations>`
+          : this._currentPage === "add-ons"
+          ? html`<analytics-addons
+              .currentData=${this._data.current}
+              .isMobile=${this._isMobile}
+            >
+            </analytics-addons>`
           : ""}
       </div>
       <analytics-map
