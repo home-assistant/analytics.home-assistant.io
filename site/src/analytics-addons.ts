@@ -493,7 +493,7 @@ export class AnalyticsAddons extends LitElement {
                 (100 * this.currentData.reports_addons) /
                 this.currentData.extended_data_from
               ).toFixed(2)}%)
-              installations have chosen to share their used integrations
+              installations have chosen to share their used add-ons
             </div>`
           : ""
       }
