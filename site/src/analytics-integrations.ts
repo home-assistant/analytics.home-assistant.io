@@ -133,7 +133,7 @@ export class AnalyticsIntegrations extends LitElement {
         <tr class="table-header">
           ${!this.isMobile ? html`<th class="idx"></th>` : ""}
           <th>Integration</th>
-          <th class="installations">Installations</th>
+          <th class="installations">Installs</th>
         </tr>
         ${tableData.map(
           (entry) => html`
