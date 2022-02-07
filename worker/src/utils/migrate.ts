@@ -20,6 +20,7 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
       integrations: {},
       last_updated: 0,
       reports_integrations: 0,
+      reports_addons: 0,
       reports_statistics: 0,
       extended_data_from: 0,
       versions: {},
@@ -64,7 +65,7 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
       lastDataEntry.active_installations;
   }
 
-  if (data.schema_version < 2) {
+  if (data.schema_version < 3) {
     analyticsData.current = { ...analyticsData.current, ...data.current };
     analyticsData.history = data.history;
   }

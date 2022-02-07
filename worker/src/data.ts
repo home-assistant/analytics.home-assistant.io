@@ -6,8 +6,8 @@ export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 850;
 
-export const SCHEMA_VERSION_QUEUE = 7;
-export const SCHEMA_VERSION_ANALYTICS = 2;
+export const SCHEMA_VERSION_QUEUE = 8;
+export const SCHEMA_VERSION_ANALYTICS = 3;
 
 export const BRANDS_DOMAINS_URL =
   "https://brands.home-assistant.io/domains.json";
@@ -83,6 +83,7 @@ export interface QueueData {
     { total: number; versions: Record<string, number> }
   >;
   reports_integrations: number;
+  reports_addons: number;
   reports_statistics: number;
   versions: Record<string, number>;
   countries: Record<string, number>;
@@ -144,6 +145,7 @@ export interface AnalyticsDataCurrent {
   last_updated: number;
   extended_data_from: number;
   reports_integrations: number;
+  reports_addons: number;
   reports_statistics: number;
   versions: Record<string, number>;
   active_installations: number;
@@ -211,6 +213,7 @@ export const createQueueData = (): QueueData => ({
   custom_integrations: {},
   reports_integrations: 0,
   reports_statistics: 0,
+  reports_addons: 0,
   versions: {},
   countries: {},
   operating_system: { boards: {}, versions: {} },

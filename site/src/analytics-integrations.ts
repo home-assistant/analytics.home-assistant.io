@@ -133,7 +133,7 @@ export class AnalyticsIntegrations extends LitElement {
         <tr class="table-header">
           ${!this.isMobile ? html`<th class="idx"></th>` : ""}
           <th>Integration</th>
-          <th class="installations">Installations</th>
+          <th class="installations">Installs</th>
         </tr>
         ${tableData.map(
           (entry) => html`
@@ -146,7 +146,6 @@ export class AnalyticsIntegrations extends LitElement {
                   title="Documentation"
                   href="https://www.home-assistant.io/integrations/${entry.domain}"
                   target="_blank"
-                  rel="noreferrer"
                 >
                   <img
                     src="https://brands.home-assistant.io/_/${entry.domain}/icon.png"
@@ -200,15 +199,20 @@ export class AnalyticsIntegrations extends LitElement {
           </mwc-icon-button>
         </div>
       </div>
-      <div class="footer">
-        ${this.currentData.reports_integrations || "Unkown"} of
-        ${this.currentData.extended_data_from}
-        (${+(
-          (100 * this.currentData.reports_integrations || 0) /
-          this.currentData.extended_data_from
-        ).toFixed(2)}%)
-        installations have chosen to share their used integrations
-      </div>
+      ${
+        this.currentData.reports_integrations
+          ? html`<div class="footer">
+              ${this.currentData.reports_integrations} of
+              ${this.currentData.extended_data_from}
+              (${+(
+                (100 * this.currentData.reports_integrations) /
+                this.currentData.extended_data_from
+              ).toFixed(2)}%)
+              installations have chosen to share their used integrations
+            </div>`
+          : ""
+      }
+
     `;
   }
 
