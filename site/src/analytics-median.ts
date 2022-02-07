@@ -35,13 +35,17 @@ export class AnalyticsMedian extends LitElement {
           })}
       </div>
       <div class="footer">
-        ${this.currentData.reports_statistics || "Unkown"} of
-        ${this.currentData.extended_data_from}
-        (${+(
-          (100 * this.currentData.reports_statistics || 0) /
-          this.currentData.extended_data_from
-        ).toFixed(2)}%)
-        installations have chosen to share usage statistics
+        ${this.currentData.reports_statistics
+          ? html`
+              ${this.currentData.reports_statistics} of
+              ${this.currentData.extended_data_from}
+              (${+(
+                (100 * this.currentData.reports_statistics) /
+                this.currentData.extended_data_from
+              ).toFixed(2)}%)
+              installations have chosen to share usage statistics
+            `
+          : ""}
       </div>`;
   }
 
