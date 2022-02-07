@@ -30,6 +30,7 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
         container: 0,
         supervised: 0,
         core: 0,
+        unsupported_container: 0,
         unknown: 0,
       },
       active_installations: 0,
