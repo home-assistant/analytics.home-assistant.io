@@ -337,7 +337,6 @@ export class AnalyticsAddons extends LitElement {
 
   protected firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
-    this._filter = "";
     this.getData();
   }
 
