@@ -424,7 +424,6 @@ export class AnalyticsAddons extends LitElement {
                     ""
                   )}/DOCS.md`}"
                   target="_blank"
-                  rel="noreferrer"
                 >
                   <img
                     src="${ADDONS[entry.slug].icon ||

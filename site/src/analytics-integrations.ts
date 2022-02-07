@@ -146,7 +146,6 @@ export class AnalyticsIntegrations extends LitElement {
                   title="Documentation"
                   href="https://www.home-assistant.io/integrations/${entry.domain}"
                   target="_blank"
-                  rel="noreferrer"
                 >
                   <img
                     src="https://brands.home-assistant.io/_/${entry.domain}/icon.png"
