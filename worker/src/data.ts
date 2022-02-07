@@ -6,7 +6,7 @@ export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 850;
 
-export const SCHEMA_VERSION_QUEUE = 8;
+export const SCHEMA_VERSION_QUEUE = 9;
 export const SCHEMA_VERSION_ANALYTICS = 3;
 
 export const BRANDS_DOMAINS_URL =
@@ -28,6 +28,7 @@ export enum ShortInstallationType {
   CONTAINER = "d",
   OS = "o",
   SUPERVISED = "s",
+  UNSUPPORTED_THIRD_PARTY_CONTAINER = "t",
   UNKNOWN = "u",
 }
 
@@ -92,6 +93,7 @@ export interface QueueData {
     container: number;
     core: number;
     supervised: number;
+    unsupported_container: number;
     unknown: number;
   };
   supervisor: {
@@ -129,6 +131,7 @@ export interface AnalyticsDataHistory {
     container: number;
     core: number;
     supervised: number;
+    unsupported_container: number;
     unknown: number;
   };
   versions?: Record<string, number>;
@@ -158,6 +161,7 @@ export interface AnalyticsDataCurrent {
     container: number;
     core: number;
     supervised: number;
+    unsupported_container: number;
     unknown: number;
   };
 }
@@ -198,6 +202,8 @@ export const InstallationTypes: Record<string, ShortInstallationType> = {
   "Home Assistant Container": ShortInstallationType.CONTAINER,
   "Home Assistant Core": ShortInstallationType.CORE,
   "Home Assistant Supervised": ShortInstallationType.SUPERVISED,
+  "Unsupported Third Party Container":
+    ShortInstallationType.UNSUPPORTED_THIRD_PARTY_CONTAINER,
   Unknown: ShortInstallationType.UNKNOWN,
 };
 
@@ -227,6 +233,7 @@ export const createQueueData = (): QueueData => ({
     container: 0,
     core: 0,
     supervised: 0,
+    unsupported_container: 0,
     unknown: 0,
   },
   integrations: {},

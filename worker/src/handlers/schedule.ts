@@ -124,6 +124,7 @@ async function updateHistory(sentry: Toucan): Promise<void> {
     data.installation_types.core +
     data.installation_types.os +
     data.installation_types.supervised +
+    data.installation_types.unsupported_container +
     data.installation_types.unknown;
 
   analyticsData.current.installation_types = data.installation_types;
@@ -490,6 +491,7 @@ const processQueueData = (data: QueueData) => {
       data.installation_types.core +
       data.installation_types.os +
       data.installation_types.supervised +
+      data.installation_types.unsupported_container +
       data.installation_types.unknown,
     avg_users: median(data.count_users),
     avg_automations: median(data.count_automations),
