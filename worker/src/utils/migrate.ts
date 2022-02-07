@@ -65,13 +65,9 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
       lastDataEntry.active_installations;
   }
 
-  if (data.schema_version < 2) {
-    analyticsData.current = { ...analyticsData.current, ...data.current };
-    analyticsData.history = data.history;
-  }
-
   if (data.schema_version < 3) {
     analyticsData.current = { ...analyticsData.current, ...data.current };
+    analyticsData.history = data.history;
   }
 
   return analyticsData;
