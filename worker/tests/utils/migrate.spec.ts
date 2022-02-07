@@ -45,5 +45,17 @@ describe("migrateAnalyticsData", function () {
     expect(
       migrateAnalyticsData({}).current.operating_system.boards
     ).toBeDefined();
+    expect(
+      migrateAnalyticsData({ current: { active_installations: 1337 } }).current
+        .active_installations
+    ).toBe(1337);
+  });
+
+  it("migrate from lower than 3", function () {
+    expect(migrateAnalyticsData({}).current.reports_addons).toBeDefined();
+    expect(
+      migrateAnalyticsData({ current: { active_installations: 1337 } }).current
+        .active_installations
+    ).toBe(1337);
   });
 });

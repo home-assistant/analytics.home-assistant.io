@@ -408,6 +408,7 @@ function combineEntryData(
   }
 
   if (reported_addons.length) {
+    data.reports_addons++;
     for (const addon of reported_addons) {
       if (addon.slug.startsWith("local_")) {
         continue;
@@ -499,6 +500,7 @@ const processQueueData = (data: QueueData) => {
     operating_system: data.operating_system,
     supervisor: data.supervisor,
     reports_integrations: data.reports_integrations,
+    reports_addons: data.reports_addons,
     reports_statistics: data.reports_statistics,
     versions: data.versions,
     energy: {

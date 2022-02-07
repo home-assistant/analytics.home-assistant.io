@@ -1,12 +1,11 @@
-import "@material/mwc-checkbox";
-import "@material/mwc-formfield";
 import "@material/mwc-icon-button";
-import "@material/mwc-textfield";
 import "@material/mwc-list/mwc-list-item";
 import "@material/mwc-select";
+import "@material/mwc-textfield";
 import { mdiChevronLeft, mdiChevronRight, mdiClose } from "@mdi/js";
 import { css, html, LitElement, PropertyValues } from "lit";
-import { customElement, state, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
+import { AnalyticsDataCurrent } from "../../worker/src/data";
 import { AddonData, fetchAddons } from "./data";
 
 // Strict list of add-ons that are shown, ONLY add-ons that ships default with the Supervisor can be added here!
@@ -325,6 +324,8 @@ const ADDONS: {
 
 @customElement("analytics-addons")
 export class AnalyticsAddons extends LitElement {
+  @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
+
   @property({ type: Boolean }) public isMobile = false;
 
   @state() private _filter: string = "";
@@ -341,8 +342,7 @@ export class AnalyticsAddons extends LitElement {
   }
 
   render() {
-    console.log(this._addons);
-    if (this._addons === undefined) {
+    if (this._addons === undefined || this.currentData === undefined) {
       return html``;
     }
 
@@ -438,6 +438,15 @@ export class AnalyticsAddons extends LitElement {
               </td>
               <td class="installations">
                 <span>${entry.total}</span>
+                ${this.currentData!.reports_addons
+                  ? html` <span
+                      >(${(
+                        (100 * entry.total) /
+                        this.currentData!.reports_addons
+                      ).toFixed(1)}
+                      %)
+                    </span>`
+                  : ""}
               </td>
             </tr>
           `
@@ -475,6 +484,20 @@ export class AnalyticsAddons extends LitElement {
           </mwc-icon-button>
         </div>
       </div>
+      ${
+        this.currentData.reports_addons
+          ? html` <div class="footer">
+              ${this.currentData.reports_addons} of
+              ${this.currentData.extended_data_from}
+              (${+(
+                (100 * this.currentData.reports_addons) /
+                this.currentData.extended_data_from
+              ).toFixed(2)}%)
+              installations have chosen to share their used integrations
+            </div>`
+          : ""
+      }
+
     `;
   }
 
@@ -491,7 +514,6 @@ export class AnalyticsAddons extends LitElement {
   async getData() {
     try {
       const response = await fetchAddons();
-      console.log(this._addons);
       if (!response.ok) {
         return;
       }
@@ -506,7 +528,6 @@ export class AnalyticsAddons extends LitElement {
             ...data[slug],
           };
         });
-      console.log(this._addons);
     } catch (err) {
       console.log(err);
     }
@@ -640,11 +661,6 @@ export class AnalyticsAddons extends LitElement {
       margin-right: 4px;
       display: flex;
       align-items: center;
-    }
-
-    mwc-checkbox {
-      --mdc-theme-secondary: var(--primary-color);
-      --mdc-checkbox-unchecked-color: var(--secondary-text-color);
     }
   `;
 }

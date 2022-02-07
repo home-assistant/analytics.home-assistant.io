@@ -16,12 +16,7 @@ export interface AddonData {
   total: number;
 }
 
-export const AnalyticsPages = [
-  "installations",
-  "statistics",
-  "integrations",
-  "add-ons",
-];
+export const AnalyticsPages = ["installs", "stats", "integrations", "add-ons"];
 
 export const fetchData = () => fetch("/data.json");
 

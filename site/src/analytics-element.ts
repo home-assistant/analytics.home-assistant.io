@@ -23,7 +23,7 @@ const mqlDarkMode = matchMedia("(prefers-color-scheme: dark)");
 export class AnalyticsElement extends LitElement {
   @state() private _data?: AnalyticsData;
 
-  @state() private _currentPage = "installations";
+  @state() private _currentPage = "installs";
 
   @state() private _error: boolean = false;
 
@@ -54,7 +54,7 @@ export class AnalyticsElement extends LitElement {
     return html`
       <analytics-header .currentPage=${this._currentPage}> </analytics-header>
       <div class="content">
-        ${this._currentPage === "installations"
+        ${this._currentPage === "installs"
           ? html`
               <analytics-active-installations
                 .historyData=${this._data.history}
@@ -107,7 +107,7 @@ export class AnalyticsElement extends LitElement {
                 </analytics-os-boards>
               </div>
             `
-          : this._currentPage === "statistics"
+          : this._currentPage === "stats"
           ? html`<analytics-median
               .currentData=${this._data.current}
             ></analytics-median>`
@@ -129,7 +129,7 @@ export class AnalyticsElement extends LitElement {
       <analytics-map
         .currentData=${this._data.current}
         .isDarkMode=${this._isDarkMode}
-        .showMap=${this._currentPage === "installations"}
+        .showMap=${this._currentPage === "installs"}
       >
       </analytics-map>
     `;
@@ -149,8 +149,7 @@ export class AnalyticsElement extends LitElement {
   }
 
   private _pageChanged() {
-    this._currentPage =
-      window.location.hash.replace("#", "") || "installations";
+    this._currentPage = window.location.hash.replace("#", "") || "installs";
   }
 
   static styles = css`
