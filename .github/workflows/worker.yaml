@@ -7,7 +7,7 @@ on:
       - dev
 
 env:
-  WRANGLER_VERSION: "1.19.5"
+  WRANGLER_VERSION: "1.19.7"
   NODE_VERSION: "14.17.5"
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.4.0
 
-      - uses: actions/setup-node@v2.4.1
+      - uses: actions/setup-node@v2.5.1
         with:
           node-version: ${{ env.NODE_VERSION }}
 

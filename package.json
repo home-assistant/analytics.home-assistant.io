@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@google-web-components/google-chart": "^5.0.0",
+    "@google-web-components/google-chart": "^5.0.1",
     "@material/mwc-checkbox": "^0.25.3",
     "@material/mwc-formfield": "^0.25.3",
     "@material/mwc-icon": "^0.25.3",
@@ -9,23 +9,23 @@
     "@material/mwc-select": "^0.25.3",
     "@material/mwc-textfield": "^0.25.3",
     "@mdi/js": "^6.5.95",
-    "lit": "^2.0.2",
+    "lit": "^2.1.2",
     "superstruct": "^0.15.3",
     "svgmap": "^2.7.1",
     "toucan-js": "^2.5.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^2.2.2",
-    "@cloudflare/wrangler": "^1.19.5",
-    "@types/jest": "^27.0.2",
-    "@types/node": "^16.11.7",
+    "@cloudflare/workers-types": "^3.3.1",
+    "@cloudflare/wrangler": "^1.19.7",
+    "@types/jest": "^27.4.0",
+    "@types/node": "^17.0.15",
     "jest": "^26.6.3",
     "ts-jest": "^26.5.6",
     "ts-loader": "^8.3.0",
-    "typescript": "^4.4.4",
-    "vite": "^2.6.14",
-    "webpack": "^5.64.0",
-    "webpack-cli": "^4.9.1"
+    "typescript": "^4.5.5",
+    "vite": "^2.7.13",
+    "webpack": "^5.68.0",
+    "webpack-cli": "^4.9.2"
   },
   "jest": {
     "transform": {

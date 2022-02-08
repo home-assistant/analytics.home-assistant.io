@@ -48,7 +48,9 @@ export class AnalyticsActiveInstallations extends LitElement {
         ]}
         .rows=${rows}
         .options=${{
-          title: `${lastEntry.active_installations} Active Home Assistant Installations`,
+          title: `${Intl.NumberFormat().format(
+            lastEntry.active_installations
+          )} Active Home Assistant Installations`,
           series: {
             0: { color: "#3366cc" },
             1: { color: "#dc3912" },

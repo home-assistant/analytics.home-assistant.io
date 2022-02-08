@@ -6,8 +6,8 @@ export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 850;
 
-export const SCHEMA_VERSION_QUEUE = 7;
-export const SCHEMA_VERSION_ANALYTICS = 2;
+export const SCHEMA_VERSION_QUEUE = 9;
+export const SCHEMA_VERSION_ANALYTICS = 3;
 
 export const BRANDS_DOMAINS_URL =
   "https://brands.home-assistant.io/domains.json";
@@ -28,6 +28,7 @@ export enum ShortInstallationType {
   CONTAINER = "d",
   OS = "o",
   SUPERVISED = "s",
+  UNSUPPORTED_THIRD_PARTY_CONTAINER = "t",
   UNKNOWN = "u",
 }
 
@@ -53,6 +54,15 @@ export interface UuidMetadata {
   [UuidMetadataKey.EXTRA]: MetadataExtra[];
 }
 
+export interface VersionResponse {
+  channel: string;
+  hassos: Record<string, string>;
+}
+
+export interface CfRequest extends Request {
+  cf?: IncomingRequestCfProperties;
+}
+
 export interface ListEntry {
   metadata?: UuidMetadata;
   name: string;
@@ -74,6 +84,7 @@ export interface QueueData {
     { total: number; versions: Record<string, number> }
   >;
   reports_integrations: number;
+  reports_addons: number;
   reports_statistics: number;
   versions: Record<string, number>;
   countries: Record<string, number>;
@@ -82,6 +93,7 @@ export interface QueueData {
     container: number;
     core: number;
     supervised: number;
+    unsupported_container: number;
     unknown: number;
   };
   supervisor: {
@@ -119,6 +131,7 @@ export interface AnalyticsDataHistory {
     container: number;
     core: number;
     supervised: number;
+    unsupported_container: number;
     unknown: number;
   };
   versions?: Record<string, number>;
@@ -135,6 +148,7 @@ export interface AnalyticsDataCurrent {
   last_updated: number;
   extended_data_from: number;
   reports_integrations: number;
+  reports_addons: number;
   reports_statistics: number;
   versions: Record<string, number>;
   active_installations: number;
@@ -147,6 +161,7 @@ export interface AnalyticsDataCurrent {
     container: number;
     core: number;
     supervised: number;
+    unsupported_container: number;
     unknown: number;
   };
 }
@@ -187,6 +202,8 @@ export const InstallationTypes: Record<string, ShortInstallationType> = {
   "Home Assistant Container": ShortInstallationType.CONTAINER,
   "Home Assistant Core": ShortInstallationType.CORE,
   "Home Assistant Supervised": ShortInstallationType.SUPERVISED,
+  "Unsupported Third Party Container":
+    ShortInstallationType.UNSUPPORTED_THIRD_PARTY_CONTAINER,
   Unknown: ShortInstallationType.UNKNOWN,
 };
 
@@ -202,6 +219,7 @@ export const createQueueData = (): QueueData => ({
   custom_integrations: {},
   reports_integrations: 0,
   reports_statistics: 0,
+  reports_addons: 0,
   versions: {},
   countries: {},
   operating_system: { boards: {}, versions: {} },
@@ -215,6 +233,7 @@ export const createQueueData = (): QueueData => ({
     container: 0,
     core: 0,
     supervised: 0,
+    unsupported_container: 0,
     unknown: 0,
   },
   integrations: {},

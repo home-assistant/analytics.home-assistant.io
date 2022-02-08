@@ -9,11 +9,20 @@ export interface IntegrationData {
   installations: number;
 }
 
-export const AnalyticsPages = ["installations", "statistics", "integrations"];
+export interface AddonData {
+  slug: string;
+  auto_update: number;
+  protected: number;
+  total: number;
+}
+
+export const AnalyticsPages = ["installs", "stats", "integrations", "add-ons"];
 
 export const fetchData = () => fetch("/data.json");
 
 export const fetchIntegrationDetails = () => fetch("/integration_details.json");
+
+export const fetchAddons = () => fetch("/addons.json");
 
 export const relativeTime = (targetTimestamp: number): string => {
   const now = new Date();

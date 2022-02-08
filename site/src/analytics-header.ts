@@ -5,7 +5,7 @@ import { AnalyticsPages } from "./data";
 
 @customElement("analytics-header")
 export class AnalyticsHeader extends LitElement {
-  @property() public currentPage = "installations";
+  @property() public currentPage = "installs";
 
   render() {
     return html` <h1>Home Assistant Analytics</h1>

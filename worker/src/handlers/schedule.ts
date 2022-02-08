@@ -24,6 +24,7 @@ import {
   KV_KEY_CUSTOM_INTEGRATIONS,
   BRANDS_DOMAINS_URL,
   VERSION_URL,
+  VersionResponse,
 } from "../data";
 import { groupVersions } from "../utils/group-versions";
 import { median } from "../utils/median";
@@ -33,7 +34,6 @@ export async function handleSchedule(
   event: ScheduledEvent,
   sentry: Toucan
 ): Promise<void> {
-  // @ts-expect-error Missing type for cron on ScheduledEvent https://github.com/cloudflare/workers-types/pull/86
   const scheduledTask = event.cron;
 
   try {
@@ -124,6 +124,7 @@ async function updateHistory(sentry: Toucan): Promise<void> {
     data.installation_types.core +
     data.installation_types.os +
     data.installation_types.supervised +
+    data.installation_types.unsupported_container +
     data.installation_types.unknown;
 
   analyticsData.current.installation_types = data.installation_types;
@@ -205,7 +206,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
     custom: string[];
   } = await brandsDomainsResponse.json();
 
-  const osBoardsJson = await versionResponse.json();
+  const osBoardsJson = await versionResponse.json<VersionResponse>();
 
   const brandsDomains: Set<string> = new Set(
     brandsDomainsJson.custom.concat(brandsDomainsJson.core)
@@ -408,6 +409,7 @@ function combineEntryData(
   }
 
   if (reported_addons.length) {
+    data.reports_addons++;
     for (const addon of reported_addons) {
       if (addon.slug.startsWith("local_")) {
         continue;
@@ -489,6 +491,7 @@ const processQueueData = (data: QueueData) => {
       data.installation_types.core +
       data.installation_types.os +
       data.installation_types.supervised +
+      data.installation_types.unsupported_container +
       data.installation_types.unknown,
     avg_users: median(data.count_users),
     avg_automations: median(data.count_automations),
@@ -499,6 +502,7 @@ const processQueueData = (data: QueueData) => {
     operating_system: data.operating_system,
     supervisor: data.supervisor,
     reports_integrations: data.reports_integrations,
+    reports_addons: data.reports_addons,
     reports_statistics: data.reports_statistics,
     versions: data.versions,
     energy: {
