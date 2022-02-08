@@ -320,6 +320,24 @@ const ADDONS: {
       "https://github.com/hassio-addons/repository/blob/master/zwavejs2mqtt/DOCS.md",
     icon: "https://raw.githubusercontent.com/hassio-addons/repository/master/zwavejs2mqtt/icon.png",
   },
+  "5c53de3b_esphome": {
+    name: "ESPHome",
+    documentation:
+      "https://github.com/esphome/home-assistant-addon/blob/main/esphome/DOCS.md",
+    icon: "https://raw.githubusercontent.com/esphome/home-assistant-addon/main/esphome/icon.png",
+  },
+  "5c53de3b_esphome-beta": {
+    name: "ESPHome (beta)",
+    documentation:
+      "https://github.com/esphome/home-assistant-addon/blob/main/esphome-beta/DOCS.md",
+    icon: "https://raw.githubusercontent.com/esphome/home-assistant-addon/main/esphome-beta/icon.png",
+  },
+  "5c53de3b_esphome-dev": {
+    name: "ESPHome (dev)",
+    documentation:
+      "https://github.com/esphome/home-assistant-addon/blob/main/esphome-dev/DOCS.md",
+    icon: "https://raw.githubusercontent.com/esphome/home-assistant-addon/main/esphome-dev/icon.png",
+  },
 };
 
 @customElement("analytics-addons")
