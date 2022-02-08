@@ -187,7 +187,7 @@ const ADDONS: {
       "https://github.com/hassio-addons/repository/blob/master/jupyterlab/DOCS.md",
     icon: "https://raw.githubusercontent.com/hassio-addons/repository/master/jupyterlab/icon.png",
   },
-  "a0d7b954_log-viewer": {
+  a0d7b954_logviewer: {
     name: "Log Viewer",
     documentation:
       "https://github.com/hassio-addons/repository/blob/master/log-viewer/DOCS.md",
@@ -211,7 +211,7 @@ const ADDONS: {
       "https://github.com/hassio-addons/repository/blob/master/nginxproxymanager/DOCS.md",
     icon: "https://raw.githubusercontent.com/hassio-addons/repository/master/nginxproxymanager/icon.png",
   },
-  "a0d7b954_node-red": {
+  a0d7b954_nodered: {
     name: "Node-RED",
     documentation:
       "https://github.com/hassio-addons/repository/blob/master/node-red/DOCS.md",
