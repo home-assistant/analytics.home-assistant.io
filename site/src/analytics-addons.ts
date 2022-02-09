@@ -187,7 +187,7 @@ const ADDONS: {
       "https://github.com/hassio-addons/repository/blob/master/jupyterlab/DOCS.md",
     icon: "https://raw.githubusercontent.com/hassio-addons/repository/master/jupyterlab/icon.png",
   },
-  "a0d7b954_log-viewer": {
+  a0d7b954_logviewer: {
     name: "Log Viewer",
     documentation:
       "https://github.com/hassio-addons/repository/blob/master/log-viewer/DOCS.md",
@@ -211,7 +211,7 @@ const ADDONS: {
       "https://github.com/hassio-addons/repository/blob/master/nginxproxymanager/DOCS.md",
     icon: "https://raw.githubusercontent.com/hassio-addons/repository/master/nginxproxymanager/icon.png",
   },
-  "a0d7b954_node-red": {
+  a0d7b954_nodered: {
     name: "Node-RED",
     documentation:
       "https://github.com/hassio-addons/repository/blob/master/node-red/DOCS.md",
@@ -319,6 +319,24 @@ const ADDONS: {
     documentation:
       "https://github.com/hassio-addons/repository/blob/master/zwavejs2mqtt/DOCS.md",
     icon: "https://raw.githubusercontent.com/hassio-addons/repository/master/zwavejs2mqtt/icon.png",
+  },
+  "5c53de3b_esphome": {
+    name: "ESPHome",
+    documentation:
+      "https://github.com/esphome/home-assistant-addon/blob/main/esphome/DOCS.md",
+    icon: "https://raw.githubusercontent.com/esphome/home-assistant-addon/main/esphome/icon.png",
+  },
+  "5c53de3b_esphome-beta": {
+    name: "ESPHome (beta)",
+    documentation:
+      "https://github.com/esphome/home-assistant-addon/blob/main/esphome-beta/DOCS.md",
+    icon: "https://raw.githubusercontent.com/esphome/home-assistant-addon/main/esphome-beta/icon.png",
+  },
+  "5c53de3b_esphome-dev": {
+    name: "ESPHome (dev)",
+    documentation:
+      "https://github.com/esphome/home-assistant-addon/blob/main/esphome-dev/DOCS.md",
+    icon: "https://raw.githubusercontent.com/esphome/home-assistant-addon/main/esphome-dev/icon.png",
   },
 };
 
