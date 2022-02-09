@@ -114,6 +114,7 @@ export class AnalyticsElement extends LitElement {
           : this._currentPage === "integrations"
           ? html`<analytics-integrations
               .currentData=${this._data.current}
+              .isDarkMode=${this._isDarkMode}
               .isMobile=${this._isMobile}
               .domain=${query.get("domain")}
             >
