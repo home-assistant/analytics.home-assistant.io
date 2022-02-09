@@ -26,6 +26,8 @@ const DEFAULT_DOMAINS: string[] = [
 export class AnalyticsIntegrations extends LitElement {
   @property({ attribute: false }) public currentData?: AnalyticsDataCurrent;
 
+  @property({ type: Boolean }) public isDarkMode = false;
+
   @property({ type: Boolean }) public isMobile = false;
 
   @property() public domain: string | null = null;
@@ -148,7 +150,10 @@ export class AnalyticsIntegrations extends LitElement {
                   target="_blank"
                 >
                   <img
-                    src="https://brands.home-assistant.io/_/${entry.domain}/icon.png"
+                    src="https://brands.home-assistant.io/_/${entry.domain}/${this
+                      .isDarkMode
+                      ? "dark_"
+                      : ""}icon.png"
                   />
                   <span>${entry.title}</span>
                 </a>
