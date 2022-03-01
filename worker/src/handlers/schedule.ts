@@ -327,6 +327,16 @@ function combineMetadataEntryData(
     ShortInstallationType.SUPERVISED
   ) {
     data.installation_types.supervised++;
+  } else if (
+    entrydata[UuidMetadataKey.INSTALLATION_TYPE] ===
+    ShortInstallationType.UNSUPPORTED_THIRD_PARTY_CONTAINER
+  ) {
+    data.installation_types.unsupported_container++;
+  } else if (
+    entrydata[UuidMetadataKey.INSTALLATION_TYPE] ===
+    ShortInstallationType.UNKNOWN
+  ) {
+    data.installation_types.unknown++;
   }
 
   return data;
@@ -389,6 +399,12 @@ function combineEntryData(
     data.installation_types.core++;
   } else if (entrydata.installation_type === "Home Assistant Supervised") {
     data.installation_types.supervised++;
+  } else if (
+    entrydata.installation_type === "Unsupported Third Party Container"
+  ) {
+    data.installation_types.unsupported_container++;
+  } else if (entrydata.installation_type === "Unknown") {
+    data.installation_types.unknown++;
   }
 
   if (entrydata.addon_count) {
