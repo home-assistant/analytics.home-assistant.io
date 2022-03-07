@@ -19,4 +19,4 @@ if [ ! -d node_modules ]; then
 fi
 
 cd ./site
-../node_modules/.bin/vite --open
+../node_modules/.bin/vite --open --host
