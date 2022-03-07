@@ -1,12 +1,12 @@
 {
   "name": "Home Assistant Analyticss",
-  "image": "mcr.microsoft.com/vscode/devcontainers/typescript-node:14",
+  "image": "mcr.microsoft.com/vscode/devcontainers/typescript-node:16",
   "context": "..",
   "remoteEnv": {
-    "PATH":"${containerEnv:PATH}:./node_modules/.bin",
+    "PATH": "${containerEnv:PATH}:./node_modules/.bin",
     "DEVCONTAINER": "true"
   },
-  "postCreateCommand": "bash -i -c 'nvm install --lts' && script/bootstrap",
+  "postCreateCommand": "bash -i -c 'nvm install' && script/bootstrap",
   "appPort": ["8080:8080", "3001:3001"],
   "extensions": [
     "dbaeumer.vscode-eslint",
@@ -24,6 +24,6 @@
     "[typescript]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-  "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true
   }
 }
