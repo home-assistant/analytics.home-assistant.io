@@ -493,6 +493,9 @@ function combineEntryData(
   if (entrydata.energy && entrydata.energy.configured) {
     data.energy.count_configured++;
   }
+  if (entrydata.certificate) {
+    data.certificate_count_configured++;
+  }
 
   return data;
 }
@@ -521,6 +524,7 @@ const processQueueData = (data: QueueData) => {
     reports_addons: data.reports_addons,
     reports_statistics: data.reports_statistics,
     versions: data.versions,
+    certificate_count_configured: data.certificate_count_configured,
     energy: {
       count_configured: data.energy.count_configured,
     },
