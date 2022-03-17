@@ -193,7 +193,7 @@ export interface IncomingPayload {
   last_write?: number;
   state_count?: number;
   user_count?: number;
-  certificate?: number;
+  certificate?: boolean;
   energy?: { configured: boolean };
   uuid: string;
   version: string;
