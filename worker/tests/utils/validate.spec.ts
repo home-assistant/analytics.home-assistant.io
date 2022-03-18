@@ -78,6 +78,7 @@ describe("createIncomingPayload", function () {
       energy: { configured: true },
       supervisor: { healthy: false, supported: true, arch: "amd64" },
       user_count: 1,
+      certificate: true,
     };
     const fullPayload = createIncomingPayload(payload);
     expect(fullPayload.uuid).toBe(BASE_PAYLOAD.uuid);
