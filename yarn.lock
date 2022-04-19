@@ -314,12 +314,12 @@
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.5.2.tgz#8f03a22a04de437254e8ce8cc84ba39689288752"
   integrity sha512-HyYEUDeIj5rRQU2Hk5HTB2uHsbRQpF70nvMhVzi+VJR0X+xNEhjPui4/kBf3VeH/wqD28PT4sVOm8qqLjBrSZg==
 
-"@google-web-components/google-chart@^5.0.1":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@google-web-components/google-chart/-/google-chart-5.0.1.tgz#daef930048298bc1f0bdc91c291245bc2e2f2752"
-  integrity sha512-vt9CrJdDjDskLKk0ya6DI5Msy9+yVKR3MwIDQRFxORs2KL9MseEcO4/T8rwdp3TnytU+8lptKFIkD3f0qiCeCg==
+"@google-web-components/google-chart@^5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@google-web-components/google-chart/-/google-chart-5.0.2.tgz#49f8cc207522fecf96b5bb13e5ab5f353017bb06"
+  integrity sha512-gF9k3UIG4vU++N9FUSyM095CBFc3aE6V+CoGEJEI7po3Q3G87qAzBBPMKhW9LXdPMCbu74itKWOFQBWMGXUYlQ==
   dependencies:
-    lit "^2.0.2"
+    lit "^2.2.0"
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
@@ -3480,7 +3480,7 @@ lit-html@^2.2.0:
   dependencies:
     "@types/trusted-types" "^2.0.2"
 
-lit@^2.0.0, lit@^2.0.2, lit@^2.2.2:
+lit@^2.0.0, lit@^2.2.0, lit@^2.2.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/lit/-/lit-2.2.2.tgz#b7f729d6ca7e17efbf2bf589df2d5eb04d9620ba"
   integrity sha512-eN3+2QRHn/erxYB88AXiiRgQA6RltE9MhzySCwX+ACOxA/MLWN3VdXvcbZD9PN09zmUwlgzDvW3T84YWj2Sa0A==
