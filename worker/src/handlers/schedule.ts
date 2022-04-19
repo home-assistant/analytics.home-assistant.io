@@ -174,6 +174,10 @@ async function processQueue(sentry: Toucan): Promise<void> {
 
     const kv_list = await listKV(KV_PREFIX_UUID);
 
+    sentry.addBreadcrumb({
+      message: `${kv_list.length} entries`,
+    });
+
     for (const entry of kv_list) {
       if (
         entry.metadata &&
@@ -194,6 +198,10 @@ async function processQueue(sentry: Toucan): Promise<void> {
     fetch(BRANDS_DOMAINS_URL),
     fetch(VERSION_URL),
   ]);
+
+  sentry.setExtra("brandsDomainsResponse", brandsDomainsResponse);
+  sentry.setExtra("versionResponse", versionResponse);
+
   if (!brandsDomainsResponse.ok) {
     throw Error("Could not get domain list from brands");
   }
