@@ -7,7 +7,7 @@ on:
       - dev
 
 env:
-  WRANGLER_VERSION: "1.19.8"
+  WRANGLER_VERSION: "1.19.11"
   NODE_VERSION: "16.14.0"
 
 jobs:
@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Publish
     steps:
-      - uses: actions/checkout@v3.0.0
+      - uses: actions/checkout@v3.0.1
 
-      - uses: actions/setup-node@v3.0.0
+      - uses: actions/setup-node@v3.1.1
         with:
           node-version: ${{ env.NODE_VERSION }}
 

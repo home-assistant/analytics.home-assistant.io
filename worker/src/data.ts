@@ -4,7 +4,7 @@ export const KV_KEY_CUSTOM_INTEGRATIONS = "custom_integrations";
 export const KV_KEY_ADDONS = "addons";
 export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
-export const KV_MAX_PROCESS_ENTRIES = 850;
+export const KV_MAX_PROCESS_ENTRIES = 800;
 
 export const SCHEMA_VERSION_QUEUE = 11;
 export const SCHEMA_VERSION_ANALYTICS = 3;
