@@ -619,7 +619,6 @@ export class AnalyticsAddons extends LitElement {
     }
 
     .clear-button {
-      position: absolute;
       color: var(--secondary-text-color);
       margin-left: -42px;
       margin-top: 4px;
