@@ -7,7 +7,7 @@ on:
       - dev
 
 env:
-  WRANGLER_VERSION: "1.19.11"
+  WRANGLER_VERSION: "1.19.12"
   NODE_VERSION: "16.14.0"
 
 jobs:
