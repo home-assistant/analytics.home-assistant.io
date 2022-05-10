@@ -707,10 +707,10 @@
     lit "^2.0.0"
     tslib "^2.0.1"
 
-"@material/mwc-icon@^0.26.0":
-  version "0.26.0"
-  resolved "https://registry.yarnpkg.com/@material/mwc-icon/-/mwc-icon-0.26.0.tgz#0b7281e946edca3046da32e447ebee34305afc56"
-  integrity sha512-snI+u1xru4Q9FwEXhVxUoVjY3zvZ+H2ezYZa8Zn3OLArRcuz6R4yDxp1CZelaxTwyK2Sb6Hsp0h3liPCc2zl6A==
+"@material/mwc-icon@^0.26.1":
+  version "0.26.1"
+  resolved "https://registry.yarnpkg.com/@material/mwc-icon/-/mwc-icon-0.26.1.tgz#056b29b588d0e2ae5ccf857780c46b0012d9554e"
+  integrity sha512-RPcVPn+5p6hA2HjX/0wkeHQuxkJKgXMg47ffw+vhIw28qM8mprSv13hpUgrghb0f7xBvuPhf/kLb37V4xkRfwg==
   dependencies:
     lit "^2.0.0"
     tslib "^2.0.1"
