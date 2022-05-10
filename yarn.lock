@@ -710,6 +710,16 @@
     lit "^2.0.0"
     tslib "^2.0.1"
 
+"@material/mwc-checkbox@^0.26.1":
+  version "0.26.1"
+  resolved "https://registry.yarnpkg.com/@material/mwc-checkbox/-/mwc-checkbox-0.26.1.tgz#f8cc5c15c6b0ea5136d053a77d3295717ae0f57a"
+  integrity sha512-2euxVZ0zksAQ/JVkOznUOGJKfbxq+m3ijRTh44b8fQyERBobm5QtWXbhXxV9YCesqFQSbj5M3qDw6Nm5MRKluw==
+  dependencies:
+    "@material/mwc-base" "^0.26.1"
+    "@material/mwc-ripple" "^0.26.1"
+    lit "^2.0.0"
+    tslib "^2.0.1"
+
 "@material/mwc-floating-label@^0.25.3":
   version "0.25.3"
   resolved "https://registry.yarnpkg.com/@material/mwc-floating-label/-/mwc-floating-label-0.25.3.tgz#e730c5d379160bd7f72e37f3dcec13ee0c21eaaf"
