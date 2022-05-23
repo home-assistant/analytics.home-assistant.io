@@ -9,7 +9,7 @@
     "@material/mwc-select": "^0.26.1",
     "@material/mwc-textfield": "^0.26.1",
     "@mdi/js": "^6.7.96",
-    "lit": "^2.2.3",
+    "lit": "^2.2.4",
     "superstruct": "^0.15.4",
     "svgmap": "^2.7.2",
     "toucan-js": "^2.6.0"
