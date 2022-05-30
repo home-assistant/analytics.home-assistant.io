@@ -11,7 +11,7 @@
     "@mdi/js": "^6.7.96",
     "lit": "^2.2.4",
     "superstruct": "^0.15.4",
-    "svgmap": "^2.7.2",
+    "svgmap": "^2.8.0",
     "toucan-js": "^2.6.0"
   },
   "devDependencies": {
