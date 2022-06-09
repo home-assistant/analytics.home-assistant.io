@@ -127,12 +127,6 @@ const ADDONS: {
       "https://github.com/hassio-addons/repository/blob/master/chrony/DOCS.md",
     icon: "https://raw.githubusercontent.com/hassio-addons/repository/master/chrony/icon.png",
   },
-  a0d7b954_esphome: {
-    name: "ESPHome Home Assistant Add-On",
-    documentation:
-      "https://github.com/hassio-addons/repository/blob/master/esphome/DOCS.md",
-    icon: "https://raw.githubusercontent.com/hassio-addons/repository/master/esphome/icon.png",
-  },
   a0d7b954_example: {
     name: "Example",
     documentation:
