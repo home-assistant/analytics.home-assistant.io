@@ -955,10 +955,10 @@
     "@material/theme" "14.0.0-canary.53b3cad2f.0"
     tslib "^2.1.0"
 
-"@mdi/js@^6.7.96":
-  version "6.7.96"
-  resolved "https://registry.yarnpkg.com/@mdi/js/-/js-6.7.96.tgz#6cd13ba64eeaf347c857feb3c328d31af3e75876"
-  integrity sha512-vZvhFrNN9LQx+Awu3nU6ESfXXDpRA/CA4mwikzU5g8uf9NpAocK43ecQvVNntwiXlLKpyplas8d4lsfpqjtXLA==
+"@mdi/js@^6.9.96":
+  version "6.9.96"
+  resolved "https://registry.yarnpkg.com/@mdi/js/-/js-6.9.96.tgz#90e8fadef05a975df384f0505b2100a795881873"
+  integrity sha512-rK0/vLFaiItYS2W7uVmaKPKnhNQE4XVkylpk5njtVwENnp8elwY5uRL6qvdj2esuvUHG7DwygE4Qu3eKxxuJiQ==
 
 "@sentry/core@6.19.6":
   version "6.19.6"
