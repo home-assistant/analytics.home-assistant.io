@@ -8,7 +8,7 @@
     "@material/mwc-list": "^0.26.1",
     "@material/mwc-select": "^0.26.1",
     "@material/mwc-textfield": "^0.26.1",
-    "@mdi/js": "^6.7.96",
+    "@mdi/js": "^6.9.96",
     "lit": "^2.2.7",
     "superstruct": "^0.16.0",
     "svgmap": "^2.10.0",
