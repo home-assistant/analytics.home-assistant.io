@@ -6,7 +6,7 @@
     "@material/mwc-icon": "^0.27.0",
     "@material/mwc-icon-button": "^0.26.1",
     "@material/mwc-list": "^0.26.1",
-    "@material/mwc-select": "^0.26.1",
+    "@material/mwc-select": "^0.27.0",
     "@material/mwc-textfield": "^0.26.1",
     "@mdi/js": "^7.0.96",
     "lit": "^2.3.0",
