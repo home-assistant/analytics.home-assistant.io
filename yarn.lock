@@ -669,6 +669,16 @@
     lit "^2.0.0"
     tslib "^2.0.1"
 
+"@material/mwc-base@^0.27.0":
+  version "0.27.0"
+  resolved "https://registry.yarnpkg.com/@material/mwc-base/-/mwc-base-0.27.0.tgz#9bb282510b39168dcaa2d2c23aecdf91f6733c6e"
+  integrity sha512-oCWWtjbyQ52AaUbzINLGBKScIPyqhps2Y7c8t6Gu6fcFeDxhKXMV1Cqvtj/OMhtAt53XjHfD2XruWwYv3cYYUA==
+  dependencies:
+    "@material/base" "=14.0.0-canary.53b3cad2f.0"
+    "@material/dom" "=14.0.0-canary.53b3cad2f.0"
+    lit "^2.0.0"
+    tslib "^2.0.1"
+
 "@material/mwc-checkbox@^0.26.1":
   version "0.26.1"
   resolved "https://registry.yarnpkg.com/@material/mwc-checkbox/-/mwc-checkbox-0.26.1.tgz#f8cc5c15c6b0ea5136d053a77d3295717ae0f57a"
@@ -683,6 +693,15 @@
   version "0.26.1"
   resolved "https://registry.yarnpkg.com/@material/mwc-floating-label/-/mwc-floating-label-0.26.1.tgz#a18b9861305bc7a59123802da6d63fb6dbf80c9f"
   integrity sha512-iPKOWAgypL+UNZWa0jNE2P/929QEbHqrxr7BFNKpSvO/t6pX7672g1gOny7+8Dnnt+a4kVlYjWTMAw9qjOkLlg==
+  dependencies:
+    "@material/floating-label" "=14.0.0-canary.53b3cad2f.0"
+    lit "^2.0.0"
+    tslib "^2.0.1"
+
+"@material/mwc-floating-label@^0.27.0":
+  version "0.27.0"
+  resolved "https://registry.yarnpkg.com/@material/mwc-floating-label/-/mwc-floating-label-0.27.0.tgz#7d2608b1fb91f99fda009021b1f8aad809b261b9"
+  integrity sha512-uLleloTxQ6dDShcZzqgqfC8otQY8DtGMO9HFQbAEncoFAWpAehcEonsuT/IUhMORN+c5un0P5WXwcZsInJb7og==
   dependencies:
     "@material/floating-label" "=14.0.0-canary.53b3cad2f.0"
     lit "^2.0.0"
@@ -724,6 +743,15 @@
     lit "^2.0.0"
     tslib "^2.0.1"
 
+"@material/mwc-line-ripple@^0.27.0":
+  version "0.27.0"
+  resolved "https://registry.yarnpkg.com/@material/mwc-line-ripple/-/mwc-line-ripple-0.27.0.tgz#91fdc3b2fc3a2cc93cedbbf2342dd8bab37a60a6"
+  integrity sha512-n9Xpt5g3RJEl9rvk14OP6dUNJUtsJA46beTQiep7ppO7IPVFLC1v/5sPpUzfNPUBsclSPxdBuNlCxsgcIYueUw==
+  dependencies:
+    "@material/line-ripple" "=14.0.0-canary.53b3cad2f.0"
+    lit "^2.0.0"
+    tslib "^2.0.1"
+
 "@material/mwc-list@^0.26.1":
   version "0.26.1"
   resolved "https://registry.yarnpkg.com/@material/mwc-list/-/mwc-list-0.26.1.tgz#51aaf759244a7dd0f5bc4ec58a4f95aad224fede"
@@ -759,6 +787,16 @@
   integrity sha512-3vsbnNk9dzyATANoL+nv7nwGvvzgb4tQcMbjP023qmpkelV/Ci2jP8nV+UDDepJcZ6KjRJo1eUAroznp4T/rKA==
   dependencies:
     "@material/mwc-base" "^0.26.1"
+    "@material/notched-outline" "=14.0.0-canary.53b3cad2f.0"
+    lit "^2.0.0"
+    tslib "^2.0.1"
+
+"@material/mwc-notched-outline@^0.27.0":
+  version "0.27.0"
+  resolved "https://registry.yarnpkg.com/@material/mwc-notched-outline/-/mwc-notched-outline-0.27.0.tgz#1c5539c6e485e27048404e24132051dad0a47407"
+  integrity sha512-IlqfQVaEd1RAHqhOG0Xk5JhTDgBe/P9og0pnACglK6bPE0vUhYKwibJiHcr4ACTPtGWHO9o92aktR+7AIEAKtQ==
+  dependencies:
+    "@material/mwc-base" "^0.27.0"
     "@material/notched-outline" "=14.0.0-canary.53b3cad2f.0"
     lit "^2.0.0"
     tslib "^2.0.1"
@@ -805,17 +843,17 @@
     lit "^2.0.0"
     tslib "^2.0.1"
 
-"@material/mwc-textfield@^0.26.1":
-  version "0.26.1"
-  resolved "https://registry.yarnpkg.com/@material/mwc-textfield/-/mwc-textfield-0.26.1.tgz#06878a52ee49ccfe4d368741eabded541d08abc8"
-  integrity sha512-Kdb31R2PROUOM7hpyjb+pY4WIOu6BQSEQKeVy4hnLqwvhe14nTvnn9I7Fkkz4t9SNWPh3G+DQsAx9vhPuCgUyQ==
+"@material/mwc-textfield@^0.27.0":
+  version "0.27.0"
+  resolved "https://registry.yarnpkg.com/@material/mwc-textfield/-/mwc-textfield-0.27.0.tgz#07cdc6ec6b30ce5cb357a5381530689720c082ee"
+  integrity sha512-4/OEeEVAWWQ1DzpjeMLYLsa9HMlifOPjAvi0681Yj1g/RYJs5ONZS80HZ8HOT+efAOlZDugshgM4gdNS3I0XFQ==
   dependencies:
     "@material/floating-label" "=14.0.0-canary.53b3cad2f.0"
     "@material/line-ripple" "=14.0.0-canary.53b3cad2f.0"
-    "@material/mwc-base" "^0.26.1"
-    "@material/mwc-floating-label" "^0.26.1"
-    "@material/mwc-line-ripple" "^0.26.1"
-    "@material/mwc-notched-outline" "^0.26.1"
+    "@material/mwc-base" "^0.27.0"
+    "@material/mwc-floating-label" "^0.27.0"
+    "@material/mwc-line-ripple" "^0.27.0"
+    "@material/mwc-notched-outline" "^0.27.0"
     "@material/textfield" "=14.0.0-canary.53b3cad2f.0"
     lit "^2.0.0"
     tslib "^2.0.1"
