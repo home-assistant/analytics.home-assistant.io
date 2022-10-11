@@ -1,0 +1,151 @@
+html {
+  --primary-text-color: #212121;
+  --secondary-text-color: #727272;
+  --primary-background-color: #fafafa;
+  --secondary-background-color: #ffffff;
+  --divider-color: rgba(0, 0, 0, 0.12);
+  --primary-color: #03a9f4;
+}
+
+.svgMap-map-wrapper {
+  background-color: #d9ecff !important;
+}
+
+.svgMap-tooltip {
+  background-color: #fafafa !important;
+}
+.svgMap-tooltip .svgMap-tooltip-content table td span {
+  color: var(--primary-text-color) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    --primary-text-color: #e1e1e1;
+    --secondary-text-color: #9b9b9b;
+    --primary-background-color: #111111;
+    --secondary-background-color: #202020;
+    --divider-color: rgba(225, 225, 225, 0.12);
+  }
+
+  .svgMap-map-wrapper,
+  .svgMap-tooltip {
+    background: #1c1c1c !important;
+  }
+}
+
+body {
+  font-family: "Segoe UI", Roboto, sans-serif;
+  font-size: 1em;
+  padding: 0;
+  margin: 0;
+  line-height: 1.4;
+  background-color: var(--primary-background-color);
+  color: var(--primary-text-color);
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.nav-title {
+  color: var(--primary-text-color) !important;
+}
+
+.content {
+  margin: 32px 0;
+}
+
+.container {
+  margin: 0 auto;
+  padding: 16px 8px;
+  max-width: 1000px;
+}
+
+.footer {
+  margin-top: 24px;
+  border-top: 1px solid var(--divider-color);
+  padding-top: 24px;
+  text-align: center;
+}
+
+.footer > * {
+  white-space: nowrap;
+}
+
+.footer .initiative {
+  font-style: italic;
+  margin-top: 16px;
+}
+
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.nav-bar .logo {
+  width: 60%;
+}
+.nav-bar img {
+  max-height: 48px;
+  max-width: 100%;
+}
+.nav-bar ul {
+  display: flex;
+  justify-content: space-between;
+  padding: 0;
+}
+.nav-bar ul li {
+  list-style: none;
+}
+.nav-bar li a {
+  display: inline-block;
+  padding: 4px;
+  margin: 0 4px;
+  color: var(--secondary-text-color);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+.nav-bar a.active {
+  border-bottom-color: var(--primary-color);
+}
+
+.note {
+  color: var(--secondary-text-color);
+  font-style: italic;
+  margin-top: 8px;
+  margin-bottom: 32px;
+}
+
+@media screen and (max-width: 500px) {
+  body {
+    font-size: 0.8em;
+  }
+
+  .container {
+    padding: 0 8px;
+  }
+
+  .serperator {
+    display: none;
+  }
+
+  .nav-bar {
+    flex-direction: column;
+  }
+
+  .nav-bar > * {
+    margin-top: -8px;
+  }
+
+  .nav-bar .logo {
+    width: 100%;
+  }
+
+  .nav-bar ul {
+    width: 100%;
+  }
+  .nav-bar ul li {
+    padding-top: 8px;
+  }
+}

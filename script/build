@@ -6,10 +6,10 @@ declare custom_integrations
 declare data
 declare integration_details
 
-declare addons_path="${PWD}/site/public/addons.json"
-declare custom_integrations_path="${PWD}/site/public/custom_integrations.json"
-declare data_path="${PWD}/site/public/data.json"
-declare integration_details_path="${PWD}/site/public/integration_details.json"
+declare addons_path="${PWD}/site/src/_data/addons.json"
+declare custom_integrations_path="${PWD}/site/src/_data/custom_integrations.json"
+declare data_path="${PWD}/site/src/_data/data.json"
+declare integration_details_path="${PWD}/site/src/_data/integration_details.json"
 
 # Stop on errors
 set -e
@@ -17,25 +17,15 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-mkdir -p ./site/public
+rm -rf ./site/dist
+mkdir -p ./site/src/_data
 
 if [ -n "$CF_KV_TOKEN" ]; then
   if [ -n "$INCOMING_HOOK_URL" ]; then
     sleep 61 # Wait for KV writes to reach all nodes
   fi
 
-  if [ "$BRANCH" = "main" ]; then
-    addons=$(curl -sSLf "$CF_KV_URL_ADDONS" \
-      -H "Authorization: Bearer $CF_KV_TOKEN" \
-      -H "Content-Type:application/json")
-    custom_integrations=$(curl -sSLf "$CF_KV_URL_CUSTOM_INTEGRATIONS" \
-      -H "Authorization: Bearer $CF_KV_TOKEN" \
-      -H "Content-Type:application/json")
-    data=$(curl -sSLf "$CF_KV_URL" \
-      -H "Authorization: Bearer $CF_KV_TOKEN" \
-      -H "Content-Type:application/json")
-    integration_details=$(curl -sSLf https://www.home-assistant.io/integrations.json)
-  else
+  if [ "$BRANCH" = "dev" ]; then
     addons=$(curl -sSLf "$CF_KV_URL_ADDONS_DEV" \
       -H "Authorization: Bearer $CF_KV_TOKEN" \
       -H "Content-Type:application/json")
@@ -46,13 +36,24 @@ if [ -n "$CF_KV_TOKEN" ]; then
       -H "Authorization: Bearer $CF_KV_TOKEN" \
       -H "Content-Type:application/json")
     integration_details=$(curl -sSLf https://rc.home-assistant.io/integrations.json)
+  else
+    addons=$(curl -sSLf "$CF_KV_URL_ADDONS" \
+      -H "Authorization: Bearer $CF_KV_TOKEN" \
+      -H "Content-Type:application/json")
+    custom_integrations=$(curl -sSLf "$CF_KV_URL_CUSTOM_INTEGRATIONS" \
+      -H "Authorization: Bearer $CF_KV_TOKEN" \
+      -H "Content-Type:application/json")
+    data=$(curl -sSLf "$CF_KV_URL" \
+      -H "Authorization: Bearer $CF_KV_TOKEN" \
+      -H "Content-Type:application/json")
+    integration_details=$(curl -sSLf https://www.home-assistant.io/integrations.json)
   fi
 
 else
-  addons=$(curl -sSLf https://dev--home-assistant-analytics.netlify.app/addons.json)
-  custom_integrations=$(curl -sSLf https://dev--home-assistant-analytics.netlify.app/custom_integrations.json)
-  data=$(curl -sSLf https://dev--home-assistant-analytics.netlify.app/data.json)
-  integration_details=$(curl -sSLf https://rc.home-assistant.io/integrations.json)
+  addons=$(curl -sSLf https://analytics.home-assistant.io/addons.json)
+  custom_integrations=$(curl -sSLf https://analytics.home-assistant.io/custom_integrations.json)
+  data=$(curl -sSLf https://analytics.home-assistant.io/data.json)
+  integration_details=$(curl -sSLf https://www.home-assistant.io/integrations.json)
 fi
 
 # Export to files
@@ -67,4 +68,4 @@ if [ ! -d node_modules ]; then
 fi
 
 cd ./site
-../node_modules/.bin/vite build
+NODE_ENV="production" ../node_modules/.bin/eleventy

@@ -1,0 +1,178 @@
+---
+layout: base
+---
+
+<style>
+  table,
+  input[type="text"] {
+    width: 100%;
+    text-align: left;
+    -webkit-border-horizontal-spacing: 0;
+    -webkit-border-vertical-spacing: 0;
+    border-spacing: 0 0;
+    background-color: var(--secondary-background-color);
+  }
+  input[type="text"],
+  .table-footer {
+    width: calc(100% - 32px);
+    padding: 16px 16px;
+    color: var(--primary-text-color);
+    border: 0;
+    border-bottom: 1px solid var(--divider-color);
+  }
+
+  img {
+    height: 24px;
+    width: 24px;
+    margin-right: 12px;
+  }
+  td,
+  th {
+    padding: 16px;
+    background-color: var(--secondary-background-color);
+  }
+  td {
+    border-top: 1px solid var(--primary-background-color);
+  }
+  .table-header {
+    background-color: var(--primary-background-color);
+  }
+
+  .idx {
+    width: 12px;
+  }
+  .installations {
+    text-align: right;
+  }
+
+  .table-footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .table-footer div {
+    display: flex;
+    align-items: center;
+  }
+
+  select {
+    margin-left: 4px;
+    padding: 8px;
+    background-color: var(--secondary-background-color);
+    color: var(--primary-text-color);
+    border: none;
+  }
+
+  td a {
+    color: var(--primary-text-color);
+    text-decoration: none;
+    margin-right: 4px;
+    display: flex;
+    align-items: center;
+  }
+
+  .chevron {
+    display: block;
+    cursor: pointer;
+    margin: 0 8px;
+  }
+  .chevron[disabled] {
+    cursor: default;
+    color: var(--secondary-text-color);
+  }
+
+  @media only screen and (max-width: 600px) {
+    td,
+    th {
+      padding: 16px 8px;
+    }
+  }
+</style>
+
+<input
+  type="text"
+  id="search"
+  onkeyup="filterTable()"
+  placeholder="Search for {{ title | downcase }}.."
+/>
+<table id="table"></table>
+<div class="table-footer">
+  <div>
+    Lines per page
+    <select id="tableLimit" onchange="tableLimitChanged()">
+      <option>30</option>
+      <option>50</option>
+      <option>100</option>
+      <option>ALL</option>
+    </select>
+  </div>
+  <div id="paginator"></div>
+</div>
+
+{{content}}
+
+<script>
+  const darkMode = window.matchMedia("(prefers-color-scheme:dark)").matches;
+  const table = document.getElementById("table");
+  const tableLimitSelector = document.getElementById("tableLimit");
+  const paginator = document.getElementById("paginator");
+  let tableStart = 1;
+  let tableLimit = tableLimitSelector.value;
+  const tableHeader = `
+    <tr class="table-header">
+      <th class="idx"></th>
+      <th>Name</th>
+      <th class="installations">Installations</th>
+    </tr>
+    `;
+
+  function populateTable(filter) {
+    const tableRows = tableEntries
+      .filter((entry) => !filter || entry.name.toUpperCase().includes(filter))
+      .slice(
+        Number(tableStart) - 1,
+        Number(tableStart) - 1 + Number(tableLimit)
+      )
+      .map((entry) => createTableRow(entry));
+    table.innerHTML = [tableHeader].concat(tableRows).join("");
+    let currentMax = Number(tableStart) - 1 + Number(tableLimit);
+    if (currentMax > tableEntries.length) currentMax = tableEntries.length;
+    paginator.innerHTML = !filter
+      ? `
+      <p class="chevron" ${
+        tableStart === 1 ? "disabled" : 'onclick="previousPage()"'
+      }><</p>
+      ${tableStart}-${currentMax} of ${tableEntries.length}
+      <p class="chevron" ${
+        tableEntries.length - currentMax <= 0
+          ? "disabled"
+          : 'onclick="nextPage()"'
+      }>></p>
+    `
+      : "";
+  }
+
+  function filterTable() {
+    populateTable(document.getElementById("search").value.toUpperCase());
+  }
+
+  function tableLimitChanged() {
+    tableLimit =
+      tableLimitSelector.value === "ALL"
+        ? tableEntries.length
+        : tableLimitSelector.value;
+    populateTable();
+  }
+
+  function nextPage() {
+    tableStart += Number(tableLimit);
+    populateTable();
+  }
+
+  function previousPage() {
+    tableStart -= Number(tableLimit);
+    populateTable();
+  }
+
+  populateTable();
+</script>

@@ -1,0 +1,22 @@
+---
+# This file is used to generate the public /*.json files
+pagination:
+  data: datasets
+  size: 1
+datasets:
+ - custom_integrations
+ - addons
+ - data
+ - current_data
+permalink: '/{{ datasets[pagination.pageNumber] }}.json'
+---
+{%- assign dataset = datasets[pagination.pageNumber] -%}
+{%- if dataset == "custom_integrations" -%}
+{{ custom_integrations | json }}
+{%- elsif dataset == "addons" -%}
+{{ addons | json }}
+{%- elsif dataset == "data" -%}
+{{ data | json }}
+{%- elsif dataset == "current_data" -%}
+{{ data.current | json }}
+{%- endif -%}

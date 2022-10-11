@@ -15,7 +15,7 @@ export const MockedSentry = () => ({
   captureMessage: jest.fn(),
 });
 
-export const MockedScheduledEvent = (options: Record<string, any>) => ({
+export const MockedScheduledEvent = (options: any): ScheduledEvent => ({
   type: "cron",
   eventPhase: 0,
   composed: true,
@@ -34,10 +34,6 @@ export const MockedScheduledEvent = (options: Record<string, any>) => ({
   CAPTURING_PHASE: 0,
   AT_TARGET: 0,
   BUBBLING_PHASE: 0,
-  currentTarget: undefined,
-  srcElement: undefined,
-  target: undefined,
-  initEvent: undefined,
   cron: "",
   scheduledTime: 0,
   noRetry: () => ({}),
