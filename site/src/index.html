@@ -65,7 +65,6 @@ extra_head_contents: <script src="/static/svg-pan-zoom@3.6.1.min.js"></script>
 
 <script>
   const darkMode = window.matchMedia("(prefers-color-scheme:dark)").matches;
-  const backgroundColors = ["#66ccff", "#ff9966", "#254661", "#0a47e0", "#293f95", "#034bd9", "#0547cb", "#1bb69b", "#7c4fef", "#149ed3", "#351db4", "#301594", "#3bdcf8", "#1de416", "#3f18db", "#2acab0", "#338844", "#c0991c", "#507f50", "#007f00", "#007f1f", "#005014", "#67967b", "#692568", "#a239a0", "#812d80", "#a8763e", "#003049", "#fff3c4", "#38761d", "#f8d708", "#e8656a", "#eb6758", "#f48a73", "#318ce7", "#3b2f2f", "#bfff00", "#9966cc", "#dc143c"];
 
   Chart.defaults.color = darkMode ? "#9b9b9b" : "#727272";
   Chart.defaults.borderColor = darkMode ? "#202020" : "#ffffff";
@@ -123,7 +122,7 @@ extra_head_contents: <script src="/static/svg-pan-zoom@3.6.1.min.js"></script>
       labels: {{ data.current.versions | versionSummary | keys | json }},
       datasets: [{
         data: {{ data.current.versions | versionSummary | values | json }},
-        backgroundColor: backgroundColors.reverse(),
+        backgroundColor: {{ data.current.versions | versionSummary | keys | randomColors }}
       }]
     }
   });
@@ -159,10 +158,10 @@ extra_head_contents: <script src="/static/svg-pan-zoom@3.6.1.min.js"></script>
           {{ data.current.installation_types.core }}
         ],
         backgroundColor: [
-          "#dc3912",
-          "#ff9900",
-          "#990099",
-          "#109618"
+          "{{ "Operating System" | randomColor }}",
+          "{{ "Container" | randomColor }}",
+          "{{ "Supervised" | randomColor }}",
+          "{{ "Core" | randomColor }}"
         ]
       }]
     }
@@ -188,7 +187,7 @@ extra_head_contents: <script src="/static/svg-pan-zoom@3.6.1.min.js"></script>
       labels: {{ data.current.operating_system.versions | osVersionSummary | keys | json }},
       datasets: [{
         data: {{ data.current.operating_system.versions | osVersionSummary | values | json }},
-        backgroundColor: backgroundColors.reverse(),
+        backgroundColor: {{ data.current.operating_system.versions | osVersionSummary | keys | randomColors }}
       }]
     }
   });
@@ -214,8 +213,7 @@ extra_head_contents: <script src="/static/svg-pan-zoom@3.6.1.min.js"></script>
       labels: {{ sorted.labels | json }},
       datasets: [{
         data: {{ sorted.data | json }},
-        backgroundColor: backgroundColors.reverse(),
-
+        backgroundColor: {{ sorted.backgroundColor | json }},
       }]
     }
   });

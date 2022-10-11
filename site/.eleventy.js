@@ -1,5 +1,6 @@
 const historyFiltering = require("./src/tools/history_filter");
 const calculate = require("./src/tools/calculate");
+const colors = require("./src/tools/colors");
 
 const friendlyBoardName = {
   "intel-nuc": "Intel NUC",
@@ -23,14 +24,11 @@ const friendlyBoardName = {
   yellow: "Home Assistant Yellow",
 };
 
-const randomColor = () =>
-  `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-
 const dataPoint = (data) => ({
   borderWidth: 1,
   pointRadius: 0,
   fill: false,
-  borderColor: randomColor(),
+  borderColor: colors.getColor(data.label),
   ...data,
 });
 
@@ -61,6 +59,11 @@ module.exports = function (eleventyConfig) {
   );
   eleventyConfig.addFilter("keys", (data) => Object.keys(data));
   eleventyConfig.addFilter("values", (data) => Object.values(data));
+
+  eleventyConfig.addFilter("randomColor", (input) => colors.getColor(input));
+  eleventyConfig.addFilter("randomColors", (input) =>
+    JSON.stringify(input.map((entry) => colors.getColor(entry)))
+  );
 
   eleventyConfig.addFilter("versionSummary", (data) => {
     const releases = Object();
@@ -124,7 +127,9 @@ module.exports = function (eleventyConfig) {
       .forEach((key) => {
         data.labels.push(friendlyBoardName[key] || key);
         data.data.push(value[key]);
-        data.backgroundColor.push(randomColor());
+        data.backgroundColor.push(
+          colors.getColor(friendlyBoardName[key] || key)
+        );
       });
     return data;
   });
@@ -147,23 +152,11 @@ module.exports = function (eleventyConfig) {
     }
 
     return JSON.stringify([
-      dataPoint({ data: data.total, label: "Total", borderColor: "#3366cc" }),
-      dataPoint({
-        data: data.os,
-        label: "Operating System",
-        borderColor: "#dc3912",
-      }),
-      dataPoint({
-        data: data.container,
-        label: "Container",
-        borderColor: "#ff9900",
-      }),
-      dataPoint({ data: data.core, label: "Core", borderColor: "#109618" }),
-      dataPoint({
-        data: data.supervised,
-        label: "Supervised",
-        borderColor: "#990099",
-      }),
+      dataPoint({ data: data.total, label: "Total" }),
+      dataPoint({ data: data.os, label: "Operating System" }),
+      dataPoint({ rdata: data.container, label: "Container" }),
+      dataPoint({ data: data.core, label: "Core" }),
+      dataPoint({ data: data.supervised, label: "Supervised" }),
     ]);
   });
 
