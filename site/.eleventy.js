@@ -3,6 +3,7 @@ const colors = require("./src/tools/colors");
 const dataTable = require("./src/tools/data_table");
 const friendlyNames = require("./src/tools/friendly_names");
 const historyFiltering = require("./src/tools/history_filter");
+const versionTools = require("./src/tools/versions");
 
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/_static": "static" });
@@ -41,72 +42,25 @@ module.exports = function (eleventyConfig) {
     JSON.stringify(input.map((entry) => colors.getColor(entry)))
   );
 
-  eleventyConfig.addFilter("versionSummary", (data) => {
-    const releases = Object();
-    const results = {};
+  eleventyConfig.addFilter("versionSummary", (data) =>
+    versionTools.sortedVersions(data, true)
+  );
 
-    Object.keys(data).forEach((version) => {
-      if (!version.includes("dev")) {
-        const key = version.split(".").slice(0, 2).join(".");
-        releases[key] = (releases[key] || 0) + data[version];
-      }
-    });
-
-    const allRows = Object.keys(releases)
-      .filter((key) => releases[key] > 100)
-      .sort((a, b) => {
-        const mainVersionCmp =
-          parseInt(b.split(".")[0]) - parseInt(a.split(".")[0]);
-        if (mainVersionCmp !== 0) {
-          return mainVersionCmp;
-        }
-        return parseInt(b.split(".")[1]) - parseInt(a.split(".")[1]);
-      });
-
-    allRows.slice(0, 5).forEach((version) => {
-      results[version] = releases[version];
-    });
-
-    if (allRows.length > 5) {
-      results["Other"] = allRows
-        .slice(5)
-        .reduce((accumulator, item) => accumulator + releases[item], 0);
-    }
-
-    return results;
-  });
-
-  eleventyConfig.addFilter("osVersionSummary", (data) => {
-    const results = {};
-
-    const sortedVersions = Object.keys(data).sort((a, b) => data[b] - data[a]);
-    sortedVersions.slice(0, 5).forEach((version) => {
-      results[version] = data[version];
-    });
-
-    if (sortedVersions.length > 5) {
-      results["Other"] = sortedVersions
-        .slice(5)
-        .reduce(
-          (accumulator, currentValue) => accumulator + data[currentValue],
-          0
-        );
-    }
-
-    return results;
-  });
+  eleventyConfig.addFilter("osVersionSummary", (data) =>
+    versionTools.sortedVersions(data)
+  );
 
   eleventyConfig.addFilter("sortBoards", (value) => {
     const data = { data: [], labels: [], backgroundColor: [] };
-    Object.keys(value)
-      .sort()
-      .forEach((key) => {
-        data.labels.push(friendlyNames.HaOsBoard[key] || key);
-        data.data.push(value[key]);
-        data.backgroundColor.push(
-          colors.getColor(friendlyNames.HaOsBoard[key] || key)
-        );
-      });
+
+    for (const key of Object.keys(value).sort()) {
+      data.labels.push(friendlyNames.HaOsBoard[key] || key);
+      data.data.push(value[key]);
+      data.backgroundColor.push(
+        colors.getColor(friendlyNames.HaOsBoard[key] || key)
+      );
+    }
+
     return data;
   });
 
@@ -141,9 +95,9 @@ module.exports = function (eleventyConfig) {
     const versionHistoryData = historyFiltering(history);
 
     for (const entry of versionHistoryData) {
-      Object.keys(entry.versions).forEach((version) =>
-        allVersions.add(version)
-      );
+      for (const version of Object.keys(entry.versions)) {
+        allVersions.add(version);
+      }
     }
 
     const versionsOrdered = Array.from(allVersions).sort((a, b) => {
@@ -156,20 +110,21 @@ module.exports = function (eleventyConfig) {
     });
 
     const versions = {};
-    versionsOrdered.forEach((entry) => {
-      versions[entry] = [];
-    });
 
-    versionHistoryData.forEach((entry) => {
-      versionsOrdered.forEach((version) => {
+    for (const entry of versionHistoryData) {
+      for (const version of versionsOrdered) {
         if (entry.versions[version] || 0 > 100) {
+          if (!versions[version]) {
+            versions[version] = [];
+          }
           versions[version].push({
             x: Number(entry.timestamp),
             y: entry.versions[version] || 0,
           });
         }
-      });
-    });
+      }
+    }
+
     return JSON.stringify(
       Object.keys(versions).map((version) =>
         dataTable.DataPoint({ data: versions[version], label: version })
