@@ -2,7 +2,7 @@ const colors = require("./colors");
 
 const DataPoint = (data) => ({
   borderWidth: 1,
-  pointRadius: 0,
+  pointRadius: 2,
   fill: false,
   borderColor: colors.getColor(data.label),
   ...data,
