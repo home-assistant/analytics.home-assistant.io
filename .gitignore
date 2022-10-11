@@ -1,5 +1,5 @@
 node_modules
 dist
 worker/worker
-site/public/*.json
+site/src/_data/*.json
 .vscode/settings.json

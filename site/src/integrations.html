@@ -1,0 +1,30 @@
+---
+layout: table
+title: Integrations
+excluded_domains:
+  - cloud
+  - google_translate
+  - met
+  - rpi_power
+---
+<script>
+  const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details, excluded_domains | json}};
+  const reportsIntegrations = Number({{ data.current.reports_integrations }});
+  const createTableRow = (entry) =>  `
+  <tr>
+    <td class="idx">${entry.idx}</td>
+    <td>
+      <a title="Documentation" href="https://www.home-assistant.io/integrations/${entry.domain}" target="_blank">
+        <img src="https://brands.home-assistant.io/_/${entry.domain}/${darkMode ? 'dark_' : ''}icon.png">
+        <span>${entry.name}</span>
+      </a>
+    </td>
+    <td class="installations">
+      <span>${Intl.NumberFormat().format(entry.installations)}</span>
+      <span>(${((100 * entry.installations) / reportsIntegrations).toFixed(1)}%)</span>
+    </td>
+  </tr>
+  `
+</script>
+
+<div class="note">{{ data.current.reports_integrations | formatNumber }} of {{ data.current.extended_data_from | formatNumber }} ({{ data.current.extended_data_from | calculatePercentage: data.current.reports_integrations }}%) installations have chosen to share their used integrations</div>

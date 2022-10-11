@@ -6,17 +6,24 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-mkdir -p ./site/public
+rm -rf ./site/dist
+mkdir -p ./site/src/_data
 
-curl -sSLf https://dev--home-assistant-analytics.netlify.app/data.json | jq . > ./site/public/data.json
-curl -sSLf https://dev--home-assistant-analytics.netlify.app/custom_integrations.json | jq . > ./site/public/custom_integrations.json
-curl -sSLf https://dev--home-assistant-analytics.netlify.app/addons.json | jq . > ./site/public/addons.json
-curl -sSLf https://rc.home-assistant.io/integrations.json | jq . > ./site/public/integration_details.json
-
+if [ "$ANALYTICS_DATA" = "prod" ]; then
+  curl -sSLf https://analytics.home-assistant.io/data.json | jq . > ./site/src/_data/data.json
+  curl -sSLf https://analytics.home-assistant.io/custom_integrations.json | jq . > ./site/src/_data/custom_integrations.json
+  curl -sSLf https://analytics.home-assistant.io/addons.json | jq . > ./site/src/_data/addons.json
+  curl -sSLf https://www.home-assistant.io/integrations.json | jq . > ./site/src/_data/integration_details.json
+else
+  curl -sSLf https://dev--home-assistant-analytics.netlify.app/data.json | jq . > ./site/src/_data/data.json
+  curl -sSLf https://dev--home-assistant-analytics.netlify.app/custom_integrations.json | jq . > ./site/src/_data/custom_integrations.json
+  curl -sSLf https://dev--home-assistant-analytics.netlify.app/addons.json | jq . > ./site/src/_data/addons.json
+  curl -sSLf https://rc.home-assistant.io/integrations.json | jq . > ./site/src/_data/integration_details.json
+fi
 
 if [ ! -d node_modules ]; then
   script/bootstrap
 fi
 
 cd ./site
-../node_modules/.bin/vite --open --host
+../node_modules/.bin/eleventy --watch --serve

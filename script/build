@@ -6,10 +6,10 @@ declare custom_integrations
 declare data
 declare integration_details
 
-declare addons_path="${PWD}/site/public/addons.json"
-declare custom_integrations_path="${PWD}/site/public/custom_integrations.json"
-declare data_path="${PWD}/site/public/data.json"
-declare integration_details_path="${PWD}/site/public/integration_details.json"
+declare addons_path="${PWD}/site/src/_data/addons.json"
+declare custom_integrations_path="${PWD}/site/src/_data/custom_integrations.json"
+declare data_path="${PWD}/site/src/_data/data.json"
+declare integration_details_path="${PWD}/site/src/_data/integration_details.json"
 
 # Stop on errors
 set -e
@@ -17,7 +17,8 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-mkdir -p ./site/public
+rm -rf ./site/dist
+mkdir -p ./site/src/_data
 
 if [ -n "$CF_KV_TOKEN" ]; then
   if [ -n "$INCOMING_HOOK_URL" ]; then
@@ -67,4 +68,4 @@ if [ ! -d node_modules ]; then
 fi
 
 cd ./site
-../node_modules/.bin/vite build
+NODE_ENV="production" ../node_modules/.bin/eleventy

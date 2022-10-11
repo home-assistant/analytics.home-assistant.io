@@ -1,0 +1,81 @@
+---
+title: ""
+description: ""
+navigation:
+  - name: Installations
+    path: /
+    matchPath: /index
+  - name: Statistics
+    path: /statistics
+  - name: Integrations
+    path: /integrations
+  - name: Add-ons
+    path: /add-ons
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% if title %}{{title}} | {% endif %}Home Assistant Analytics</title>
+    <meta property="og:title" content="{% if title %}{{title}} | {% endif %}Home Assistant Analytics" />
+    <meta property="og:site_name" content="Home Assistant Analytics" />
+    <meta property="og:url" content="https://analytics.home-assistant.io/" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:description"
+      content="Summary of the collected Home Assistant usage statistics."
+    />
+    <meta
+      property="og:image"
+      content="https://brands.home-assistant.io/analytics/icon.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@home_assistant" />
+    <meta name="twitter:title" content="Home Assistant Analytics" />
+    <meta
+      name="twitter:description"
+      content="Summary of the collected Home Assistant usage statistics."
+    />
+    <meta
+      name="twitter:image"
+      content="https://brands.home-assistant.io/analytics/icon.png"
+    />
+    <meta name="viewport" content="width=device-width" />
+
+    <link
+    rel="icon"
+    type="image/png"
+    href="https://brands.home-assistant.io/analytics/icon.png"
+  />
+    <link href="/static/styles.css" rel="stylesheet">
+    {{extra_head_contents}}
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav-bar">
+        <a href="/"><h1 class="nav-title">Home&nbsp;Assistant&nbsp;Analytics</h1></a>
+        <ul>
+          {% for nav in navigation %}
+            <li><a class="{% if page.filePathStem == nav.matchPath or page.filePathStem == nav.path %}active{% endif %}" href="{{ nav.path }}">{{ nav.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="container content {{ title | downcase }}">{{ content }}</div>
+
+    <div class="container">
+      <div class="footer">
+        Home&nbsp;Assistant&nbsp;Analytics &nbsp;<span class="serperator">–</span>&nbsp;
+        <a
+        title="Documentation"
+        href="https://www.home-assistant.io/integrations/analytics"
+        target="_blank"
+      >
+        Learn&nbsp;more&nbsp;about&nbsp;how&nbsp;this&nbsp;data&nbsp;is&nbsp;gathered
+      </a>
+      </div>
+    </div>
+  </body>
+</html>
