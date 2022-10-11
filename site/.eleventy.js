@@ -1,41 +1,8 @@
-const historyFiltering = require("./src/tools/history_filter");
 const calculate = require("./src/tools/calculate");
 const colors = require("./src/tools/colors");
-
-const friendlyBoardName = {
-  "intel-nuc": "Intel NUC",
-  "generic-aarch64": "Generic AArch64",
-  "generic-x86-64": "Generic x86-64",
-  "khadas-vim3": "Khadas VIM3",
-  ova: "Virtual Machine",
-  "odroid-c2": "ODROID-C2",
-  "odroid-c4": "ODROID-C4",
-  "odroid-n2": "ODROID-N2",
-  "odroid-xu4": "ODROID-XU4",
-  rpi: "Raspberry Pi",
-  rpi0: "Raspberry Pi Zero",
-  "rpi0-w": "Raspberry Pi Zero W",
-  rpi2: "Raspberry Pi 2",
-  rpi3: "Raspberry Pi 3 (32-bit)",
-  "rpi3-64": "Raspberry Pi 3",
-  rpi4: "Raspberry Pi 4 (32-bit)",
-  "rpi4-64": "Raspberry Pi 4",
-  tinker: "ASUS Tinker Board",
-  yellow: "Home Assistant Yellow",
-};
-
-const dataPoint = (data) => ({
-  borderWidth: 1,
-  pointRadius: 0,
-  fill: false,
-  borderColor: colors.getColor(data.label),
-  ...data,
-});
-
-const sortTableData = (tableData) =>
-  tableData
-    .sort((a, b) => b.installations - a.installations)
-    .map((entry, idx) => ({ ...entry, idx: idx + 1 }));
+const dataTable = require("./src/tools/data_table");
+const friendlyNames = require("./src/tools/friendly_names");
+const historyFiltering = require("./src/tools/history_filter");
 
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/_static": "static" });
@@ -134,10 +101,10 @@ module.exports = function (eleventyConfig) {
     Object.keys(value)
       .sort()
       .forEach((key) => {
-        data.labels.push(friendlyBoardName[key] || key);
+        data.labels.push(friendlyNames.HaOsBoard[key] || key);
         data.data.push(value[key]);
         data.backgroundColor.push(
-          colors.getColor(friendlyBoardName[key] || key)
+          colors.getColor(friendlyNames.HaOsBoard[key] || key)
         );
       });
     return data;
@@ -161,11 +128,11 @@ module.exports = function (eleventyConfig) {
     }
 
     return JSON.stringify([
-      dataPoint({ data: data.total, label: "Total" }),
-      dataPoint({ data: data.os, label: "Operating System" }),
-      dataPoint({ rdata: data.container, label: "Container" }),
-      dataPoint({ data: data.core, label: "Core" }),
-      dataPoint({ data: data.supervised, label: "Supervised" }),
+      dataTable.DataPoint({ data: data.total, label: "Total" }),
+      dataTable.DataPoint({ data: data.os, label: "Operating System" }),
+      dataTable.DataPoint({ rdata: data.container, label: "Container" }),
+      dataTable.DataPoint({ data: data.core, label: "Core" }),
+      dataTable.DataPoint({ data: data.supervised, label: "Supervised" }),
     ]);
   });
 
@@ -205,7 +172,7 @@ module.exports = function (eleventyConfig) {
     });
     return JSON.stringify(
       Object.keys(versions).map((version) =>
-        dataPoint({ data: versions[version], label: version })
+        dataTable.DataPoint({ data: versions[version], label: version })
       )
     );
   });
@@ -213,7 +180,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addFilter(
     "sortIntegrations",
     (integrations, integration_details, excluded_domains) =>
-      sortTableData(
+      dataTable.SortTableData(
         Object.keys(integration_details)
           .filter(
             (domain) =>
@@ -229,7 +196,7 @@ module.exports = function (eleventyConfig) {
   );
 
   eleventyConfig.addFilter("sortAddons", (addons, addons_details) =>
-    sortTableData(
+    dataTable.SortTableData(
       Object.keys(addons_details).map((slug) => ({
         slug,
         name: addons_details[slug].name,
