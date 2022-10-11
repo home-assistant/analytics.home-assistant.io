@@ -33,7 +33,6 @@ html {
   }
 }
 
-
 body {
   font-family: "Segoe UI", Roboto, sans-serif;
   font-size: 1em;
@@ -41,7 +40,7 @@ body {
   margin: 0;
   line-height: 1.4;
   background-color: var(--primary-background-color);
-  color: var(--primary-text-color)
+  color: var(--primary-text-color);
 }
 
 a {
@@ -52,7 +51,6 @@ a {
 .nav-title {
   color: var(--primary-text-color) !important;
 }
-
 
 .content {
   margin: 32px 0;
@@ -70,6 +68,11 @@ a {
   padding-top: 24px;
   text-align: center;
 }
+
+.footer > * {
+  white-space: nowrap;
+}
+
 .footer .initiative {
   font-style: italic;
   margin-top: 16px;
@@ -120,7 +123,7 @@ a {
   }
 
   .container {
-    padding: 0 8px;;
+    padding: 0 8px;
   }
 
   .serperator {
@@ -131,7 +134,7 @@ a {
     flex-direction: column;
   }
 
-  .nav-bar > *  {
+  .nav-bar > * {
     margin-top: -8px;
   }
 

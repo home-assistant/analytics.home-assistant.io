@@ -1,8 +1,10 @@
 ---
 layout: base
 ---
+
 <style>
-  table, input[type=text] {
+  table,
+  input[type="text"] {
     width: 100%;
     text-align: left;
     -webkit-border-horizontal-spacing: 0;
@@ -10,7 +12,8 @@ layout: base
     border-spacing: 0 0;
     background-color: var(--secondary-background-color);
   }
-  input[type=text], .table-footer {
+  input[type="text"],
+  .table-footer {
     width: calc(100% - 32px);
     padding: 16px 16px;
     color: var(--primary-text-color);
@@ -75,9 +78,8 @@ layout: base
   }
   .chevron[disabled] {
     cursor: default;
-    color: var(--secondary-text-color)
+    color: var(--secondary-text-color);
   }
-
 
   @media only screen and (max-width: 600px) {
     td,
@@ -87,12 +89,16 @@ layout: base
   }
 </style>
 
-<input type="text" id="search" onkeyup="filterTable()" placeholder="Search for {{ title | downcase }}..">
-<table id="table">
-
-</table>
+<input
+  type="text"
+  id="search"
+  onkeyup="filterTable()"
+  placeholder="Search for {{ title | downcase }}.."
+/>
+<table id="table"></table>
 <div class="table-footer">
-  <div>Lines per page
+  <div>
+    Lines per page
     <select id="tableLimit" onchange="tableLimitChanged()">
       <option>30</option>
       <option>50</option>
@@ -100,9 +106,7 @@ layout: base
       <option>ALL</option>
     </select>
   </div>
-  <div id="paginator">
-
-  </div>
+  <div id="paginator"></div>
 </div>
 
 {{content}}
@@ -120,43 +124,55 @@ layout: base
       <th>Name</th>
       <th class="installations">Installations</th>
     </tr>
-    `
+    `;
 
   function populateTable(filter) {
     const tableRows = tableEntries
-      .filter(entry => !filter || (entry.name).toUpperCase().includes(filter))
-      .slice(Number(tableStart) - 1, Number(tableStart) - 1 + Number(tableLimit))
-      .map(entry => createTableRow(entry))
-    table.innerHTML = [tableHeader].concat(tableRows).join("")
-    let currentMax = Number(tableStart) - 1  + Number(tableLimit)
-    if (currentMax > tableEntries.length) currentMax = tableEntries.length
-    paginator.innerHTML = !filter ? `
-      <p class="chevron" ${tableStart === 1 ? 'disabled' : 'onclick="previousPage()"'}><</p>
+      .filter((entry) => !filter || entry.name.toUpperCase().includes(filter))
+      .slice(
+        Number(tableStart) - 1,
+        Number(tableStart) - 1 + Number(tableLimit)
+      )
+      .map((entry) => createTableRow(entry));
+    table.innerHTML = [tableHeader].concat(tableRows).join("");
+    let currentMax = Number(tableStart) - 1 + Number(tableLimit);
+    if (currentMax > tableEntries.length) currentMax = tableEntries.length;
+    paginator.innerHTML = !filter
+      ? `
+      <p class="chevron" ${
+        tableStart === 1 ? "disabled" : 'onclick="previousPage()"'
+      }><</p>
       ${tableStart}-${currentMax} of ${tableEntries.length}
-      <p class="chevron" ${tableEntries.length - currentMax <= 0 ? 'disabled' : 'onclick="nextPage()"'}>></p>
-    ` : ""
+      <p class="chevron" ${
+        tableEntries.length - currentMax <= 0
+          ? "disabled"
+          : 'onclick="nextPage()"'
+      }>></p>
+    `
+      : "";
   }
 
   function filterTable() {
-    populateTable(document.getElementById("search").value.toUpperCase())
+    populateTable(document.getElementById("search").value.toUpperCase());
   }
 
-
-  function tableLimitChanged () {
-
-    tableLimit = tableLimitSelector.value === "ALL" ? tableEntries.length : tableLimitSelector.value
-    populateTable()
+  function tableLimitChanged() {
+    tableLimit =
+      tableLimitSelector.value === "ALL"
+        ? tableEntries.length
+        : tableLimitSelector.value;
+    populateTable();
   }
 
-  function nextPage () {
-    tableStart += Number(tableLimit)
-    populateTable()
+  function nextPage() {
+    tableStart += Number(tableLimit);
+    populateTable();
   }
 
-  function previousPage () {
-    tableStart -= Number(tableLimit)
-    populateTable()
+  function previousPage() {
+    tableStart -= Number(tableLimit);
+    populateTable();
   }
 
-  populateTable()
+  populateTable();
 </script>
