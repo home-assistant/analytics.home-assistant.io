@@ -5,6 +5,7 @@ const DataPoint = (data) => ({
   pointRadius: 2,
   fill: false,
   borderColor: colors.getColor(data.label),
+  backgroundColor: colors.getColor(data.label),
   ...data,
 });
 
