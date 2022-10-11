@@ -1,5 +1,5 @@
-const historyFiltering = require("./src/tools/history_filter")
-const calculate = require("./src/tools/calculate")
+const historyFiltering = require("./src/tools/history_filter");
+const calculate = require("./src/tools/calculate");
 
 const friendlyBoardName = {
   "intel-nuc": "Intel NUC",
@@ -23,23 +23,48 @@ const friendlyBoardName = {
   yellow: "Home Assistant Yellow",
 };
 
-const randomColor = () => `#${Math.floor(Math.random() * 16777215).toString(16)}`
-const dataPoint = (data) => ({ borderWidth: 1, pointRadius: 0, fill: false, borderColor: randomColor(), ...data })
-const sortTableData = (tableData) => tableData.sort((a, b) => b.installations - a.installations).map((entry, idx) => ({ ...entry, idx: idx + 1 }));
+const randomColor = () =>
+  `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+
+const dataPoint = (data) => ({
+  borderWidth: 1,
+  pointRadius: 0,
+  fill: false,
+  borderColor: randomColor(),
+  ...data,
+});
+
+const sortTableData = (tableData) =>
+  tableData
+    .sort((a, b) => b.installations - a.installations)
+    .map((entry, idx) => ({ ...entry, idx: idx + 1 }));
 
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/_static": "static" });
 
-  eleventyConfig.addFilter("historyFiltering", (history) => historyFiltering(history))
-  eleventyConfig.addFilter("countriesForMap", (base) => JSON.stringify(Object.keys(base || {}).reduce((obj, key) => ({ ...obj, [key]: { installations: base[key] || 0 } }), {})));
-  eleventyConfig.addFilter("calculatePercentage", (total, part, decimal) => calculate.percentage(total, part, decimal));
-  eleventyConfig.addFilter("formatNumber", (value) => Intl.NumberFormat().format(value));
+  eleventyConfig.addFilter("historyFiltering", (history) =>
+    historyFiltering(history)
+  );
+  eleventyConfig.addFilter("countriesForMap", (base) =>
+    JSON.stringify(
+      Object.keys(base || {}).reduce(
+        (obj, key) => ({ ...obj, [key]: { installations: base[key] || 0 } }),
+        {}
+      )
+    )
+  );
+  eleventyConfig.addFilter("calculatePercentage", (total, part, decimal) =>
+    calculate.percentage(total, part, decimal)
+  );
+  eleventyConfig.addFilter("formatNumber", (value) =>
+    Intl.NumberFormat().format(value)
+  );
   eleventyConfig.addFilter("keys", (data) => Object.keys(data));
   eleventyConfig.addFilter("values", (data) => Object.values(data));
 
   eleventyConfig.addFilter("versionSummary", (data) => {
     const releases = Object();
-    const results = {}
+    const results = {};
 
     Object.keys(data).forEach((version) => {
       if (!version.includes("dev")) {
@@ -57,65 +82,94 @@ module.exports = function (eleventyConfig) {
           return mainVersionCmp;
         }
         return parseInt(b.split(".")[1]) - parseInt(a.split(".")[1]);
-      })
+      });
 
-
-    allRows.slice(0, 5).forEach(version => { results[version] = releases[version] })
+    allRows.slice(0, 5).forEach((version) => {
+      results[version] = releases[version];
+    });
 
     if (allRows.length > 5) {
       results["Other"] = allRows
         .slice(5)
-        .reduce((accumulator, item) => accumulator + releases[item], 0)
+        .reduce((accumulator, item) => accumulator + releases[item], 0);
     }
 
-    return results
+    return results;
   });
 
   eleventyConfig.addFilter("osVersionSummary", (data) => {
-    const results = {}
+    const results = {};
 
     const sortedVersions = Object.keys(data).sort((a, b) => data[b] - data[a]);
-    sortedVersions.slice(0, 5).forEach(version => { results[version] = data[version] })
+    sortedVersions.slice(0, 5).forEach((version) => {
+      results[version] = data[version];
+    });
 
     if (sortedVersions.length > 5) {
       results["Other"] = sortedVersions
         .slice(5)
-        .reduce((accumulator, currentValue) => accumulator + data[currentValue], 0)
+        .reduce(
+          (accumulator, currentValue) => accumulator + data[currentValue],
+          0
+        );
     }
 
-    return results
+    return results;
   });
 
   eleventyConfig.addFilter("sortBoards", (value) => {
-    const data = { data: [], labels: [], backgroundColor: [] }
-    Object.keys(value).sort().forEach(key => { data.labels.push(friendlyBoardName[key] || key); data.data.push(value[key]); data.backgroundColor.push(randomColor()) })
-    return data
+    const data = { data: [], labels: [], backgroundColor: [] };
+    Object.keys(value)
+      .sort()
+      .forEach((key) => {
+        data.labels.push(friendlyBoardName[key] || key);
+        data.data.push(value[key]);
+        data.backgroundColor.push(randomColor());
+      });
+    return data;
   });
 
   eleventyConfig.addFilter("mergeInstallationHistory", (history) => {
-    const data = { total: [], os: [], core: [], supervised: [], container: [] }
+    const data = { total: [], os: [], core: [], supervised: [], container: [] };
 
     for (const entry of historyFiltering(history)) {
-      data.total.push({ x: (entry.timestamp), y: entry.active_installations })
-      data.os.push({ x: (entry.timestamp), y: entry.installation_types.os })
-      data.core.push({ x: (entry.timestamp), y: entry.installation_types.core })
-      data.supervised.push({ x: (entry.timestamp), y: entry.installation_types.supervised })
-      data.container.push({ x: (entry.timestamp), y: entry.installation_types.container })
+      data.total.push({ x: entry.timestamp, y: entry.active_installations });
+      data.os.push({ x: entry.timestamp, y: entry.installation_types.os });
+      data.core.push({ x: entry.timestamp, y: entry.installation_types.core });
+      data.supervised.push({
+        x: entry.timestamp,
+        y: entry.installation_types.supervised,
+      });
+      data.container.push({
+        x: entry.timestamp,
+        y: entry.installation_types.container,
+      });
     }
 
     return JSON.stringify([
       dataPoint({ data: data.total, label: "Total", borderColor: "#3366cc" }),
-      dataPoint({ data: data.os, label: "Operating System", borderColor: "#dc3912" }),
-      dataPoint({ data: data.container, label: "Container", borderColor: "#ff9900" }),
+      dataPoint({
+        data: data.os,
+        label: "Operating System",
+        borderColor: "#dc3912",
+      }),
+      dataPoint({
+        data: data.container,
+        label: "Container",
+        borderColor: "#ff9900",
+      }),
       dataPoint({ data: data.core, label: "Core", borderColor: "#109618" }),
-      dataPoint({ data: data.supervised, label: "Supervised", borderColor: "#990099" })
-    ])
-  }
-  )
+      dataPoint({
+        data: data.supervised,
+        label: "Supervised",
+        borderColor: "#990099",
+      }),
+    ]);
+  });
 
   eleventyConfig.addFilter("mergeVersionHistory", (history) => {
-    const allVersions = new Set()
-    const versionHistoryData = historyFiltering(history)
+    const allVersions = new Set();
+    const versionHistoryData = historyFiltering(history);
 
     for (const entry of versionHistoryData) {
       Object.keys(entry.versions).forEach((version) =>
@@ -132,42 +186,57 @@ module.exports = function (eleventyConfig) {
       return parseInt(b.split(".")[1]) - parseInt(a.split(".")[1]);
     });
 
-    const versions = {}
-    versionsOrdered.forEach(entry => { versions[entry] = [] })
+    const versions = {};
+    versionsOrdered.forEach((entry) => {
+      versions[entry] = [];
+    });
 
     versionHistoryData.forEach((entry) => {
       versionsOrdered.forEach((version) => {
         if (entry.versions[version] || 0 > 100) {
-          versions[version].push({ x: Number(entry.timestamp), y: entry.versions[version] || 0 })
+          versions[version].push({
+            x: Number(entry.timestamp),
+            y: entry.versions[version] || 0,
+          });
         }
-
       });
     });
-    return JSON.stringify(Object.keys(versions).map(version => dataPoint({ data: versions[version], label: version })))
-  }
-  )
+    return JSON.stringify(
+      Object.keys(versions).map((version) =>
+        dataPoint({ data: versions[version], label: version })
+      )
+    );
+  });
 
-  eleventyConfig.addFilter("sortIntegrations", (integrations, integration_details, excluded_domains) => sortTableData(
-    Object.keys(integration_details).filter(
-      (domain) => integration_details[domain].quality_scale !== "internal" && !excluded_domains.includes(domain),
-    ).map((domain) => (
-      {
-        domain,
-        name: integration_details[domain].title,
-        installations: integrations[domain] || 0
-      }
-    ))));
+  eleventyConfig.addFilter(
+    "sortIntegrations",
+    (integrations, integration_details, excluded_domains) =>
+      sortTableData(
+        Object.keys(integration_details)
+          .filter(
+            (domain) =>
+              integration_details[domain].quality_scale !== "internal" &&
+              !excluded_domains.includes(domain)
+          )
+          .map((domain) => ({
+            domain,
+            name: integration_details[domain].title,
+            installations: integrations[domain] || 0,
+          }))
+      )
+  );
 
-  eleventyConfig.addFilter("sortAddons", (addons, addons_details) => sortTableData(
-    Object.keys(addons_details).map((slug) => (
-      {
+  eleventyConfig.addFilter("sortAddons", (addons, addons_details) =>
+    sortTableData(
+      Object.keys(addons_details).map((slug) => ({
         slug,
         name: addons_details[slug].name,
         icon: addons_details[slug].icon,
         documentation: addons_details[slug].documentation,
-        installations: addons[slug]?.total || 0
-      }
-    ))));
+        installations: addons[slug]?.total || 0,
+      }))
+    )
+  );
 
   return {
     dir: {
@@ -175,7 +244,7 @@ module.exports = function (eleventyConfig) {
       output: "dist",
       layouts: "_layouts",
       data: "_data",
-      htmlTemplateEngine: "liquid"
+      htmlTemplateEngine: "liquid",
     },
   };
 };
