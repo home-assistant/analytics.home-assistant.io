@@ -1,0 +1,237 @@
+---
+layout: base
+title: Installations
+
+extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
+  <script src="/static/svgMap.min.js"></script>
+  <script src="/static/chart.min.js"></script>
+  <script src="/static/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <link href="/static/svgMap.min.css" rel="stylesheet">
+---
+
+<style>
+  .chart-title {
+    color: var(--secondary-text-color);
+  }
+  canvas {
+    margin-bottom: 32px;
+  }
+  .half {
+    display: flex;
+  }
+  .half > * {
+    flex: 1;
+    margin: 0 16px;
+  }
+  @media only screen and (max-width: 600px) {
+    .half {
+      flex-direction: column-reverse;
+    }
+  }
+</style>
+
+<div class="chart-title">
+  {{ data.history.last.active_installations | formatNumber }} Active Home
+  Assistant Installations
+</div>
+<canvas id="installationsChart" style="width: 100%"></canvas>
+
+<div class="chart-title">Version history</div>
+<canvas id="versionHistoryChart" style="width: 100%"></canvas>
+
+<div class="half">
+  <div>
+    <div class="chart-title">Last releases</div>
+    <canvas id="lastReleaseChart" style="width: 100%"></canvas>
+  </div>
+  <div>
+    <div class="chart-title">Installations types</div>
+    <canvas id="installationTypesChart" style="width: 100%"></canvas>
+  </div>
+</div>
+
+<div class="half">
+  <div>
+    <div class="chart-title">Top 5 used operating system versions</div>
+    <canvas id="top5OSversionChart" style="width: 100%"></canvas>
+  </div>
+  <div>
+    <div class="chart-title">Board types</div>
+    <canvas id="boardTypesChart" style="width: 100%"></canvas>
+  </div>
+</div>
+
+<div id="svgMap"></div>
+
+<script>
+  const darkMode = window.matchMedia("(prefers-color-scheme:dark)").matches;
+
+  Chart.defaults.color = darkMode ? "#9b9b9b" : "#727272";
+  Chart.defaults.borderColor = darkMode ? "#202020" : "#ffffff";
+  Chart.defaults.plugins.legend.position = "right";
+
+  new Chart("installationsChart", {
+    type: "line",
+    options: {
+      parsing: false,
+      responsive: false,
+      scales: {
+        x: {
+          type: 'time',
+        }
+      }
+    },
+    data: {
+      datasets: {{ data.history | mergeInstallationHistory }},
+    }
+  });
+
+  new Chart("versionHistoryChart", {
+    type: "line",
+    options: {
+      parsing: false,
+      responsive: false,
+      scales: {
+        x: {
+          type: 'time',
+        }
+      }
+    },
+    data: {
+      datasets: {{ data.history | mergeVersionHistory }},
+    }
+  });
+
+  new Chart("lastReleaseChart", {
+    type: "pie",
+    options: {
+      plugins: {
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            footer: (item) => {
+              let sum = 0;
+              item[0].dataset.data.forEach(data => { sum += Number(data) });
+              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
+            }
+          }
+        },
+      },
+    },
+    data: {
+      labels: {{ data.current.versions | versionSummary | keys | json }},
+      datasets: [{
+        data: {{ data.current.versions | versionSummary | values | json }},
+        backgroundColor: {{ data.current.versions | versionSummary | keys | randomColors }}
+      }]
+    }
+  });
+
+  new Chart("installationTypesChart", {
+    type: "pie",
+    options: {
+      plugins: {
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            footer: (item) => {
+              let sum = 0;
+              item[0].dataset.data.forEach(data => { sum += Number(data) });
+              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
+            }
+          }
+        },
+      },
+    },
+    data: {
+      labels: [
+        "Operating System",
+        "Container",
+        "Supervised",
+        "Core"
+      ],
+      datasets: [{
+        data: [
+          {{ data.current.installation_types.os }},
+          {{ data.current.installation_types.container }},
+          {{ data.current.installation_types.supervised }},
+          {{ data.current.installation_types.core }}
+        ],
+        backgroundColor: [
+          "{{ "Operating System" | randomColor }}",
+          "{{ "Container" | randomColor }}",
+          "{{ "Supervised" | randomColor }}",
+          "{{ "Core" | randomColor }}"
+        ]
+      }]
+    }
+  });
+
+  new Chart("top5OSversionChart", {
+    type: "pie",
+    options: {
+      plugins: {
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            footer: (item) => {
+              let sum = 0;
+              item[0].dataset.data.forEach(data => { sum += Number(data) });
+              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
+            }
+          }
+        },
+      },
+    },
+    data: {
+      labels: {{ data.current.operating_system.versions | osVersionSummary | keys | json }},
+      datasets: [{
+        data: {{ data.current.operating_system.versions | osVersionSummary | values | json }},
+        backgroundColor: {{ data.current.operating_system.versions | osVersionSummary | keys | randomColors }}
+      }]
+    }
+  });
+
+  new Chart("boardTypesChart", {
+    {%- assign sorted = data.current.operating_system.boards | sortBoards -%}
+    type: "pie",
+    options: {
+      plugins: {
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            footer: (item) => {
+              let sum = 0;
+              item[0].dataset.data.forEach(data => { sum += Number(data) });
+              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
+            }
+          }
+        },
+      },
+    },
+    data: {
+      labels: {{ sorted.labels | json }},
+      datasets: [{
+        data: {{ sorted.data | json }},
+        backgroundColor: {{ sorted.backgroundColor | json }},
+      }]
+    }
+  });
+
+  new svgMap({
+    targetElementID: 'svgMap',
+    colorMin: "#80CBC4",
+    colorMax: "#004D40",
+    hideFlag: true,
+    initialZoom: 1.0,
+    data: {
+            data: {
+              installations: {
+                format: "{0} Installations",
+              },
+            },
+            applyData: "installations",
+            values: {{ data.current.countries | countriesForMap }},
+          },
+  });
+</script>

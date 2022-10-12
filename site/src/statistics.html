@@ -1,0 +1,62 @@
+---
+layout: base
+title: Statistics
+---
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 16px;
+    height: 100%;
+    width: 100%;
+  }
+  .grid .metric {
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--secondary-background-color);
+    text-align: center;
+  }
+  .grid span:first-of-type {
+    line-height: 42px;
+    font-size: 24px;
+    text-transform: capitalize;
+  }
+  .grid span:last-of-type {
+    background-color: var(--primary-background-color);
+    margin: 0 4px 4px;
+    font-size: 42px;
+    padding: 64px 0;
+    height: 100%;
+    text-align: center;
+  }
+  @media only screen and (max-width: 1000px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media only screen and (max-width: 600px) {
+    .grid {
+      grid-template-columns: repeat(1, 1fr);
+    }
+  }
+</style>
+
+{% assign medians = "addons,automations,integrations,states,users" | split: ',' %}
+
+<div class="grid">
+{% for median in medians %}
+{% assign dataset = "avg_" | append: median %}
+  <div class="metric">
+    <span>{{median}}</span>
+    <span>{{ data.current[dataset] }}</span>
+  </div>
+{% endfor %}
+<div class="metric">
+  <span>Energy configured</span>
+  <span>{{ 100 | times: data.current.energy.count_configured | divided_by: data.current.integrations["energy"] | round:2 }}%</span>
+</div>
+</div>
+
+<div class="note">{{ data.current.reports_statistics | formatNumber }} of {{ data.current.extended_data_from | formatNumber }} ({{ data.current.extended_data_from | calculatePercentage: data.current.reports_statistics }} %) installations have chosen to share usage statistics</div>
