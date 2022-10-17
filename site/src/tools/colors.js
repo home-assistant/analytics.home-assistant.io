@@ -90,13 +90,14 @@ const getColor = (input) =>
   COLORS[
     [...input]
       .filter((entry) => /^[a-zA-Z0-9]*$/.test(entry))
+      .reverse()
       .reduce(
         (total, entry) =>
           total +
           (/^[0-9]*$/.test(entry)
-            ? Number(entry)
-            : entry.toLowerCase().charCodeAt(0) - 96),
-        0
+            ? entry
+            : String(entry.toLowerCase().charCodeAt(0) - 96)),
+        "0"
       ) % COLORS.length
   ];
 
