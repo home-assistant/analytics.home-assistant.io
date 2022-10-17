@@ -5,7 +5,7 @@ const calculate = require("./calculate");
 
 const groupedCutoff = {
   yearly: moment().subtract({ years: 1 }).startOf("year"),
-  monthly: moment().subtract({ months: 1 }).startOf("month"),
+  monthly: moment().subtract({ months: 2 }).startOf("month"),
   weekly: moment().subtract({ weeks: 2 }).startOf("week"),
 };
 
