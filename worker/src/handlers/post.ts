@@ -34,9 +34,9 @@ export async function handlePost(
   let incomingPayload;
   sentry.addBreadcrumb({ message: "Process started" });
   const request_json = await request.json<Record<string, any>>();
-  if (request.cf) {
+  if (request.cf && "country" in request.cf) {
     request_json.country = request.cf.country;
-    if (withRegion.has(request_json.country)) {
+    if ("regionCode" in request.cf && withRegion.has(request_json.country)) {
       request_json.region = request.cf.regionCode;
     }
   }
