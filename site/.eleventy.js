@@ -84,7 +84,7 @@ module.exports = function (eleventyConfig) {
     return JSON.stringify([
       dataTable.DataPoint({ data: data.total, label: "Total" }),
       dataTable.DataPoint({ data: data.os, label: "Operating System" }),
-      dataTable.DataPoint({ rdata: data.container, label: "Container" }),
+      dataTable.DataPoint({ data: data.container, label: "Container" }),
       dataTable.DataPoint({ data: data.core, label: "Core" }),
       dataTable.DataPoint({ data: data.supervised, label: "Supervised" }),
     ]);
