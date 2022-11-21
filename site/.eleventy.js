@@ -84,7 +84,7 @@ module.exports = function (eleventyConfig) {
     return JSON.stringify([
       dataTable.DataPoint({ data: data.total, label: "Total" }),
       dataTable.DataPoint({ data: data.os, label: "Operating System" }),
-      dataTable.DataPoint({ rdata: data.container, label: "Container" }),
+      dataTable.DataPoint({ data: data.container, label: "Container" }),
       dataTable.DataPoint({ data: data.core, label: "Core" }),
       dataTable.DataPoint({ data: data.supervised, label: "Supervised" }),
     ]);
@@ -134,13 +134,15 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addFilter(
     "sortIntegrations",
-    (integrations, integration_details, excluded_domains) =>
+    (integrations, integration_details) =>
       dataTable.SortTableData(
         Object.keys(integration_details)
           .filter(
             (domain) =>
-              integration_details[domain].quality_scale !== "internal" &&
-              !excluded_domains.includes(domain)
+              !domain.startsWith("input_") &&
+              ["hub", "device", "helper", "service"].includes(
+                integration_details[domain].integration_type
+              )
           )
           .map((domain) => ({
             domain,
