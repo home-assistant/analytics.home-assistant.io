@@ -140,7 +140,7 @@ module.exports = function (eleventyConfig) {
           .filter(
             (domain) =>
               !domain.startsWith("input_") &&
-              ["hub", "device", "helper", "service"].includes(
+              ["integration", "hub", "device", "helper", "service"].includes(
                 integration_details[domain].integration_type
               )
           )
