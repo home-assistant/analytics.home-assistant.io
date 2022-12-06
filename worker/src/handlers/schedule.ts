@@ -153,7 +153,7 @@ async function updateHistory(sentry: Toucan): Promise<void> {
 async function processQueue(sentry: Toucan): Promise<void> {
   sentry.setTag("scheduled-task", "PROCESS_QUEUE");
   sentry.addBreadcrumb({ message: "Process started" });
-  let maxWorkerInvokations = KV_MAX_PROCESS_ENTRIES;
+  let maxWorkerinvocations = KV_MAX_PROCESS_ENTRIES;
   let queue = await getQueueData();
 
   sentry.setExtra("queue", queue);
@@ -174,7 +174,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
     queue = createQueueDefaults();
 
     const kv_list = await listKV(KV_PREFIX_UUID);
-    maxWorkerInvokations -= Math.round(kv_list.length / 1000);
+    maxWorkerinvocations -= Math.round(kv_list.length / 1000);
 
     sentry.addBreadcrumb({
       message: `${kv_list.length} entries`,
@@ -240,7 +240,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
 
   await Promise.all(
     queue.entries
-      .splice(0, maxWorkerInvokations)
+      .splice(0, maxWorkerinvocations)
       .map((entryKey) => handleEntry(entryKey))
   );
 
