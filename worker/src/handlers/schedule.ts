@@ -238,6 +238,10 @@ async function processQueue(sentry: Toucan): Promise<void> {
     }
   }
 
+  sentry.addBreadcrumb({
+    message: `${maxWorkerInvocations} remaining`,
+  });
+
   await Promise.all(
     queue.entries
       .splice(0, maxWorkerInvocations)
