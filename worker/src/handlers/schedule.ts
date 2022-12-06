@@ -174,7 +174,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
     queue = createQueueDefaults();
 
     const kv_list = await listKV(KV_PREFIX_UUID);
-    maxWorkerInvocations -= Math.round(kv_list.length / 1000);
+    maxWorkerInvocations -= Math.floor(kv_list.length / 1000);
 
     sentry.addBreadcrumb({
       message: `${kv_list.length} entries`,
