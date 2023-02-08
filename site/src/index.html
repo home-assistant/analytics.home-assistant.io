@@ -62,6 +62,16 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
 </div>
 
 <div id="svgMap"></div>
+<i>
+  Population data is provided by
+  <a
+    href="https://restcountries.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    restcountries
+  </a>
+</i>
 
 <script>
   const darkMode = window.matchMedia("(prefers-color-scheme:dark)").matches;
@@ -226,12 +236,21 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
     initialZoom: 1.0,
     data: {
             data: {
+              value: {
+                format: "{0} per million of population",
+                thousandSeparator: ".",
+              },
               installations: {
                 format: "{0} Installations",
+                thousandSeparator: ".",
+              },
+              population: {
+                format: "{0} Population",
+                thousandSeparator: ".",
               },
             },
-            applyData: "installations",
-            values: {{ data.current.countries | countriesForMap }},
+            applyData: "value",
+            values: {{ data.current.countries | countriesForMap: countries }},
           },
   });
 </script>

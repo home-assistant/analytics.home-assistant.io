@@ -13,6 +13,7 @@ curl -sSLf https://analytics.home-assistant.io/data.json | jq . > ./site/src/_da
 curl -sSLf https://analytics.home-assistant.io/custom_integrations.json | jq . > ./site/src/_data/custom_integrations.json
 curl -sSLf https://analytics.home-assistant.io/addons.json | jq . > ./site/src/_data/addons.json
 curl -sSLf https://www.home-assistant.io/integrations.json | jq . > ./site/src/_data/integration_details.json
+curl -sSLf https://restcountries.com/v3.1/all | jq . > ./site/src/_data/countries.json
 
 if [ ! -d node_modules ]; then
   script/bootstrap

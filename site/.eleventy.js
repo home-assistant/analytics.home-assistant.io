@@ -20,14 +20,25 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addFilter("historyFiltering", (history) =>
     historyFiltering(history)
   );
-  eleventyConfig.addFilter("countriesForMap", (base) =>
-    JSON.stringify(
+  eleventyConfig.addFilter("countriesForMap", (base, countries) => {
+    const countryObj = {};
+    for (const country of countries) {
+      countryObj[country["cca2"]] = country["population"];
+    }
+    return JSON.stringify(
       Object.keys(base || {}).reduce(
-        (obj, key) => ({ ...obj, [key]: { installations: base[key] || 0 } }),
+        (obj, key) => ({
+          ...obj,
+          [key]: {
+            installations: base[key] || 0,
+            population: countryObj[key] || 0,
+            value: Math.round((base[key] / countryObj[key]) * 1000000),
+          },
+        }),
         {}
       )
-    )
-  );
+    );
+  });
   eleventyConfig.addFilter("calculatePercentage", (total, part, decimal) =>
     calculate.percentage(total, part, decimal)
   );

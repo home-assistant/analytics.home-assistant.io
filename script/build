@@ -10,6 +10,7 @@ declare addons_path="${PWD}/site/src/_data/addons.json"
 declare custom_integrations_path="${PWD}/site/src/_data/custom_integrations.json"
 declare data_path="${PWD}/site/src/_data/data.json"
 declare integration_details_path="${PWD}/site/src/_data/integration_details.json"
+declare countries_path="${PWD}/site/src/_data/countries.json"
 
 # Stop on errors
 set -e
@@ -55,6 +56,9 @@ else
   data=$(curl -sSLf https://analytics.home-assistant.io/data.json)
   integration_details=$(curl -sSLf https://www.home-assistant.io/integrations.json)
 fi
+
+# https://restcountries.com/
+curl -sSLf https://restcountries.com/v3.1/all | jq . > "$countries_path"
 
 # Export to files
 echo "$addons" | jq . > "$addons_path"
