@@ -511,6 +511,15 @@ function combineEntryData(
     data.certificate_count_configured++;
   }
 
+  if (entrydata.recorder) {
+    if (!data.recorder.engines[entrydata.recorder.engine]) {
+      data.recorder.engines[entrydata.recorder.engine] = {
+        count_configured: 0,
+      };
+    }
+    data.recorder.engines[entrydata.recorder.engine].count_configured++;
+  }
+
   return data;
 }
 
@@ -541,6 +550,9 @@ const processQueueData = (data: QueueData) => {
     certificate_count_configured: data.certificate_count_configured,
     energy: {
       count_configured: data.energy.count_configured,
+    },
+    recorder: {
+      engines: data.recorder.engines,
     },
   };
 };
