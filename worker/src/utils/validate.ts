@@ -40,6 +40,10 @@ const defaultTrue = coerce(boolean(), nullable(boolean()), (value) =>
   value === null ? true : value
 );
 
+const stringLowerCase = coerce(string(), string(), (value) =>
+  value.toLowerCase()
+);
+
 export const IncomingPayloadStruct = object({
   addon_count: optional(number()),
   addons: optional(
@@ -73,6 +77,7 @@ export const IncomingPayloadStruct = object({
     object({ board: string(), version: optional(nullable(string())) })
   ),
   energy: optional(object({ configured: boolean() })),
+  recorder: optional(object({ engine: stringLowerCase, version: string() })),
   certificate: optional(boolean()),
   user_count: optional(number()),
   uuid: size(string(), 32, 32),

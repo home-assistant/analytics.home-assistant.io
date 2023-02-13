@@ -76,6 +76,7 @@ describe("createIncomingPayload", function () {
       region: "XX",
       state_count: 1,
       energy: { configured: true },
+      recorder: { engine: "Awesome_Engine", version: "123" },
       supervisor: { healthy: false, supported: true, arch: "amd64" },
       user_count: 1,
       certificate: true,
@@ -84,14 +85,16 @@ describe("createIncomingPayload", function () {
     expect(fullPayload.uuid).toBe(BASE_PAYLOAD.uuid);
     expect(fullPayload.installation_type).toBe(BASE_PAYLOAD.installation_type);
     expect(fullPayload.version).toBe(BASE_PAYLOAD.version);
-    expect(fullPayload.energy.configured).toBeTruthy();
+    expect(fullPayload.energy!.configured).toBeTruthy();
+    expect(fullPayload.recorder!.engine).toBe("awesome_engine");
+    expect(fullPayload.recorder!.version).toBe("123");
 
     const payloadWithoutArch = createIncomingPayload({
       ...payload,
       supervisor: { healthy: false, supported: true },
     });
 
-    expect(payloadWithoutArch.supervisor.arch).not.toBeDefined();
+    expect(payloadWithoutArch.supervisor!.arch).not.toBeDefined();
   });
 
   it("Default true", function () {
@@ -99,7 +102,7 @@ describe("createIncomingPayload", function () {
       ...BASE_PAYLOAD,
       addons: [{ ...ADDON, protected: null }],
     });
-    expect(payload.addons[0].protected).toBe(true);
+    expect(payload.addons![0].protected).toBe(true);
   });
 
   it("Default false", function () {
@@ -107,6 +110,6 @@ describe("createIncomingPayload", function () {
       ...BASE_PAYLOAD,
       addons: [{ ...ADDON, auto_update: null }],
     });
-    expect(payload.addons[0].auto_update).toBe(false);
+    expect(payload.addons![0].auto_update).toBe(false);
   });
 });

@@ -6,7 +6,7 @@ export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 800;
 
-export const SCHEMA_VERSION_QUEUE = 13;
+export const SCHEMA_VERSION_QUEUE = 14;
 export const SCHEMA_VERSION_ANALYTICS = 3;
 
 export const BRANDS_DOMAINS_URL =
@@ -115,6 +115,14 @@ export interface QueueData {
   energy: {
     count_configured: number;
   };
+  recorder: {
+    engines: {
+      [engine: string]: {
+        count_configured: number;
+        versions: Record<string, number>;
+      };
+    };
+  };
 }
 
 export interface Queue {
@@ -195,6 +203,7 @@ export interface IncomingPayload {
   user_count?: number;
   certificate?: boolean;
   energy?: { configured: boolean };
+  recorder?: { engine: string; version: string };
   uuid: string;
   version: string;
 }
@@ -247,6 +256,9 @@ export const createQueueData = (): QueueData => ({
   certificate_count_configured: 0,
   energy: {
     count_configured: 0,
+  },
+  recorder: {
+    engines: {},
   },
 });
 
