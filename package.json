@@ -5,7 +5,7 @@
     "svg-pan-zoom": "^3.6.1",
     "svgmap": "^2.10.1",
     "superstruct": "0.16.0",
-    "toucan-js": "^2.6.1"
+    "toucan-js": "^3.1.0"
   },
   "devDependencies": {
     "@11ty/eleventy": "^2.0.0",
