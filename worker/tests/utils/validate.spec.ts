@@ -76,7 +76,7 @@ describe("createIncomingPayload", function () {
       region: "XX",
       state_count: 1,
       energy: { configured: true },
-      recorder: { engine: "Awesome_Engine" },
+      recorder: { engine: "Awesome_Engine", version: "123" },
       supervisor: { healthy: false, supported: true, arch: "amd64" },
       user_count: 1,
       certificate: true,
@@ -87,6 +87,7 @@ describe("createIncomingPayload", function () {
     expect(fullPayload.version).toBe(BASE_PAYLOAD.version);
     expect(fullPayload.energy!.configured).toBeTruthy();
     expect(fullPayload.recorder!.engine).toBe("awesome_engine");
+    expect(fullPayload.recorder!.version).toBe("123");
 
     const payloadWithoutArch = createIncomingPayload({
       ...payload,

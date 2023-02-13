@@ -119,6 +119,7 @@ export interface QueueData {
     engines: {
       [engine: string]: {
         count_configured: number;
+        versions: Record<string, number>;
       };
     };
   };
@@ -202,7 +203,7 @@ export interface IncomingPayload {
   user_count?: number;
   certificate?: boolean;
   energy?: { configured: boolean };
-  recorder?: { engine: string };
+  recorder?: { engine: string; version: string };
   uuid: string;
   version: string;
 }
