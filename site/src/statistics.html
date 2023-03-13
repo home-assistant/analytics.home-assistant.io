@@ -1,6 +1,8 @@
 ---
 layout: base
 title: Statistics
+
+extra_head_contents: <script src="/static/chart.umd.js"></script>
 ---
 
 <style>
@@ -43,20 +45,79 @@ title: Statistics
   }
 </style>
 
-{% assign medians = "addons,automations,integrations,states,users" | split: ',' %}
+{% assign medians = "addons,automations,integrations,states,users" | split: ','
+%}
 
 <div class="grid">
-{% for median in medians %}
-{% assign dataset = "avg_" | append: median %}
+  {% for median in medians %} {% assign dataset = "avg_" | append: median %}
   <div class="metric">
     <span>{{median}}</span>
     <span>{{ data.current[dataset] }}</span>
   </div>
-{% endfor %}
-<div class="metric">
-  <span>Energy configured</span>
-  <span>{{ 100 | times: data.current.energy.count_configured | divided_by: data.current.integrations["energy"] | round:2 }}%</span>
-</div>
+  {% endfor %}
+  <div class="metric">
+    <span>Energy configured</span>
+    <span
+      >{{ 100 | times: data.current.energy.count_configured | divided_by:
+      data.current.integrations["energy"] | round:2 }}%</span
+    >
+  </div>
+
+  <div class="metric">
+    <span>Database engines</span>
+   <span><canvas id="databaseEngineChart" style="width: 100%"></canvas>
+  </div>
 </div>
 
-<div class="note">{{ data.current.reports_statistics | formatNumber }} of {{ data.current.extended_data_from | formatNumber }} ({{ data.current.extended_data_from | calculatePercentage: data.current.reports_statistics }} %) installations have chosen to share usage statistics</div>
+<div class="note">
+  {{ data.current.reports_statistics | formatNumber }} of {{
+  data.current.extended_data_from | formatNumber }} ({{
+  data.current.extended_data_from | calculatePercentage:
+  data.current.reports_statistics }} %) installations have chosen to share usage
+  statistics
+</div>
+
+<script>
+    const darkMode = window.matchMedia("(prefers-color-scheme:dark)").matches;
+
+    Chart.defaults.color = darkMode ? "#9b9b9b" : "#727272";
+    Chart.defaults.borderColor = darkMode ? "#202020" : "#ffffff";
+    Chart.defaults.plugins.legend.position = "right";
+
+  new Chart("databaseEngineChart", {
+    type: "pie",
+    options: {
+      plugins: {
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            footer: (item) => {
+              let sum = 0;
+              item[0].dataset.data.forEach(data => { sum += Number(data) });
+              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
+            }
+          }
+        },
+      },
+    },
+    data: {
+      labels: [
+        "SQLite",
+        "MySQL",
+        "PostgreSQL"
+      ],
+      datasets: [{
+        data: [
+        {{ data.current.recorder.engines.sqlite.count_configured }},
+        {{ data.current.recorder.engines.mysql.count_configured }},
+        {{ data.current.recorder.engines.postgresql.count_configured }},
+        ],
+        backgroundColor: [
+        "{{ "SQLite" | randomColor }}",
+        "{{ "MySQL" | randomColor }}",
+        "{{ "PostgreSQL" | randomColor }}",
+        ]
+      }]
+    }
+  });
+</script>
