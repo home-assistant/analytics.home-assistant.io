@@ -8,8 +8,6 @@ addons_details:
     name: Almond
   core_cec_scan:
     name: CEC Scanner
-  core_check_config:
-    name: Check Home Assistant configuration
   core_configurator:
     name: File editor
   core_deconz:
@@ -221,6 +219,7 @@ addons_details:
     documentation: https://github.com/esphome/home-assistant-addon/blob/main/esphome-dev/DOCS.md
     icon: https://raw.githubusercontent.com/esphome/home-assistant-addon/main/esphome-dev/icon.png
 ---
+
 <script>
   const tableEntries = {{ addons | sortAddons: addons_details | json}};
   const reportsAddons = Number({{ data.current.reports_addons }});
@@ -241,5 +240,10 @@ addons_details:
   `
 </script>
 
-<div class="note">{{ data.current.reports_addons | formatNumber }} of {{ data.current.extended_data_from | formatNumber }} ({{ data.current.extended_data_from | calculatePercentage: data.current.reports_addons }}%) installations have chosen to share their used add-ons</div>
-
+<div class="note">
+  {{ data.current.reports_addons | formatNumber }} of {{
+  data.current.extended_data_from | formatNumber }} ({{
+  data.current.extended_data_from | calculatePercentage:
+  data.current.reports_addons }}%) installations have chosen to share their used
+  add-ons
+</div>
