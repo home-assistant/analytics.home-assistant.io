@@ -6,6 +6,7 @@ const HaOsBoard = {
   ova: "Virtual Machine",
   "odroid-c2": "ODROID-C2",
   "odroid-c4": "ODROID-C4",
+  "odroid-m1": "ODROID-M1",
   "odroid-n2": "ODROID-N2",
   "odroid-xu4": "ODROID-XU4",
   rpi: "Raspberry Pi",

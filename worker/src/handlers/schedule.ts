@@ -153,6 +153,7 @@ async function updateHistory(sentry: Toucan): Promise<void> {
 async function processQueue(sentry: Toucan): Promise<void> {
   sentry.setTag("scheduled-task", "PROCESS_QUEUE");
   sentry.addBreadcrumb({ message: "Process started" });
+  let maxWorkerInvocations = KV_MAX_PROCESS_ENTRIES;
   let queue = await getQueueData();
 
   sentry.setExtra("queue", queue);
@@ -173,6 +174,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
     queue = createQueueDefaults();
 
     const kv_list = await listKV(KV_PREFIX_UUID);
+    maxWorkerInvocations -= Math.floor(kv_list.length / 1000);
 
     sentry.addBreadcrumb({
       message: `${kv_list.length} entries`,
@@ -236,9 +238,13 @@ async function processQueue(sentry: Toucan): Promise<void> {
     }
   }
 
+  sentry.addBreadcrumb({
+    message: `${maxWorkerInvocations} remaining`,
+  });
+
   await Promise.all(
     queue.entries
-      .splice(0, KV_MAX_PROCESS_ENTRIES)
+      .splice(0, maxWorkerInvocations)
       .map((entryKey) => handleEntry(entryKey))
   );
 
@@ -505,6 +511,23 @@ function combineEntryData(
     data.certificate_count_configured++;
   }
 
+  if (entrydata.recorder) {
+    if (!data.recorder.engines[entrydata.recorder.engine]) {
+      data.recorder.engines[entrydata.recorder.engine] = {
+        versions: {},
+        count_configured: 0,
+      };
+    }
+    data.recorder.engines[entrydata.recorder.engine].count_configured++;
+    data.recorder.engines[entrydata.recorder.engine].versions[
+      entrydata.recorder.version
+    ] = bumpValue(
+      data.recorder.engines[entrydata.recorder.engine].versions[
+        entrydata.recorder.version
+      ]
+    );
+  }
+
   return data;
 }
 
@@ -536,5 +559,6 @@ const processQueueData = (data: QueueData) => {
     energy: {
       count_configured: data.energy.count_configured,
     },
+    recorder: data.recorder,
   };
 };

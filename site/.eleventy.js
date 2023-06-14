@@ -10,7 +10,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({
     "../node_modules/svgmap/dist/svgMap.min.css": "static/svgMap.min.css",
     "../node_modules/svgmap/dist/svgMap.min.js": "static/svgMap.min.js",
-    "../node_modules/chart.js/dist/chart.min.js": "static/chart.min.js",
+    "../node_modules/chart.js/dist/chart.umd.js": "static/chart.umd.js",
     "../node_modules/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js":
       "static/chartjs-adapter-date-fns.bundle.min.js",
     "../node_modules/svg-pan-zoom/dist/svg-pan-zoom.min.js":
