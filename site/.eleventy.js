@@ -134,13 +134,14 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addFilter(
     "sortIntegrations",
-    (integrations, integration_details, excluded_domains) =>
+    (integrations, integration_details) =>
       dataTable.SortTableData(
         Object.keys(integration_details)
           .filter(
             (domain) =>
-              integration_details[domain].quality_scale !== "internal" &&
-              !excluded_domains.includes(domain)
+              ["integration", "hub", "device", "helper", "service"].includes(
+                integration_details[domain].integration_type
+              )
           )
           .map((domain) => ({
             domain,

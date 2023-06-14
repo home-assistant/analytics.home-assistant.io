@@ -1,14 +1,10 @@
 ---
 layout: table
 title: Integrations
-excluded_domains:
-  - cloud
-  - google_translate
-  - met
-  - rpi_power
 ---
+
 <script>
-  const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details, excluded_domains | json}};
+  const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details | json}};
   const reportsIntegrations = Number({{ data.current.reports_integrations }});
   const createTableRow = (entry) =>  `
   <tr>
@@ -27,4 +23,10 @@ excluded_domains:
   `
 </script>
 
-<div class="note">{{ data.current.reports_integrations | formatNumber }} of {{ data.current.extended_data_from | formatNumber }} ({{ data.current.extended_data_from | calculatePercentage: data.current.reports_integrations }}%) installations have chosen to share their used integrations</div>
+<div class="note">
+  {{ data.current.reports_integrations | formatNumber }} of {{
+  data.current.extended_data_from | formatNumber }} ({{
+  data.current.extended_data_from | calculatePercentage:
+  data.current.reports_integrations }}%) installations have chosen to share
+  their used integrations
+</div>
