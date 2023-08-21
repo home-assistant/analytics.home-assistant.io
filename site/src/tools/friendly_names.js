@@ -19,6 +19,7 @@ const HaOsBoard = {
   "rpi4-64": "Raspberry Pi 4",
   tinker: "ASUS Tinker Board",
   yellow: "Home Assistant Yellow",
+  green: "Home Assistant Green",
 };
 
 module.exports = { HaOsBoard };
