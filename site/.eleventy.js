@@ -54,11 +54,12 @@ module.exports = function (eleventyConfig) {
     const data = { data: [], labels: [], backgroundColor: [] };
 
     for (const key of Object.keys(value).sort()) {
-      data.labels.push(friendlyNames.HaOsBoard[key] || key);
-      data.data.push(value[key]);
-      data.backgroundColor.push(
-        colors.getColor(friendlyNames.HaOsBoard[key] || key)
-      );
+      const friendlyName = friendlyNames.HaOsBoard[key];
+      if (friendlyName) {
+        data.labels.push(friendlyName);
+        data.data.push(value[key]);
+        data.backgroundColor.push(colors.getColor(friendlyName));
+      }
     }
 
     return data;
