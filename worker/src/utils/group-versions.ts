@@ -1,7 +1,7 @@
 export const groupVersions = (versions: Record<string, number>) => {
   const releases: Record<string, number> = {};
   const releases_filtered: Record<string, number> = {};
-  const filterLowerLimit = WORKER_ENV ? 10 : 100;
+  const filterLowerLimit = WORKER_ENV === "dev" ? 10 : 100;
 
   Object.keys(versions).forEach((version) => {
     const key: string = version.split(".").slice(0, 2).join(".");
