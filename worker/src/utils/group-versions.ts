@@ -1,6 +1,7 @@
 export const groupVersions = (versions: Record<string, number>) => {
   const releases: Record<string, number> = {};
   const releases_filtered: Record<string, number> = {};
+  const filterLowerLimit = WORKER_ENV === "dev" ? 10 : 100;
 
   Object.keys(versions).forEach((version) => {
     const key: string = version.split(".").slice(0, 2).join(".");
@@ -8,10 +9,10 @@ export const groupVersions = (versions: Record<string, number>) => {
   });
 
   Object.keys(releases)
-    .filter((key) => releases[key] > 100)
+    .filter((key) => releases[key] > filterLowerLimit)
     .forEach((key) => {
       releases_filtered[key] = releases[key];
     });
 
   return releases_filtered;
-}
+};

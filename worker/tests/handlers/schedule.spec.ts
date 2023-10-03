@@ -29,6 +29,7 @@ describe("schedule handler", function () {
       })),
     }));
     (global as any).NETLIFY_BUILD_HOOK = "";
+    (global as any).WORKER_ENV = "production";
   });
 
   describe("Unexpected task", function () {
