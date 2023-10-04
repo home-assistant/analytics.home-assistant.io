@@ -1,6 +1,7 @@
-type = "webpack"
-webpack_config = "webpack.config.js"
 account_id = "dc9f963dfa4a630ca83eda7ccd8f363d"
+compatibility_date = "2022-01-23"
+main = "./src/index.ts"
+send_metrics = false
 
 [triggers]
 crons = ["*/2 * * * *", "5 0 * * *", "0 * * * *"]
@@ -32,12 +33,11 @@ vars = {WORKER_ENV = "dev"}
 name = "analytics-local-dev-v1"
 workers_dev = true
 kv_namespaces = [
-         { binding = "KV", preview_id = "7892aa96dc6540d9b7e685c92bee384c"}
+         { binding = "KV", id = "7892aa96dc6540d9b7e685c92bee384c", preview_id = "7892aa96dc6540d9b7e685c92bee384c"}
 ]
 vars = {WORKER_ENV = "local-dev"}
 
 
 [build]
-upload.format = "service-worker"
 command = "../node_modules/.bin/webpack build -c webpack.config.js"
 watch_dir = "./src"

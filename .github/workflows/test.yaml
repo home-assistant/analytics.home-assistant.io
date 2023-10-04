@@ -7,32 +7,43 @@ on:
       - dev
 
 env:
+  WRANGLER_VERSION: "3.5.1"
   NODE_VERSION: "16.14.0"
 
 jobs:
   worker:
     runs-on: ubuntu-latest
-    name: Build worker
+    name: Build ${{ matrix.environment }} worker
+    strategy:
+      matrix:
+        environment:
+          - dev
+          - local-dev
+          - production
     steps:
-      - uses: actions/checkout@v3.5.3
+      - uses: actions/checkout@v4.1.0
 
-      - uses: actions/setup-node@v3.6.0
+      - uses: actions/setup-node@v3.8.1
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install packages
         run: script/bootstrap
 
-      - name: Build
-        run: script/worker_build
+      - name: Build ${{ matrix.environment }} worker
+        uses: cloudflare/wrangler-action@v3.1.0
+        with:
+          workingDirectory: "worker"
+          wranglerVersion: ${{ env.WRANGLER_VERSION }}
+          command: deploy --dry-run --env=${{ matrix.environment }}
 
   site:
     runs-on: ubuntu-latest
     name: Build site
     steps:
-      - uses: actions/checkout@v3.5.3
+      - uses: actions/checkout@v4.1.0
 
-      - uses: actions/setup-node@v3.6.0
+      - uses: actions/setup-node@v3.8.1
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -46,9 +57,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Test worker
     steps:
-      - uses: actions/checkout@v3.5.3
+      - uses: actions/checkout@v4.1.0
 
-      - uses: actions/setup-node@v3.6.0
+      - uses: actions/setup-node@v3.8.1
         with:
           node-version: ${{ env.NODE_VERSION }}
 
