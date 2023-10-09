@@ -1,4 +1,4 @@
-import Toucan from "toucan-js";
+import { Toucan } from "toucan-js";
 import { handlePostWrapper } from "./handlers/post";
 import { handleSchedule } from "./handlers/schedule";
 
@@ -12,8 +12,11 @@ declare global {
 const sentryClient = (event: FetchEvent | ScheduledEvent, handler: string) => {
   const client = new Toucan({
     dsn: SENTRY_DSN,
-    allowedHeaders: ["user-agent"],
-    event,
+    requestDataOptions: {
+      allowedHeaders: ["user-agent"],
+    },
+    // request does not exist on ScheduledEvent
+    request: "request" in event ? event.request : undefined,
     environment: WORKER_ENV,
   });
   client.setTag("handler", handler);

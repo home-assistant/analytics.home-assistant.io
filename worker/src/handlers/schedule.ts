@@ -1,5 +1,5 @@
 // Scheduled taks handler to manage the KV store
-import Toucan from "toucan-js";
+import { Toucan } from "toucan-js";
 import {
   bumpValue,
   createQueueData,
