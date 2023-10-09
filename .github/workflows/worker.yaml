@@ -40,5 +40,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_WORKER_API_TOKEN }}
           workingDirectory: "worker"
+          packageManager: yarn
           wranglerVersion: ${{ steps.wrangler.outputs.version }}
           command: deploy --env=${{ steps.environment.outputs.environment }}
