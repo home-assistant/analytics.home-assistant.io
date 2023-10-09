@@ -1,3 +1,4 @@
 {
-  "main": "worker.js"
+  "main": "worker.js",
+  "private": true
 }
