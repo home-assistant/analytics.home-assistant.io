@@ -31,7 +31,7 @@ jobs:
         run: script/bootstrap
 
       - name: Build ${{ matrix.environment }} worker
-        uses: cloudflare/wrangler-action@v3.1.0
+        uses: cloudflare/wrangler-action@v3.2.0
         with:
           workingDirectory: "worker"
           wranglerVersion: ${{ steps.wrangler.outputs.version }}
