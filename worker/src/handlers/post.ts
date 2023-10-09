@@ -1,5 +1,5 @@
 // Receive data from a Home Assistant installation
-import Toucan from "toucan-js";
+import { Toucan } from "toucan-js";
 import {
   CfRequest,
   generateUuidMetadata,
