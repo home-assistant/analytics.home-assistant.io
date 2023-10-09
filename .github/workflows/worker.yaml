@@ -36,9 +36,10 @@ jobs:
           echo "environment=${environment}" >> "$GITHUB_OUTPUT"
 
       - name: Publish ${{ steps.environment.outputs.environment }} worker
-        uses: cloudflare/wrangler-action@v3.1.0
+        uses: cloudflare/wrangler-action@v3.2.0
         with:
           apiToken: ${{ secrets.CF_WORKER_API_TOKEN }}
           workingDirectory: "worker"
+          packageManager: yarn
           wranglerVersion: ${{ steps.wrangler.outputs.version }}
           command: deploy --env=${{ steps.environment.outputs.environment }}
