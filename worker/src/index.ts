@@ -10,10 +10,11 @@ const sentryClient = (
   const client = new Toucan({
     dsn: event.env.SENTRY_DSN,
     requestDataOptions: {
-      allowedHeaders: ["user-agent"],
+      allowedHeaders: ["user-agent", "cf-ray"],
     },
     // request does not exist on ScheduledEvent
     request: "request" in event ? event.request : undefined,
+    context: event.ctx,
     environment: event.env.WORKER_ENV,
   });
   client.setTag("handler", handler);

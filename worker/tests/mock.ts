@@ -5,6 +5,12 @@ export const MockedKV = () => ({
   getWithMetadata: jest.fn(async () => {}),
 });
 
+export const MockedConsole = () => ({
+  log: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+});
+
 export const MockedSentry = () => ({
   addBreadcrumb: jest.fn(),
   setUser: jest.fn(),

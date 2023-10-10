@@ -50,8 +50,9 @@ export async function handleSchedule(
     } else {
       throw new Error(`Unexpected schedule task: ${scheduledTask}`);
     }
-  } catch (e) {
-    sentry.captureException(e);
+  } catch (e: any) {
+    const captureId = sentry.captureException(e);
+    console.error(`${e?.message} (${captureId})`);
   }
 }
 
