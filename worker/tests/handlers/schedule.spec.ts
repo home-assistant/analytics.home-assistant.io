@@ -10,7 +10,12 @@ import {
   SCHEMA_VERSION_QUEUE,
 } from "../../src/data";
 import { handleSchedule } from "../../src/handlers/schedule";
-import { MockedKV, MockedScheduledEvent, MockedSentry } from "../mock";
+import {
+  MockedConsole,
+  MockedKV,
+  MockedScheduledEvent,
+  MockedSentry,
+} from "../mock";
 
 describe("schedule handler", function () {
   let MockSentry;
@@ -20,6 +25,7 @@ describe("schedule handler", function () {
   beforeEach(() => {
     MockSentry = MockedSentry();
     (global as any).KV = MockKV = MockedKV();
+    (global as any).console = MockedConsole();
     (global as any).fetch = MockFetch = jest.fn(async () => ({
       ok: true,
       json: jest.fn(async () => ({

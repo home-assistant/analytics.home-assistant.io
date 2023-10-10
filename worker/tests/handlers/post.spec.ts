@@ -1,5 +1,5 @@
 import { handlePost } from "../../src/handlers/post";
-import { MockedKV, MockedSentry } from "../mock";
+import { MockedConsole, MockedKV, MockedSentry } from "../mock";
 
 class MockResponse {}
 
@@ -17,6 +17,7 @@ describe("post handler", function () {
   beforeEach(() => {
     MockSentry = MockedSentry();
     (global as any).KV = MockKV = MockedKV();
+    (global as any).console = MockedConsole();
     MockRequest = {
       json: async () => ({ ...BASE_PAYLOAD }),
       cf: { country: "XX" },
