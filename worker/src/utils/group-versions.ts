@@ -1,7 +1,12 @@
-export const groupVersions = (versions: Record<string, number>) => {
+import { WorkerEvent } from "../data";
+
+export const groupVersions = (
+  event: WorkerEvent,
+  versions: Record<string, number>
+) => {
   const releases: Record<string, number> = {};
   const releases_filtered: Record<string, number> = {};
-  const filterLowerLimit = WORKER_ENV === "dev" ? 10 : 100;
+  const filterLowerLimit = event.env.WORKER_ENV === "dev" ? 10 : 100;
 
   Object.keys(versions).forEach((version) => {
     const key: string = version.split(".").slice(0, 2).join(".");

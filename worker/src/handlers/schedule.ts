@@ -146,7 +146,7 @@ async function updateHistory(
     timestamp: timestampString,
     active_installations,
     installation_types: data.installation_types,
-    versions: groupVersions(data.versions),
+    versions: groupVersions(event, data.versions),
   });
 
   sentry.addBreadcrumb({ message: "Trigger Netlify build" });
