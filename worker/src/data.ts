@@ -13,6 +13,26 @@ export const BRANDS_DOMAINS_URL =
   "https://brands.home-assistant.io/domains.json";
 export const VERSION_URL = "https://version.home-assistant.io/dev.json";
 
+export interface WorkerEnv {
+  KV: KVNamespace;
+  NETLIFY_BUILD_HOOK: string;
+  SENTRY_DSN: string;
+  WORKER_ENV: string;
+}
+
+export interface WorkerEvent {
+  env: WorkerEnv;
+  ctx: ExecutionContext;
+}
+
+export interface FetchWorkerEvent extends WorkerEvent {
+  request: CfRequest;
+}
+
+export interface ScheduledWorkerEvent extends WorkerEvent {
+  controller: ScheduledController;
+}
+
 export enum UuidMetadataKey {
   ADDED = "a",
   COUNTRY = "c",

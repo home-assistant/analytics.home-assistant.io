@@ -25,27 +25,28 @@ import {
   BRANDS_DOMAINS_URL,
   VERSION_URL,
   VersionResponse,
+  ScheduledWorkerEvent,
 } from "../data";
 import { groupVersions } from "../utils/group-versions";
 import { median } from "../utils/median";
 import { migrateAnalyticsData } from "../utils/migrate";
 
 export async function handleSchedule(
-  event: ScheduledEvent,
+  event: ScheduledWorkerEvent,
   sentry: Toucan
 ): Promise<void> {
-  const scheduledTask = event.cron;
+  const scheduledTask = event.controller.cron;
 
   try {
     if (scheduledTask === ScheduledTask.PROCESS_QUEUE) {
       // Runs every 2 minutes
-      await processQueue(sentry);
+      await processQueue(event, sentry);
     } else if (scheduledTask === ScheduledTask.RESET_QUEUE) {
       // Runs every day
-      await resetQueue(sentry);
+      await resetQueue(event, sentry);
     } else if (scheduledTask === ScheduledTask.UPDATE_HISTORY) {
       // Runs every hour
-      await updateHistory(sentry);
+      await updateHistory(event, sentry);
     } else {
       throw new Error(`Unexpected schedule task: ${scheduledTask}`);
     }
@@ -54,46 +55,55 @@ export async function handleSchedule(
   }
 }
 
-const getQueueData = async (): Promise<Queue> =>
-  (await KV.get<Queue>(KV_KEY_QUEUE, "json")) || createQueueDefaults();
+const getQueueData = async (event: ScheduledWorkerEvent): Promise<Queue> =>
+  (await event.env.KV.get<Queue>(KV_KEY_QUEUE, "json")) ||
+  createQueueDefaults();
 
-const getAnalyticsData = async (): Promise<AnalyticsData> => {
-  const data = await KV.get(KV_KEY_CORE_ANALYTICS, "json");
+const getAnalyticsData = async (
+  event: ScheduledWorkerEvent
+): Promise<AnalyticsData> => {
+  const data = await event.env.KV.get(KV_KEY_CORE_ANALYTICS, "json");
   return migrateAnalyticsData(data);
 };
 
-async function resetQueue(sentry: Toucan): Promise<void> {
+async function resetQueue(
+  event: ScheduledWorkerEvent,
+  sentry: Toucan
+): Promise<void> {
   sentry.setTag("scheduled-task", "RESET_QUEUE");
   sentry.addBreadcrumb({ message: "Process started" });
-  const queue = await getQueueData();
+  const queue = await getQueueData(event);
 
   sentry.setExtra("queue", queue);
 
   if (queue.entries.length === 0 && queue.process_complete) {
     sentry.addBreadcrumb({ message: "Store reset queue" });
-    await KV.put(KV_KEY_QUEUE, JSON.stringify(createQueueDefaults()));
+    await event.env.KV.put(KV_KEY_QUEUE, JSON.stringify(createQueueDefaults()));
   }
   sentry.addBreadcrumb({ message: "Process complete" });
 }
 
-async function updateHistory(sentry: Toucan): Promise<void> {
+async function updateHistory(
+  event: ScheduledWorkerEvent,
+  sentry: Toucan
+): Promise<void> {
   sentry.setTag("scheduled-task", "UPDATE_HISTORY");
   sentry.addBreadcrumb({ message: "Process started" });
   let data = createQueueData();
 
   sentry.addBreadcrumb({ message: "Get current data" });
-  const analyticsData = await getAnalyticsData();
+  const analyticsData = await getAnalyticsData(event);
   const timestamp = new Date().getTime();
   const timestampString = String(timestamp);
 
   sentry.addBreadcrumb({ message: "List UUID entries" });
-  const kv_list = await listKV(KV_PREFIX_UUID);
+  const kv_list = await listKV(event, KV_PREFIX_UUID);
 
   const missingMetata = kv_list.filter((entry) => !entry.metadata);
 
   async function handleMissingMetadata(entry: ListEntry) {
-    const value = await KV.get<IncomingPayload>(entry.name, "json");
-    await KV.put(entry.name, JSON.stringify(value), {
+    const value = await event.env.KV.get<IncomingPayload>(entry.name, "json");
+    await event.env.KV.put(entry.name, JSON.stringify(value), {
       expiration: entry.expiration,
       metadata: generateUuidMetadata(value!, timestamp),
     });
@@ -139,22 +149,25 @@ async function updateHistory(sentry: Toucan): Promise<void> {
   });
 
   sentry.addBreadcrumb({ message: "Trigger Netlify build" });
-  const resp = await fetch(NETLIFY_BUILD_HOOK, { method: "POST" });
+  const resp = await fetch(event.env.NETLIFY_BUILD_HOOK, { method: "POST" });
   if (!resp.ok) {
     throw new Error("Failed to call Netlify build hook");
   }
 
   sentry.addBreadcrumb({ message: "Store data" });
-  await KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(analyticsData));
+  await event.env.KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(analyticsData));
 
   sentry.addBreadcrumb({ message: "Process complete" });
 }
 
-async function processQueue(sentry: Toucan): Promise<void> {
+async function processQueue(
+  event: ScheduledWorkerEvent,
+  sentry: Toucan
+): Promise<void> {
   sentry.setTag("scheduled-task", "PROCESS_QUEUE");
   sentry.addBreadcrumb({ message: "Process started" });
   let maxWorkerInvocations = KV_MAX_PROCESS_ENTRIES;
-  let queue = await getQueueData();
+  let queue = await getQueueData(event);
 
   sentry.setExtra("queue", queue);
 
@@ -173,7 +186,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
     // Reset queue
     queue = createQueueDefaults();
 
-    const kv_list = await listKV(KV_PREFIX_UUID);
+    const kv_list = await listKV(event, KV_PREFIX_UUID);
     maxWorkerInvocations -= Math.floor(kv_list.length / 1000);
 
     sentry.addBreadcrumb({
@@ -226,7 +239,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
 
   async function handleEntry(entryKey: string) {
     let entryData;
-    entryData = await KV.get<IncomingPayload>(entryKey, "json");
+    entryData = await event.env.KV.get<IncomingPayload>(entryKey, "json");
 
     if (entryData !== undefined && entryData !== null) {
       queue.data = combineEntryData(
@@ -256,7 +269,7 @@ async function processQueue(sentry: Toucan): Promise<void> {
     const timestampString = String(timestamp);
 
     const queue_data = processQueueData(queue.data);
-    const storedAnalytics = await getAnalyticsData();
+    const storedAnalytics = await getAnalyticsData(event);
 
     storedAnalytics.current = {
       ...queue_data,
@@ -265,38 +278,41 @@ async function processQueue(sentry: Toucan): Promise<void> {
     };
 
     sentry.addBreadcrumb({ message: "Trigger Netlify build" });
-    const resp = await fetch(NETLIFY_BUILD_HOOK, { method: "POST" });
+    const resp = await fetch(event.env.NETLIFY_BUILD_HOOK, { method: "POST" });
     if (!resp.ok) {
       throw new Error("Failed to call Netlify build hook");
     }
 
     sentry.addBreadcrumb({ message: "Store data" });
     await Promise.all([
-      KV.put(
+      event.env.KV.put(
         `${KV_PREFIX_HISTORY}:${timestampString}`,
         JSON.stringify(queue_data)
       ),
-      KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(storedAnalytics)),
-      KV.put(
+      event.env.KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(storedAnalytics)),
+      event.env.KV.put(
         KV_KEY_CUSTOM_INTEGRATIONS,
         JSON.stringify(queue.data.custom_integrations)
       ),
-      KV.put(KV_KEY_ADDONS, JSON.stringify(queue.data.addons)),
+      event.env.KV.put(KV_KEY_ADDONS, JSON.stringify(queue.data.addons)),
     ]);
 
     queue = createQueueDefaults();
     queue.process_complete = true;
   }
   sentry.addBreadcrumb({ message: "Process complete" });
-  await KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
+  await event.env.KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
 }
 
-async function listKV(prefix: string): Promise<ListEntry[]> {
+async function listKV(
+  event: ScheduledWorkerEvent,
+  prefix: string
+): Promise<ListEntry[]> {
   let entries: ListEntry[] = [];
 
   let lastResponse;
   while (lastResponse === undefined || !lastResponse.list_complete) {
-    lastResponse = await KV.list({
+    lastResponse = await event.env.KV.list({
       prefix,
       cursor: lastResponse !== undefined ? lastResponse.cursor : undefined,
     });
