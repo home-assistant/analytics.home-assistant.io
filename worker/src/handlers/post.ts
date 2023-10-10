@@ -21,8 +21,9 @@ export async function handlePostWrapper(
 ): Promise<Response> {
   try {
     return await handlePost(request, sentry);
-  } catch (e) {
-    sentry.captureException(e);
+  } catch (e: any) {
+    const captureId = sentry.captureException(e);
+    console.error(`${e?.message} (${captureId})`);
     return new Response(null, { status: 500 });
   }
 }
@@ -47,8 +48,9 @@ export async function handlePost(
   try {
     sentry.addBreadcrumb({ message: "Validate incoming payload" });
     incomingPayload = createIncomingPayload(request_json);
-  } catch (e) {
-    sentry.captureException(e);
+  } catch (e: any) {
+    const captureId = sentry.captureException(e);
+    console.error(`${e?.message} (${captureId})`);
     return new Response(null, { status: 400 });
   }
 
