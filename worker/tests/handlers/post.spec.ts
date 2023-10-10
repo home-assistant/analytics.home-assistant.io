@@ -1,50 +1,47 @@
 import { handlePost } from "../../src/handlers/post";
-import { MockedConsole, MockedKV, MockedSentry } from "../mock";
+import {
+  BASE_PAYLOAD,
+  MockedConsole,
+  MockedFetchEvent,
+  MockedSentry,
+} from "../mock";
 
 class MockResponse {}
 
-const BASE_PAYLOAD = {
-  uuid: "12345678901234567890123456789012",
-  installation_type: "Unknown",
-  version: "1970.1.1",
-};
-
 describe("post handler", function () {
-  let MockRequest;
   let MockSentry;
-  let MockKV;
 
   beforeEach(() => {
     MockSentry = MockedSentry();
-    (global as any).KV = MockKV = MockedKV();
     (global as any).console = MockedConsole();
-    MockRequest = {
-      json: async () => ({ ...BASE_PAYLOAD }),
-      cf: { country: "XX" },
-    };
     (global as any).Response = MockResponse;
   });
 
   it("First interaction", async () => {
-    await handlePost(MockRequest, MockSentry);
-    expect(MockKV.getWithMetadata).toBeCalledWith(
+    const event = MockedFetchEvent({});
+    await handlePost(event, MockSentry);
+    expect(event.env.KV.getWithMetadata).toBeCalledWith(
       "uuid:12345678901234567890123456789012",
       "json"
     );
     expect(MockSentry.addBreadcrumb).toBeCalledWith({
       message: "First contact for UUID, store payload",
     });
-    expect(MockKV.put).toBeCalledTimes(1);
+    expect(event.env.KV.put).toBeCalledTimes(1);
   });
 
   it("Time has passed", async () => {
-    MockKV.getWithMetadata = jest.fn(async () => ({
-      value: { ...BASE_PAYLOAD, country: "XX" },
-      metadata: { u: 161892932 },
-    }));
+    const event = MockedFetchEvent({});
 
-    await handlePost(MockRequest, MockSentry);
-    expect(MockKV.getWithMetadata).toBeCalledWith(
+    (event.env.KV.getWithMetadata as jest.Mock).mockImplementation(
+      async () => ({
+        value: { ...BASE_PAYLOAD, country: "XX" },
+        metadata: { u: 161892932 },
+      })
+    );
+
+    await handlePost(event, MockSentry);
+    expect(event.env.KV.getWithMetadata).toBeCalledWith(
       "uuid:12345678901234567890123456789012",
       "json"
     );
@@ -53,38 +50,42 @@ describe("post handler", function () {
         message: "Threshold has passed, update stored data",
       })
     );
-    expect(MockKV.put).toBeCalledTimes(1);
+    expect(event.env.KV.put).toBeCalledTimes(1);
   });
 
   it("Data changed", async () => {
-    MockKV.getWithMetadata = jest.fn(async () => ({
-      value: { ...BASE_PAYLOAD },
-    }));
-    MockRequest.json = async () => ({
-      ...BASE_PAYLOAD,
-      installation_type: "Home Assistant OS",
-      integrations: ["awesome"],
-      integration_count: 1,
-      addons: [
-        {
-          slug: "test_addon",
-          version: "1970.1.1",
-          protected: true,
-          auto_update: false,
-        },
-      ],
+    const event = MockedFetchEvent({
+      payload: {
+        installation_type: "Home Assistant OS",
+        integrations: ["awesome"],
+        integration_count: 1,
+        addons: [
+          {
+            slug: "test_addon",
+            version: "1970.1.1",
+            protected: true,
+            auto_update: false,
+          },
+        ],
+      },
     });
 
-    await handlePost(MockRequest, MockSentry);
-    expect(MockKV.getWithMetadata).toBeCalledWith(
+    (event.env.KV.getWithMetadata as jest.Mock).mockImplementation(
+      async () => ({
+        value: { ...BASE_PAYLOAD },
+      })
+    );
+
+    await handlePost(event, MockSentry);
+    expect(event.env.KV.getWithMetadata).toBeCalledWith(
       "uuid:12345678901234567890123456789012",
       "json"
     );
     expect(MockSentry.addBreadcrumb).toBeCalledWith({
       message: "Payload changed, update stored data",
     });
-    expect(MockKV.put).toBeCalledTimes(1);
-    expect(MockKV.put).toBeCalledWith(
+    expect(event.env.KV.put).toBeCalledTimes(1);
+    expect(event.env.KV.put).toBeCalledWith(
       "uuid:12345678901234567890123456789012",
       expect.any(String),
       expect.objectContaining({
@@ -99,17 +100,20 @@ describe("post handler", function () {
   });
 
   it("Nothing changed, time has not passed", async () => {
-    MockKV.getWithMetadata = jest.fn(async () => ({
-      value: { ...BASE_PAYLOAD, country: "XX" },
-      metadata: { u: new Date().getTime() },
-    }));
+    const event = MockedFetchEvent({});
+    (event.env.KV.getWithMetadata as jest.Mock).mockImplementation(
+      async () => ({
+        value: { ...BASE_PAYLOAD, country: "XX" },
+        metadata: { u: new Date().getTime() },
+      })
+    );
 
-    await handlePost(MockRequest, MockSentry);
-    expect(MockKV.getWithMetadata).toBeCalledWith(
+    await handlePost(event, MockSentry);
+    expect(event.env.KV.getWithMetadata).toBeCalledWith(
       "uuid:12345678901234567890123456789012",
       "json"
     );
 
-    expect(MockKV.put).toBeCalledTimes(0);
+    expect(event.env.KV.put).toBeCalledTimes(0);
   });
 });

@@ -1,9 +1,13 @@
-export const MockedKV = () => ({
-  put: jest.fn(async () => {}),
-  get: jest.fn(async () => {}),
-  list: jest.fn(async () => {}),
-  getWithMetadata: jest.fn(async () => {}),
-});
+import { ScheduledWorkerEvent, FetchWorkerEvent } from "../src/data";
+
+export const MockedKV = () =>
+  ({
+    put: jest.fn(async () => {}),
+    get: jest.fn(async () => ""),
+    list: jest.fn(async () => {}),
+    delete: jest.fn(async () => {}),
+    getWithMetadata: jest.fn(async () => {}),
+  } as unknown as KVNamespace);
 
 export const MockedConsole = () => ({
   log: jest.fn(),
@@ -21,28 +25,64 @@ export const MockedSentry = () => ({
   captureMessage: jest.fn(),
 });
 
-export const MockedScheduledEvent = (options: any): ScheduledEvent => ({
-  type: "cron",
-  eventPhase: 0,
-  composed: true,
-  bubbles: true,
-  cancelable: true,
-  defaultPrevented: false,
-  returnValue: false,
-  timeStamp: 0,
-  isTrusted: true,
-  cancelBubble: false,
-  stopImmediatePropagation: () => ({}),
-  preventDefault: () => ({}),
-  stopPropagation: () => ({}),
-  composedPath: () => [],
-  NONE: 0,
-  CAPTURING_PHASE: 0,
-  AT_TARGET: 0,
-  BUBBLING_PHASE: 0,
-  cron: "",
-  scheduledTime: 0,
-  noRetry: () => ({}),
-  waitUntil: async (promise: Promise<any>) => ({}),
-  ...options,
+export const BASE_PAYLOAD = {
+  uuid: "12345678901234567890123456789012",
+  installation_type: "Unknown",
+  version: "1970.1.1",
+};
+
+export const MockedFetchEvent = (options: {
+  request?: Partial<FetchWorkerEvent["request"]>;
+  env?: Partial<FetchWorkerEvent["env"]>;
+  ctx?: Partial<FetchWorkerEvent["ctx"]>;
+  payload?: Record<string, any>;
+}): FetchWorkerEvent => ({
+  request: {
+    cf: {
+      country: "XX",
+      ...options.request?.cf,
+    } as IncomingRequestCfProperties,
+    json: async () => ({
+      ...BASE_PAYLOAD,
+      ...options.payload,
+    }),
+    ...options.request,
+  } as FetchWorkerEvent["request"],
+  env: {
+    SENTRY_DSN: "",
+    WORKER_ENV: "testing",
+    NETLIFY_BUILD_HOOK: "https://somesite/hook",
+    KV: MockedKV(),
+    ...options.env,
+  },
+  ctx: {
+    waitUntil: () => {},
+    passThroughOnException: () => {},
+    ...options.ctx,
+  },
+});
+
+export const MockedScheduledEvent = (options: {
+  controller?: Partial<ScheduledWorkerEvent["controller"]>;
+  env?: Partial<ScheduledWorkerEvent["env"]>;
+  ctx?: Partial<ScheduledWorkerEvent["ctx"]>;
+}): ScheduledWorkerEvent => ({
+  controller: {
+    scheduledTime: 1234,
+    cron: "",
+    noRetry: () => {},
+    ...options.controller,
+  },
+  env: {
+    SENTRY_DSN: "",
+    WORKER_ENV: "testing",
+    NETLIFY_BUILD_HOOK: "https://somesite/hook",
+    KV: MockedKV(),
+    ...options.env,
+  },
+  ctx: {
+    waitUntil: () => {},
+    passThroughOnException: () => {},
+    ...options.ctx,
+  },
 });
