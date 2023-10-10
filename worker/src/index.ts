@@ -16,8 +16,12 @@ const sentryClient = (
     request: "request" in event ? event.request : undefined,
     context: event.ctx,
     environment: event.env.WORKER_ENV,
+    initialScope: {
+      tags: {
+        handler,
+      },
+    },
   });
-  client.setTag("handler", handler);
 
   return client;
 };
