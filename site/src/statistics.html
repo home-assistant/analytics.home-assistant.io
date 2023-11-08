@@ -55,7 +55,7 @@ title: Statistics
 {% endfor %}
 <div class="metric">
   <span>Energy configured</span>
-  <span>{{ 100 | times: data.current.energy.count_configured | divided_by: data.current.integrations["energy"] | round:2 }}%</span>
+  <span>{{ 100 | times: data.current.energy.count_configured | divided_by: data.current.extended_data_from | round:2 }}%</span>
 </div>
 </div>
 
