@@ -1,36 +1,50 @@
-import Toucan from "toucan-js";
+import { Toucan } from "toucan-js";
 import { handlePostWrapper } from "./handlers/post";
 import { handleSchedule } from "./handlers/schedule";
+import { FetchWorkerEvent, ScheduledWorkerEvent } from "./data";
 
-declare global {
-  const KV: KVNamespace;
-  const NETLIFY_BUILD_HOOK: string;
-  const SENTRY_DSN: string;
-  const WORKER_ENV: string;
-}
-
-const sentryClient = (event: FetchEvent | ScheduledEvent, handler: string) => {
+const sentryClient = (
+  event: FetchWorkerEvent | ScheduledWorkerEvent,
+  handler: string
+) => {
   const client = new Toucan({
-    dsn: SENTRY_DSN,
-    allowedHeaders: ["user-agent"],
-    event,
-    environment: WORKER_ENV,
+    dsn: event.env.SENTRY_DSN,
+    requestDataOptions: {
+      allowedHeaders: ["user-agent", "cf-ray"],
+    },
+    // request does not exist on ScheduledEvent
+    request: "request" in event ? event.request : undefined,
+    context: event.ctx,
+    environment: event.env.WORKER_ENV,
+    initialScope: {
+      tags: {
+        handler,
+      },
+    },
   });
-  client.setTag("handler", handler);
 
   return client;
 };
 
-addEventListener("fetch", (event: FetchEvent) => {
-  if (event.request.method === "POST") {
-    event.respondWith(
-      handlePostWrapper(event.request, sentryClient(event, "post"))
-    );
-  } else {
-    event.respondWith(new Response(null, { status: 405 }));
-  }
-});
-
-addEventListener("scheduled", (event) => {
-  event.waitUntil(handleSchedule(event, sentryClient(event, "schedule")));
-});
+export default {
+  fetch: async (
+    request: FetchWorkerEvent["request"],
+    env: FetchWorkerEvent["env"],
+    ctx: FetchWorkerEvent["ctx"]
+  ) => {
+    const event: FetchWorkerEvent = { request, env, ctx };
+    if (request.method === "POST") {
+      return await handlePostWrapper(event, sentryClient(event, "post"));
+    } else {
+      return new Response(null, { status: 405 });
+    }
+  },
+  scheduled: async (
+    controller: ScheduledWorkerEvent["controller"],
+    env: ScheduledWorkerEvent["env"],
+    ctx: ScheduledWorkerEvent["ctx"]
+  ) => {
+    const event: ScheduledWorkerEvent = { controller, env, ctx };
+    await handleSchedule(event, sentryClient(event, "schedule"));
+  },
+} as ExportedHandler;

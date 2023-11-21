@@ -6,20 +6,20 @@ on:
       - main
       - dev
 
-env:
-  WRANGLER_VERSION: "3.5.1"
-  NODE_VERSION: "16.14.0"
-
 jobs:
   publish:
     runs-on: ubuntu-latest
     name: Publish
     steps:
-      - uses: actions/checkout@v4.1.0
+      - uses: actions/checkout@v4.1.1
 
-      - uses: actions/setup-node@v3.8.1
+      - uses: actions/setup-node@v4.0.0
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: '.nvmrc'
+
+      - name: Set wrangler version
+        id: wrangler
+        run: echo "version=$(jq -r .devDependencies.wrangler package.json | cut -c2-)" >> "$GITHUB_OUTPUT"
 
       - name: Install packages
         run: script/bootstrap
@@ -36,9 +36,10 @@ jobs:
           echo "environment=${environment}" >> "$GITHUB_OUTPUT"
 
       - name: Publish ${{ steps.environment.outputs.environment }} worker
-        uses: cloudflare/wrangler-action@v3.1.0
+        uses: cloudflare/wrangler-action@v3.3.1
         with:
           apiToken: ${{ secrets.CF_WORKER_API_TOKEN }}
           workingDirectory: "worker"
-          wranglerVersion: ${{ env.WRANGLER_VERSION }}
+          packageManager: yarn
+          wranglerVersion: ${{ steps.wrangler.outputs.version }}
           command: deploy --env=${{ steps.environment.outputs.environment }}

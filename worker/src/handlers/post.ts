@@ -1,7 +1,7 @@
 // Receive data from a Home Assistant installation
-import Toucan from "toucan-js";
+import { Toucan } from "toucan-js";
 import {
-  CfRequest,
+  FetchWorkerEvent,
   generateUuidMetadata,
   IncomingPayload,
   KV_PREFIX_UUID,
@@ -16,21 +16,23 @@ const expirationTtl = 5184000;
 const withRegion = new Set(["US"]);
 
 export async function handlePostWrapper(
-  request: CfRequest,
+  event: FetchWorkerEvent,
   sentry: Toucan
 ): Promise<Response> {
   try {
-    return await handlePost(request, sentry);
-  } catch (e) {
-    sentry.captureException(e);
+    return await handlePost(event, sentry);
+  } catch (e: any) {
+    const captureId = sentry.captureException(e);
+    console.error(`${e?.message} (${captureId})`);
     return new Response(null, { status: 500 });
   }
 }
 
 export async function handlePost(
-  request: CfRequest,
+  event: FetchWorkerEvent,
   sentry: Toucan
 ): Promise<Response> {
+  const { request } = event;
   let incomingPayload;
   sentry.addBreadcrumb({ message: "Process started" });
   const request_json = await request.json<Record<string, any>>();
@@ -47,8 +49,9 @@ export async function handlePost(
   try {
     sentry.addBreadcrumb({ message: "Validate incoming payload" });
     incomingPayload = createIncomingPayload(request_json);
-  } catch (e) {
-    sentry.captureException(e);
+  } catch (e: any) {
+    const captureId = sentry.captureException(e);
+    console.error(`${e?.message} (${captureId})`);
     return new Response(null, { status: 400 });
   }
 
@@ -62,11 +65,12 @@ export async function handlePost(
   const stored: {
     value?: IncomingPayload | null;
     metadata?: UuidMetadata | null;
-  } = await KV.getWithMetadata(storageKey, "json");
+  } = await event.env.KV.getWithMetadata(storageKey, "json");
 
   if (!stored || !stored.value) {
     sentry.addBreadcrumb({ message: "First contact for UUID, store payload" });
     await storePayload(
+      event,
       storageKey,
       incomingPayload,
       stringifiedPayload,
@@ -87,6 +91,7 @@ export async function handlePost(
   if (!deepEqual(stored.value, JSON.parse(stringifiedPayload))) {
     sentry.addBreadcrumb({ message: "Payload changed, update stored data" });
     await storePayload(
+      event,
       storageKey,
       incomingPayload,
       stringifiedPayload,
@@ -105,6 +110,7 @@ export async function handlePost(
     });
 
     await storePayload(
+      event,
       storageKey,
       incomingPayload,
       stringifiedPayload,
@@ -118,13 +124,14 @@ export async function handlePost(
 }
 
 async function storePayload(
+  event: FetchWorkerEvent,
   storageKey: string,
   payload: IncomingPayload,
   stringifiedPayload: string,
   currentTimestamp: number,
   metadata?: UuidMetadata | null
 ) {
-  await KV.put(storageKey, stringifiedPayload, {
+  await event.env.KV.put(storageKey, stringifiedPayload, {
     expirationTtl,
     metadata: generateUuidMetadata(payload, currentTimestamp, metadata),
   });

@@ -1,4 +1,5 @@
 import { groupVersions } from "../../src/utils/group-versions";
+import { MockedScheduledEvent } from "../mock";
 
 const sampleData = {
   "1970.1.0": 11,
@@ -20,8 +21,9 @@ describe("groupVersions", function () {
   });
 
   it("test dev", function () {
-    (global as any).WORKER_ENV = "dev";
-    expect(groupVersions(sampleData)).toStrictEqual({
+    const event = MockedScheduledEvent({ env: { WORKER_ENV: "dev" } });
+
+    expect(groupVersions(event, sampleData)).toStrictEqual({
       "1970.1": 11,
       "2021.4": 110,
       "2021.5": 150,
@@ -30,8 +32,8 @@ describe("groupVersions", function () {
   });
 
   it("test production", function () {
-    (global as any).WORKER_ENV = "production";
-    expect(groupVersions(sampleData)).toStrictEqual({
+    const event = MockedScheduledEvent({ env: { WORKER_ENV: "production" } });
+    expect(groupVersions(event, sampleData)).toStrictEqual({
       "2021.4": 110,
       "2021.5": 150,
       "2021.6": 119,
