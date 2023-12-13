@@ -17,6 +17,7 @@ const HaOsBoard = {
   "rpi3-64": "Raspberry Pi 3",
   rpi4: "Raspberry Pi 4 (32-bit)",
   "rpi4-64": "Raspberry Pi 4",
+  "rpi5-64": "Raspberry Pi 5",
   tinker: "ASUS Tinker Board",
   yellow: "Home Assistant Yellow",
   green: "Home Assistant Green",
