@@ -47,6 +47,9 @@ export async function handleSchedule(
     } else if (scheduledTask === ScheduledTask.UPDATE_HISTORY) {
       // Runs every hour
       await updateHistory(event, sentry);
+    } else if (scheduledTask === ScheduledTask.REGENERATE_SITE) {
+      // Runs 15 min over each hour
+      await regenerateSite(event, sentry);
     } else {
       throw new Error(`Unexpected schedule task: ${scheduledTask}`);
     }
@@ -80,6 +83,32 @@ async function resetQueue(
   if (queue.entries.length === 0 && queue.process_complete) {
     sentry.addBreadcrumb({ message: "Store reset queue" });
     await event.env.KV.put(KV_KEY_QUEUE, JSON.stringify(createQueueDefaults()));
+  }
+  sentry.addBreadcrumb({ message: "Process complete" });
+}
+
+async function regenerateSite(
+  event: ScheduledWorkerEvent,
+  sentry: Toucan
+): Promise<void> {
+  sentry.setTag("scheduled-task", "REGENERATE_SITE");
+  sentry.addBreadcrumb({ message: "Process started" });
+
+  sentry.addBreadcrumb({ message: "Get current data" });
+  const analyticsData = await getAnalyticsData(event);
+  const currentTimestamp = new Date().getTime();
+  const lastHistoryEntry =
+    analyticsData.history[analyticsData.history.length - 1];
+
+  if (currentTimestamp - Number(lastHistoryEntry.timestamp) > 3_600_000) {
+    // Ideally this would never hit, but let's throw an error here to detect it.
+    throw new Error("The data is not updated in the past hour!");
+  }
+
+  sentry.addBreadcrumb({ message: "Trigger Netlify build" });
+  const resp = await fetch(event.env.NETLIFY_BUILD_HOOK, { method: "POST" });
+  if (!resp.ok) {
+    throw new Error("Failed to call Netlify build hook");
   }
   sentry.addBreadcrumb({ message: "Process complete" });
 }
@@ -148,12 +177,6 @@ async function updateHistory(
     installation_types: data.installation_types,
     versions: groupVersions(event, data.versions),
   });
-
-  sentry.addBreadcrumb({ message: "Trigger Netlify build" });
-  const resp = await fetch(event.env.NETLIFY_BUILD_HOOK, { method: "POST" });
-  if (!resp.ok) {
-    throw new Error("Failed to call Netlify build hook");
-  }
 
   sentry.addBreadcrumb({ message: "Store data" });
   await event.env.KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(analyticsData));
