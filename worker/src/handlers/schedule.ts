@@ -38,17 +38,25 @@ export async function handleSchedule(
   const scheduledTask = event.controller.cron;
 
   try {
-    if (scheduledTask === ScheduledTask.PROCESS_QUEUE) {
-      // Runs every 2 minutes
-      await processQueue(event, sentry);
-    } else if (scheduledTask === ScheduledTask.RESET_QUEUE) {
-      // Runs every day
-      await resetQueue(event, sentry);
-    } else if (scheduledTask === ScheduledTask.UPDATE_HISTORY) {
-      // Runs every hour
-      await updateHistory(event, sentry);
-    } else {
-      throw new Error(`Unexpected schedule task: ${scheduledTask}`);
+    switch (scheduledTask) {
+      case ScheduledTask.PROCESS_QUEUE:
+        // Runs every 2 minutes
+        await processQueue(event, sentry);
+        break;
+      case ScheduledTask.RESET_QUEUE:
+        // Runs every day
+        await resetQueue(event, sentry);
+        break;
+      case ScheduledTask.UPDATE_HISTORY:
+        // Runs every hour
+        await updateHistory(event, sentry);
+        break;
+      case ScheduledTask.REGENERATE_SITE:
+        // Runs 15 min over each hour
+        await regenerateSite(event, sentry);
+        break;
+      default:
+        throw new Error(`Unexpected schedule task: ${scheduledTask}`);
     }
   } catch (e: any) {
     const captureId = sentry.captureException(e);
@@ -80,6 +88,32 @@ async function resetQueue(
   if (queue.entries.length === 0 && queue.process_complete) {
     sentry.addBreadcrumb({ message: "Store reset queue" });
     await event.env.KV.put(KV_KEY_QUEUE, JSON.stringify(createQueueDefaults()));
+  }
+  sentry.addBreadcrumb({ message: "Process complete" });
+}
+
+async function regenerateSite(
+  event: ScheduledWorkerEvent,
+  sentry: Toucan
+): Promise<void> {
+  sentry.setTag("scheduled-task", "REGENERATE_SITE");
+  sentry.addBreadcrumb({ message: "Process started" });
+
+  sentry.addBreadcrumb({ message: "Get current data" });
+  const analyticsData = await getAnalyticsData(event);
+  const currentTimestamp = new Date().getTime();
+  const lastHistoryEntry =
+    analyticsData.history[analyticsData.history.length - 1];
+
+  if (currentTimestamp - Number(lastHistoryEntry.timestamp) > 3_600_000) {
+    // Ideally this would never hit, but let's throw an error here to detect it.
+    throw new Error("The data is not updated in the past hour!");
+  }
+
+  sentry.addBreadcrumb({ message: "Trigger Netlify build" });
+  const resp = await fetch(event.env.NETLIFY_BUILD_HOOK, { method: "POST" });
+  if (!resp.ok) {
+    throw new Error("Failed to call Netlify build hook");
   }
   sentry.addBreadcrumb({ message: "Process complete" });
 }
@@ -148,12 +182,6 @@ async function updateHistory(
     installation_types: data.installation_types,
     versions: groupVersions(event, data.versions),
   });
-
-  sentry.addBreadcrumb({ message: "Trigger Netlify build" });
-  const resp = await fetch(event.env.NETLIFY_BUILD_HOOK, { method: "POST" });
-  if (!resp.ok) {
-    throw new Error("Failed to call Netlify build hook");
-  }
 
   sentry.addBreadcrumb({ message: "Store data" });
   await event.env.KV.put(KV_KEY_CORE_ANALYTICS, JSON.stringify(analyticsData));
@@ -340,34 +368,27 @@ function combineMetadataEntryData(
     );
   }
 
-  if (
-    entrydata[UuidMetadataKey.INSTALLATION_TYPE] === ShortInstallationType.OS
-  ) {
-    data.installation_types.os++;
-  } else if (
-    entrydata[UuidMetadataKey.INSTALLATION_TYPE] ===
-    ShortInstallationType.CONTAINER
-  ) {
-    data.installation_types.container++;
-  } else if (
-    entrydata[UuidMetadataKey.INSTALLATION_TYPE] === ShortInstallationType.CORE
-  ) {
-    data.installation_types.core++;
-  } else if (
-    entrydata[UuidMetadataKey.INSTALLATION_TYPE] ===
-    ShortInstallationType.SUPERVISED
-  ) {
-    data.installation_types.supervised++;
-  } else if (
-    entrydata[UuidMetadataKey.INSTALLATION_TYPE] ===
-    ShortInstallationType.UNSUPPORTED_THIRD_PARTY_CONTAINER
-  ) {
-    data.installation_types.unsupported_container++;
-  } else if (
-    entrydata[UuidMetadataKey.INSTALLATION_TYPE] ===
-    ShortInstallationType.UNKNOWN
-  ) {
-    data.installation_types.unknown++;
+  switch (entrydata[UuidMetadataKey.INSTALLATION_TYPE]) {
+    case ShortInstallationType.OS:
+      data.installation_types.os++;
+      break;
+    case ShortInstallationType.CONTAINER:
+      data.installation_types.container++;
+      break;
+    case ShortInstallationType.CORE:
+      data.installation_types.core++;
+      break;
+    case ShortInstallationType.SUPERVISED:
+      data.installation_types.supervised++;
+      break;
+    case ShortInstallationType.UNSUPPORTED_THIRD_PARTY_CONTAINER:
+      data.installation_types.unsupported_container++;
+      break;
+    case ShortInstallationType.UNKNOWN:
+      data.installation_types.unknown++;
+      break;
+    default:
+      break;
   }
 
   return data;
@@ -422,20 +443,27 @@ function combineEntryData(
     }
   }
 
-  if (entrydata.installation_type === "Home Assistant OS") {
-    data.installation_types.os++;
-  } else if (entrydata.installation_type === "Home Assistant Container") {
-    data.installation_types.container++;
-  } else if (entrydata.installation_type === "Home Assistant Core") {
-    data.installation_types.core++;
-  } else if (entrydata.installation_type === "Home Assistant Supervised") {
-    data.installation_types.supervised++;
-  } else if (
-    entrydata.installation_type === "Unsupported Third Party Container"
-  ) {
-    data.installation_types.unsupported_container++;
-  } else if (entrydata.installation_type === "Unknown") {
-    data.installation_types.unknown++;
+  switch (entrydata.installation_type) {
+    case "Home Assistant OS":
+      data.installation_types.os++;
+      break;
+    case "Home Assistant Container":
+      data.installation_types.container++;
+      break;
+    case "Home Assistant Core":
+      data.installation_types.core++;
+      break;
+    case "Home Assistant Supervised":
+      data.installation_types.supervised++;
+      break;
+    case "Unsupported Third Party Container":
+      data.installation_types.unsupported_container++;
+      break;
+    case "Unknown":
+      data.installation_types.unknown++;
+      break;
+    default:
+      break;
   }
 
   if (entrydata.addon_count) {

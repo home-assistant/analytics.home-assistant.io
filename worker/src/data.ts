@@ -62,6 +62,7 @@ export enum ScheduledTask {
   PROCESS_QUEUE = "*/2 * * * *",
   RESET_QUEUE = "5 0 * * *",
   UPDATE_HISTORY = "0 * * * *",
+  REGENERATE_SITE = "15 * * * *",
 }
 
 export interface UuidMetadata {

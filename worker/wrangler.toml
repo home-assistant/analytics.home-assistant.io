@@ -4,7 +4,7 @@ main = "./src/index.ts"
 send_metrics = false
 
 [triggers]
-crons = ["*/2 * * * *", "5 0 * * *", "0 * * * *"]
+crons = ["*/2 * * * *", "5 0 * * *", "0 * * * *", "15 * * * *"]
 
 # For production environment, use '-e production'
 [env.production]
