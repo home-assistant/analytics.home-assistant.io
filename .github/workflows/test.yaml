@@ -31,7 +31,7 @@ jobs:
         run: script/bootstrap
 
       - name: Build ${{ matrix.environment }} worker
-        uses: cloudflare/wrangler-action@v3.3.2
+        uses: cloudflare/wrangler-action@v3.5.0
         with:
           workingDirectory: "worker"
           packageManager: yarn
