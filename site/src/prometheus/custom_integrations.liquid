@@ -1,0 +1,20 @@
+---
+# This file is used to generate the prometheus/custom_integrations endpoint
+permalink: '/prometheus/custom_integrations'
+---
+#
+# Example usage:
+#  - job_name: "homeassistant_analytics_custom_integrations"
+#    scrape_interval: 1h
+#    metrics_path: /prometheus/custom_integrations
+#    scheme: https
+#    static_configs:
+#      - targets: ["analytics.home-assistant.io"]
+#
+
+{%- for integration in custom_integrations %}
+custom_integration{domain="{{ integration[0] }}"} {{ integration[1]["total"] }}
+{%- for version in integration[1]["versions"] %}
+custom_integration_version{domain="{{ integration[0] }}",version="{{version[0]}}"} {{ version[1] }}
+{%- endfor -%}
+{%- endfor -%}
