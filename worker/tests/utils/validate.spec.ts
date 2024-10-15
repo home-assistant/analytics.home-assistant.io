@@ -1,4 +1,3 @@
-import { string } from "superstruct";
 import { createIncomingPayload } from "../../src/utils/validate";
 
 describe("createIncomingPayload", function () {
@@ -111,5 +110,30 @@ describe("createIncomingPayload", function () {
       addons: [{ ...ADDON, auto_update: null }],
     });
     expect(payload.addons![0].auto_update).toBe(false);
+  });
+
+  it("Valid versions", function () {
+    for (const version of [
+      "YYYY.MM.P",
+      "YYYY.MM.P.devYYYYMMDDHHMM",
+      "YYYY.M.P.devYYYYMMDDHHMM",
+    ]) {
+      const payload = createIncomingPayload({ ...BASE_PAYLOAD, version });
+      expect(payload.version).toBe(version);
+    }
+  });
+
+  it("Invalid versions", function () {
+    for (const version of [
+      "9999.9",
+      "YYYY.MM.P.devYYYYMMDDHHMMX",
+      "9999.99.9.dev9999999999999",
+    ]) {
+      expect(() => {
+        createIncomingPayload({ ...BASE_PAYLOAD, version });
+      }).toThrow(
+        `At path: version -- Expected a string with a length between \`7\` and \`25\` but received one with a length of \`${version.length}\``
+      );
+    }
   });
 });
