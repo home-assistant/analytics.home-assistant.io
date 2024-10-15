@@ -81,7 +81,7 @@ export const IncomingPayloadStruct = object({
   certificate: optional(boolean()),
   user_count: optional(number()),
   uuid: size(string(), 32, 32),
-  version: size(string(), 7, 22),
+  version: size(string(), 7, 25),
 });
 
 export const createIncomingPayload = (data: unknown): IncomingPayload => {
