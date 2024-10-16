@@ -1,26 +1,26 @@
 {
   "dependencies": {
-    "chart.js": "^4.4.1",
+    "chart.js": "^4.4.4",
     "chartjs-adapter-date-fns": "^2.0.1",
     "svg-pan-zoom": "^3.6.1",
-    "svgmap": "^2.10.1",
-    "superstruct": "1.0.3",
-    "toucan-js": "^3.3.1"
+    "svgmap": "^2.11.1",
+    "superstruct": "2.0.2",
+    "toucan-js": "^4.0.0"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^2.0.1",
+    "@11ty/eleventy": "^3.0.0",
     "@cloudflare/workers-types": "^3.17.0",
     "@types/jest": "^27.5.0",
     "@types/node": "^18.15.10",
     "jest": "^26.6.3",
     "memoize-one": "^6.0.0",
-    "moment": "^2.29.4",
+    "moment": "^2.30.1",
     "ts-jest": "^26.5.6",
     "ts-loader": "^9.5.1",
     "typescript": "^4.9.5",
-    "webpack": "^5.90.2",
+    "webpack": "^5.95.0",
     "webpack-cli": "^5.1.4",
-    "wrangler": "^3.19.0"
+    "wrangler": "^3.80.4"
   },
   "jest": {
     "transform": {
