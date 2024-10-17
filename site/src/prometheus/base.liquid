@@ -1,0 +1,49 @@
+---
+# This file is used to generate the prometheus/base endpoint
+permalink: '/prometheus/base'
+eleventyAllowMissingExtension: true
+---
+#
+# Example usage:
+#  - job_name: "homeassistant_analytics_base"
+#    scrape_interval: 1h
+#    metrics_path: /prometheus/base
+#    scheme: https
+#    static_configs:
+#      - targets: ["analytics.home-assistant.io"]
+#
+instances {{ data.history.last.active_installations }}
+{%- for installation_types in data.current.installation_types %}
+installation_type{type="{{ installation_types[0] }}"} {{ installation_types[1] }}
+{%- endfor %}
+
+reports_addons {{ data.current.reports_addons }}
+reports_integrations {{ data.current.reports_integrations }}
+reports_statistics {{ data.current.reports_statistics }}
+
+median_addons_count {{ data.current.avg_addons }}
+median_automations_count {{ data.current.avg_automations }}
+median_integrations_count {{ data.current.avg_integrations }}
+median_states_count {{ data.current.avg_states }}
+median_users_count {{ data.current.avg_users }}
+
+{% for country in data.current.countries %}
+country{code="{{ country[0] }}"} {{ country[1] }}
+{%- endfor %}
+
+{% for version in data.current.versions %}
+version{version="{{ version[0] }}"} {{ version[1] }}
+{%- endfor %}
+
+supervisor_unhealthy {{ data.current.supervisor["unhealthy"] }}
+supervisor_unsupported {{ data.current.supervisor["unsupported"] }}
+{% for arch in data.current.supervisor["arch"] %}
+supervisor_arch{arch="{{ arch[0] }}"} {{ arch[1] }}
+{%- endfor %}
+
+{% for board in data.current.operating_system["boards"] %}
+operating_system_board{board="{{ board[0] }}"} {{ board[1] }}
+{%- endfor %}
+{% for version in data.current.operating_system["versions"] %}
+operating_system_version{version="{{ version[0] }}"} {{ version[1] }}
+{%- endfor %}

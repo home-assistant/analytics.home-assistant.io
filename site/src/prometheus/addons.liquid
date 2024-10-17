@@ -1,0 +1,23 @@
+---
+# This file is used to generate the prometheus/addons endpoint
+permalink: '/prometheus/addons'
+eleventyAllowMissingExtension: true
+---
+#
+# Example usage:
+#  - job_name: "homeassistant_analytics_addons"
+#    scrape_interval: 1h
+#    metrics_path: /prometheus/addons
+#    scheme: https
+#    static_configs:
+#      - targets: ["analytics.home-assistant.io"]
+#
+
+{%- for addon in addons %}
+addon_total{slug="{{addon[0]}}"} {{addon[1]["total"]}}
+addon_auto_update{slug="{{addon[0]}}"} {{addon[1]["auto_update"]}}
+addon_protected{slug="{{addon[0]}}"} {{addon[1]["protected"]}}
+{%- for version in addon[1]["versions"] %}
+addon_version{slug="{{addon[0]}}",version="{{version[0]}}"} {{version[1]}}
+{%- endfor %}
+{%- endfor -%}

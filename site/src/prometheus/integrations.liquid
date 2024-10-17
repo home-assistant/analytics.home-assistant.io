@@ -1,0 +1,18 @@
+---
+# This file is used to generate the prometheus/integrations endpoint
+permalink: '/prometheus/integrations'
+eleventyAllowMissingExtension: true
+---
+#
+# Example usage:
+#  - job_name: "homeassistant_analytics_integrations"
+#    scrape_interval: 1h
+#    metrics_path: /prometheus/integrations
+#    scheme: https
+#    static_configs:
+#      - targets: ["analytics.home-assistant.io"]
+#
+
+{%- for integration in data.current.integrations %}
+integration{domain="{{ integration[0] }}"} {{ integration[1] }}
+{%- endfor -%}
