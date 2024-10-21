@@ -2,7 +2,7 @@
   "dependencies": {
     "chart.js": "^4.4.5",
     "chartjs-adapter-date-fns": "^2.0.1",
-    "svg-pan-zoom": "^3.6.1",
+    "svg-pan-zoom": "^3.6.2",
     "svgmap": "^2.11.1",
     "superstruct": "2.0.2",
     "toucan-js": "^4.0.0"
