@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "chart.js": "^4.4.5",
+    "chart.js": "^4.4.6",
     "chartjs-adapter-date-fns": "^2.0.1",
     "svg-pan-zoom": "^3.6.2",
     "svgmap": "^2.11.1",
