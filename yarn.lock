@@ -1723,7 +1723,7 @@ chartjs-adapter-date-fns@^2.0.1:
   resolved "https://registry.yarnpkg.com/chartjs-adapter-date-fns/-/chartjs-adapter-date-fns-2.0.1.tgz#3d007d4985391362fb15c96310fff8376a434bae"
   integrity sha512-v3WV9rdnQ05ce3A0ZCjzUekJCAbfm6+3HqSoeY2BIkdMYZoYr/4T+ril1tZyDl869lz6xdNVMXejUFT9YKpw4A==
 
-chokidar@^3.5.3, chokidar@^3.6.0:
+chokidar@^3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.6.0.tgz#197c6cc669ef2a8dc5e7b4d97ee4e092c3eb0d5b"
   integrity sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==
@@ -1737,6 +1737,13 @@ chokidar@^3.5.3, chokidar@^3.6.0:
     readdirp "~3.6.0"
   optionalDependencies:
     fsevents "~2.3.2"
+
+chokidar@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-4.0.1.tgz#4a6dff66798fb0f72a94f616abbd7e1a19f31d41"
+  integrity sha512-n8enUVCED/KVRQlab1hr3MVpcVMvxtZjmEa956u+4YijlmQED223XMSYj2tLuKvr4jcCTzNNMpQDUer72MMmzA==
+  dependencies:
+    readdirp "^4.0.1"
 
 chrome-trace-event@^1.0.2:
   version "1.0.3"
@@ -4439,6 +4446,11 @@ read-pkg@^5.2.0:
     parse-json "^5.0.0"
     type-fest "^0.6.0"
 
+readdirp@^4.0.1:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/readdirp/-/readdirp-4.0.2.tgz#388fccb8b75665da3abffe2d8f8ed59fe74c230a"
+  integrity sha512-yDMz9g+VaZkqBYS/ozoBJwaBhTbZo3UNYQHNRw1D3UFQB8oHB4uS/tAODO+ZLjGWmUbKnIlOWO+aaIiAxrUWHA==
+
 readdirp@~3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/readdirp/-/readdirp-3.6.0.tgz#74a370bd857116e245b29cc97340cd431a02a6c7"
@@ -5528,17 +5540,17 @@ workerd@1.20241106.1:
     "@cloudflare/workerd-linux-arm64" "1.20241106.1"
     "@cloudflare/workerd-windows-64" "1.20241106.1"
 
-wrangler@^3.86.0:
-  version "3.86.0"
-  resolved "https://registry.yarnpkg.com/wrangler/-/wrangler-3.86.0.tgz#cc6e3ca42afc7c0681c8177b570fd58ac6377819"
-  integrity sha512-jL670AFVPLTILvEjAL165aYM/ZqtZCqT+e6LKiniflRZxSGKu4o/wyHeOmOM6i5kYJHSmF40E4lOZqapDtkF8g==
+wrangler@^3.87.0:
+  version "3.87.0"
+  resolved "https://registry.yarnpkg.com/wrangler/-/wrangler-3.87.0.tgz#3dbd47583f6ba74adf6b622fa61f24a345558ee9"
+  integrity sha512-BExktnSLeGgG+uxgnr4h9eZ5nefdpTVcTHR+gEIWRvqk07XL04nJwpPYAOIPKPpB7E2tMdDJgNLGQN/CY6e1xQ==
   dependencies:
     "@cloudflare/kv-asset-handler" "0.3.4"
     "@cloudflare/workers-shared" "0.7.1"
     "@esbuild-plugins/node-globals-polyfill" "^0.2.3"
     "@esbuild-plugins/node-modules-polyfill" "^0.2.2"
     blake3-wasm "^2.1.5"
-    chokidar "^3.5.3"
+    chokidar "^4.0.1"
     date-fns "^4.1.0"
     esbuild "0.17.19"
     itty-time "^1.0.6"
