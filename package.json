@@ -3,7 +3,7 @@
     "chart.js": "^4.4.7",
     "chartjs-adapter-date-fns": "^2.0.1",
     "svg-pan-zoom": "^3.6.2",
-    "svgmap": "^2.12.1",
+    "svgmap": "^2.12.2",
     "superstruct": "2.0.2",
     "toucan-js": "^4.0.0"
   },
