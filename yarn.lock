@@ -5064,17 +5064,17 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
-svg-pan-zoom@^3.6.1, svg-pan-zoom@^3.6.2:
+svg-pan-zoom@^3.6.2:
   version "3.6.2"
   resolved "https://registry.yarnpkg.com/svg-pan-zoom/-/svg-pan-zoom-3.6.2.tgz#be136506211b242627a234a9656f8128fcbbabed"
   integrity sha512-JwnvRWfVKw/Xzfe6jriFyfey/lWJLq4bUh2jwoR5ChWQuQoOH8FEh1l/bEp46iHHKHEJWIyFJETbazraxNWECg==
 
-svgmap@^2.12.1:
-  version "2.12.1"
-  resolved "https://registry.yarnpkg.com/svgmap/-/svgmap-2.12.1.tgz#f0797897c6129ceeaa370050615e3edf6ec401f5"
-  integrity sha512-1PI7RSKh9p9g4G+PhgT1LM+nZ17l8ovYHoQd8NrWmd8cGVu2yoSoOSxxMDzMbDDBBg4zuy0VJq+n4OG1vrIQSg==
+svgmap@^2.12.2:
+  version "2.12.2"
+  resolved "https://registry.yarnpkg.com/svgmap/-/svgmap-2.12.2.tgz#24ffc880757bd207413f0b5a4692527023398e95"
+  integrity sha512-SCX1Oys3v1dz3mTEbQha+6lrHGyu3LwXBhcgW0HlTh7waQDMFqNUKD8hADvDaPkPapRvNCLMnXaVD1Pbxbnhow==
   dependencies:
-    svg-pan-zoom "^3.6.1"
+    svg-pan-zoom "^3.6.2"
 
 symbol-tree@^3.2.4:
   version "3.2.4"
