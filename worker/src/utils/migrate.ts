@@ -24,7 +24,7 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
       reports_statistics: 0,
       extended_data_from: 0,
       versions: {},
-      operating_system: { boards: {}, versions: {} },
+      operating_system: { boards: {}, versions: {}, board_versions: {} },
       installation_types: {
         os: 0,
         container: 0,
@@ -69,6 +69,17 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
   if (data.schema_version < 3) {
     analyticsData.current = { ...analyticsData.current, ...data.current };
     analyticsData.history = data.history;
+  }
+
+  // Handle migration from schema version 3 to 4 (add board_versions)
+  if (data.schema_version === 3) {
+    analyticsData.current = { ...analyticsData.current, ...data.current };
+    analyticsData.history = data.history;
+
+    // Initialize board_versions if not present
+    if (!analyticsData.current.operating_system.board_versions) {
+      analyticsData.current.operating_system.board_versions = {};
+    }
   }
 
   return analyticsData;
