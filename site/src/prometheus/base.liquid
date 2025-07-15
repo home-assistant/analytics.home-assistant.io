@@ -47,3 +47,8 @@ operating_system_board{board="{{ board[0] }}"} {{ board[1] }}
 {% for version in data.current.operating_system["versions"] %}
 operating_system_version{version="{{ version[0] }}"} {{ version[1] }}
 {%- endfor %}
+{% for board in data.current.operating_system["board_versions"] %}
+{%- for version in board[1] %}
+operating_system_board_version{board="{{ board[0] }}",version="{{ version[0] }}"} {{ version[1] }}
+{%- endfor %}
+{%- endfor %}
