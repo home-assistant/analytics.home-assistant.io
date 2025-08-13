@@ -416,15 +416,21 @@ function combineEntryData(
 
   if (entrydata.operating_system) {
     if (osBoards.has(entrydata.operating_system.board)) {
-      data.operating_system.boards[entrydata.operating_system.board] =
-        bumpValue(
-          data.operating_system.boards[entrydata.operating_system.board]
-        );
+      const board = entrydata.operating_system.board;
+      data.operating_system.boards[board] =
+        bumpValue(data.operating_system.boards[board]);
+
       if (entrydata.operating_system.version) {
-        data.operating_system.versions[entrydata.operating_system.version] =
-          bumpValue(
-            data.operating_system.versions[entrydata.operating_system.version]
-          );
+        const version = entrydata.operating_system.version;
+        data.operating_system.versions[version] =
+          bumpValue(data.operating_system.versions[version]);
+
+        // Track OS version per board
+        if (!data.operating_system.board_versions[board]) {
+          data.operating_system.board_versions[board] = {};
+        }
+        data.operating_system.board_versions[board][version] =
+          bumpValue(data.operating_system.board_versions[board][version]);
       }
     }
   }
