@@ -4828,10 +4828,10 @@ svg-pan-zoom@^3.6.2:
   resolved "https://registry.yarnpkg.com/svg-pan-zoom/-/svg-pan-zoom-3.6.2.tgz#be136506211b242627a234a9656f8128fcbbabed"
   integrity sha512-JwnvRWfVKw/Xzfe6jriFyfey/lWJLq4bUh2jwoR5ChWQuQoOH8FEh1l/bEp46iHHKHEJWIyFJETbazraxNWECg==
 
-svgmap@^2.12.2:
-  version "2.12.2"
-  resolved "https://registry.yarnpkg.com/svgmap/-/svgmap-2.12.2.tgz#24ffc880757bd207413f0b5a4692527023398e95"
-  integrity sha512-SCX1Oys3v1dz3mTEbQha+6lrHGyu3LwXBhcgW0HlTh7waQDMFqNUKD8hADvDaPkPapRvNCLMnXaVD1Pbxbnhow==
+svgmap@^2.13.0:
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/svgmap/-/svgmap-2.13.0.tgz#9141601dc4e5f17b7411b87d8eac9e1ed32922d0"
+  integrity sha512-gKpLEbSPVn3JQxkaKGq1pHiZEQUJYvUvnD1518Z/J04XDLnH3uJ7Ts5Gxcs+bXAAdFJcFSFqZ5GZWI5waif9fQ==
   dependencies:
     svg-pan-zoom "^3.6.2"
 
