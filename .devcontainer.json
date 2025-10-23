@@ -1,6 +1,6 @@
 {
   "name": "Home Assistant Analyticss",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
   "context": "..",
   "remoteEnv": {
     "PATH": "${containerEnv:PATH}:./node_modules/.bin",
