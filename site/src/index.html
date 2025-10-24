@@ -10,99 +10,115 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
 ---
 
 <style>
-  .intro {
+  .row {
     display: flex;
-    flex-direction: row;
-    column-gap: 3em;
-    row-gap: 1em;
-    margin-bottom: 1em;
+    gap: 2rem;
+    margin-bottom: 2rem;
   }
-  .intro > * {
-    flex: 1;
+  .col {
+    flex: 1 0 0;
   }
   .chart-title {
     color: var(--secondary-text-color);
+    margin-bottom: 0.5rem;
   }
   canvas {
-    margin-bottom: 32px;
-  }
-  .half {
-    display: flex;
-  }
-  .half > * {
-    flex: 1;
-    margin: 0 16px;
-  }
-  @media only screen and (max-width: 800px) {
-    .intro {
-      flex-direction: column;
-    }
+    width: 100%;
   }
   @media only screen and (max-width: 600px) {
-    .half {
-      flex-direction: column-reverse;
+    .row {
+      flex-direction: column;
+    }
+
+    .row-donut {
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
     }
   }
 </style>
 
-<div class="intro">
-  <div>
+<div class="row">
+  <div class="col">
     Home Assistant allows users to share their usage data. It is used to
     influence Home Assistant development priorities and to convince
     manufacturers to add local control and privacy-focused features.
   </div>
-  <div>
+
+  <div class="col">
     Analytics in Home Assistant are opt-in and do not reflect the entire Home
     Assistant userbase. We estimate that less than a fourth of all Home Assistant
     users opt in.
   </div>
 </div>
 
-<div class="chart-title">
-  {{ data.history.last.active_installations | formatNumber }} Active Home
-  Assistant Installations
+<div class="row">
+  <div class="col">
+    <div class="chart-title">
+      {{ data.history.last.active_installations | formatNumber }} Active Home
+      Assistant Installations
+    </div>
+    <canvas id="installationsChart"></canvas>
+  </div>
 </div>
-<canvas id="installationsChart" style="width: 100%"></canvas>
 
-<div class="chart-title">Version history</div>
-<canvas id="versionHistoryChart" style="width: 100%"></canvas>
+<div class="row">
+  <div class="col">
+    <div class="chart-title">Version history</div>
+    <canvas id="versionHistoryChart"></canvas>
+  </div>
+</div>
 
-<div class="half">
-  <div>
+<div class="row row-donut">
+  <div class="col">
     <div class="chart-title">Last releases</div>
-    <canvas id="lastReleaseChart" style="width: 100%"></canvas>
+    <canvas id="lastReleaseChart"></canvas>
   </div>
-  <div>
+
+  <div class="col">
     <div class="chart-title">Installation types</div>
-    <canvas id="installationTypesChart" style="width: 100%"></canvas>
+    <canvas id="installationTypesChart"></canvas>
   </div>
 </div>
 
-<div class="half">
-  <div>
+<div class="row row-donut">
+  <div class="col">
     <div class="chart-title">Top 5 used operating system versions</div>
-    <canvas id="top5OSversionChart" style="width: 100%"></canvas>
+    <canvas id="top5OSversionChart"></canvas>
   </div>
-  <div>
+
+  <div class="col">
     <div class="chart-title">Board types</div>
-    <canvas id="boardTypesChart" style="width: 100%"></canvas>
+    <canvas id="boardTypesChart"></canvas>
   </div>
 </div>
 
-<div id="svgMap"></div>
+<div class="row">
+  <div id="installationsPerCountry" class="col"></div>
+</div>
 
 <script>
+  function tooltipFooterCallback(item) {
+    let sum = 0;
+    item[0].dataset.data.forEach(data => { sum += Number(data) });
+    return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
+  }
   const darkMode = window.matchMedia("(prefers-color-scheme:dark)").matches;
 
   Chart.defaults.color = darkMode ? "#9b9b9b" : "#727272";
   Chart.defaults.borderColor = darkMode ? "#202020" : "#ffffff";
+  Chart.defaults.responsive = true;
   Chart.defaults.plugins.legend.position = "right";
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
 
   new Chart("installationsChart", {
     type: "line",
     options: {
       parsing: false,
-      responsive: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+        },
+      },
       scales: {
         x: {
           type: 'time',
@@ -118,7 +134,16 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
     type: "line",
     options: {
       parsing: false,
-      responsive: false,
+      aspectRatio: window.innerWidth < 600 ? 0.8 : 1.5,
+      plugins: {
+        legend: {
+          align: "start",
+          position: "bottom",
+          labels: {
+            usePointStyle: true
+          }
+        },
+      },
       scales: {
         x: {
           type: 'time',
@@ -134,14 +159,13 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
     type: "pie",
     options: {
       plugins: {
+        legend: {
+          position: window.innerWidth < 600 ? "bottom" : "right",
+        },
         tooltip: {
           enabled: true,
           callbacks: {
-            footer: (item) => {
-              let sum = 0;
-              item[0].dataset.data.forEach(data => { sum += Number(data) });
-              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
-            }
+            footer: tooltipFooterCallback
           }
         },
       },
@@ -159,14 +183,13 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
     type: "pie",
     options: {
       plugins: {
+        legend: {
+          position: window.innerWidth < 600 ? "bottom" : "right",
+        },
         tooltip: {
           enabled: true,
           callbacks: {
-            footer: (item) => {
-              let sum = 0;
-              item[0].dataset.data.forEach(data => { sum += Number(data) });
-              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
-            }
+            footer: tooltipFooterCallback
           }
         },
       },
@@ -199,14 +222,13 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
     type: "pie",
     options: {
       plugins: {
+        legend: {
+          position: window.innerWidth < 600 ? "bottom" : "right",
+        },
         tooltip: {
           enabled: true,
           callbacks: {
-            footer: (item) => {
-              let sum = 0;
-              item[0].dataset.data.forEach(data => { sum += Number(data) });
-              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
-            }
+            footer: tooltipFooterCallback
           }
         },
       },
@@ -225,14 +247,14 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
     type: "pie",
     options: {
       plugins: {
+        legend: {
+          align: "start",
+          position: window.innerWidth < 600 ? "bottom" : "right",
+        },
         tooltip: {
           enabled: true,
           callbacks: {
-            footer: (item) => {
-              let sum = 0;
-              item[0].dataset.data.forEach(data => { sum += Number(data) });
-              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
-            }
+            footer: tooltipFooterCallback
           }
         },
       },
@@ -247,19 +269,19 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
   });
 
   new svgMap({
-    targetElementID: 'svgMap',
+    targetElementID: 'installationsPerCountry',
     colorMin: "#80CBC4",
     colorMax: "#004D40",
     hideFlag: true,
     initialZoom: 1.0,
     data: {
-            data: {
-              installations: {
-                format: "{0} Installations",
-              },
-            },
-            applyData: "installations",
-            values: {{ data.current.countries | countriesForMap }},
-          },
+      data: {
+        installations: {
+          format: "{0} Installations",
+        },
+      },
+      applyData: "installations",
+      values: {{ data.current.countries | countriesForMap }},
+    },
   });
 </script>
