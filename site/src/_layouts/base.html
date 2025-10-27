@@ -18,10 +18,10 @@ navigation:
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% if title %}{{title}} | {% endif %}Home Assistant Analytics</title>
+    <title>{% if title %}{{ title }} | {% endif %}Home Assistant Analytics</title>
     <meta
       property="og:title"
-      content="{% if title %}{{title}} | {% endif %}Home Assistant Analytics"
+      content="{% if title %}{{ title }} | {% endif %}Home Assistant Analytics"
     />
     <meta property="og:site_name" content="Home Assistant Analytics" />
     <meta property="og:url" content="https://analytics.home-assistant.io/" />
@@ -53,30 +53,33 @@ navigation:
       href="https://brands.home-assistant.io/analytics/icon.png"
     />
     <link href="/static/styles.css" rel="stylesheet" />
-    {{extra_head_contents}}
+    {{ extra_head_contents }}
   </head>
   <body>
     <div class="container">
-      <div class="nav-bar">
+      <header class="nav-bar">
         <a href="/"><h1 class="nav-title">Home Assistant Analytics</h1></a>
-        <ul>
-          {% for nav in navigation %}
-          <li>
-            <a
-              class="{% if page.filePathStem == nav.matchPath or page.filePathStem == nav.path %}active{% endif %}"
-              href="{{ nav.path }}"
-              >{{ nav.name }}</a
-            >
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
+        <nav>
+          <ul>
+            {% for nav in navigation %}
+            <li>
+              <a
+                class="{% if page.filePathStem == nav.matchPath or page.filePathStem == nav.path %}active{% endif %}"
+                href="{{ nav.path }}"
+                >
+                {{ nav.name }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </nav>
+      </header>
 
-    <div class="container content">{{ content }}</div>
+      <main>
+        {{ content }}
+      </main>
 
-    <div class="container">
-      <div class="footer">
+      <footer class="footer">
         <span>Home Assistant Analytics</span>
         <span class="serperator">–</span>
         <a
@@ -86,7 +89,7 @@ navigation:
         >
           Learn more about how this data is gathered
         </a>
-      </div>
+      </footer>
     </div>
   </body>
 </html>
