@@ -4,7 +4,7 @@ title: Integrations
 ---
 
 <script>
-  const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details | json}};
+  const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details | json }};
   const reportsIntegrations = Number({{ data.current.reports_integrations }});
   const createTableRow = (entry) =>  `
   <tr>
@@ -24,9 +24,7 @@ title: Integrations
 </script>
 
 <div class="note">
-  {{ data.current.reports_integrations | formatNumber }} of {{
-  data.current.extended_data_from | formatNumber }} ({{
-  data.current.extended_data_from | calculatePercentage:
-  data.current.reports_integrations }}%) installations have chosen to share
-  their used integrations
+  {{ data.current.reports_integrations | formatNumber }} of {{ data.current.extended_data_from | formatNumber }}
+  ({{ data.current.extended_data_from | calculatePercentage: data.current.reports_integrations }}%)
+  installations have chosen to share their used integrations
 </div>

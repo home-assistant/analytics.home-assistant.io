@@ -49,7 +49,7 @@ title: Statistics
 {% for median in medians %}
 {% assign dataset = "avg_" | append: median %}
   <div class="metric">
-    <span>{{median}}</span>
+    <span>{{ median }}</span>
     <span>{{ data.current[dataset] }}</span>
   </div>
 {% endfor %}
@@ -59,4 +59,8 @@ title: Statistics
 </div>
 </div>
 
-<div class="note">{{ data.current.reports_statistics | formatNumber }} of {{ data.current.extended_data_from | formatNumber }} ({{ data.current.extended_data_from | calculatePercentage: data.current.reports_statistics }} %) installations have chosen to share usage statistics</div>
+<div class="note">
+  {{ data.current.reports_statistics | formatNumber }} of {{ data.current.extended_data_from | formatNumber }}
+  ({{ data.current.extended_data_from | calculatePercentage: data.current.reports_statistics }}%)
+  installations have chosen to share usage statistics
+</div>
