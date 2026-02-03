@@ -65,6 +65,10 @@ a {
   text-align: center;
 }
 
+.footer > * {
+  white-space: nowrap;
+}
+
 .nav-bar {
   display: flex;
   justify-content: space-between;
