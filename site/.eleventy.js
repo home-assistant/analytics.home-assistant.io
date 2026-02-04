@@ -7,6 +7,7 @@ const versionTools = require("./src/tools/versions");
 
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/_static": "static" });
+  eleventyConfig.addPassthroughCopy("src/_redirects");
   eleventyConfig.addPassthroughCopy({
     "../node_modules/svgmap/dist/svgMap.min.css": "static/svgMap.min.css",
     "../node_modules/svgmap/dist/svgMap.min.js": "static/svgMap.min.js",
