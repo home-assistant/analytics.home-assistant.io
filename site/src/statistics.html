@@ -49,7 +49,7 @@ title: Statistics
 {% for median in medians %}
 {% assign dataset = "avg_" | append: median %}
 {% assign display_name = median %}
-{% # Temporary: Display "apps" while still using "addons" data until full rename is complete %}
+{% comment %}Temporary: Display "apps" while still using "addons" data until full rename is complete{% endcomment %}
 {% if median == "addons" %}{% assign display_name = "apps" %}{% endif %}
   <div class="metric">
     <span>{{ display_name }}</span>
