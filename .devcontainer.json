@@ -1,5 +1,5 @@
 {
-  "name": "Home Assistant Analyticss",
+  "name": "Home Assistant Analytics",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
   "context": "..",
   "remoteEnv": {
