@@ -1,6 +1,6 @@
 ---
 layout: table
-title: Add-ons
+title: Apps
 addons_details:
   core_ada:
     name: Ada
@@ -223,7 +223,7 @@ addons_details:
 ---
 
 <script>
-  const tableEntries = {{ addons | sortAddons: addons_details | json}};
+  const tableEntries = {{ addons | sortAddons: addons_details | json }};
   const reportsAddons = Number({{ data.current.reports_addons }});
   const createTableRow = (entry) =>  `
   <tr>
@@ -243,9 +243,7 @@ addons_details:
 </script>
 
 <div class="note">
-  {{ data.current.reports_addons | formatNumber }} of {{
-  data.current.extended_data_from | formatNumber }} ({{
-  data.current.extended_data_from | calculatePercentage:
-  data.current.reports_addons }}%) installations have chosen to share their used
-  add-ons
+  {{ data.current.reports_addons | formatNumber }} of {{ data.current.extended_data_from | formatNumber }}
+  ({{ data.current.extended_data_from | calculatePercentage: data.current.reports_addons }}%)
+  installations have chosen to share their used apps
 </div>
