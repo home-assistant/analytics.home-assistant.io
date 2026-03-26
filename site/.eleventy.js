@@ -141,7 +141,7 @@ module.exports = function (eleventyConfig) {
         Object.keys(integration_details)
           .filter(
             (domain) =>
-              ["integration", "hub", "device", "helper", "service"].includes(
+              ["device", "helper", "hub", "service"].includes(
                 integration_details[domain].integration_type
               )
           )
