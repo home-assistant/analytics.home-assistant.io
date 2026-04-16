@@ -301,11 +301,13 @@ async function processQueue(
     const storedAnalytics = await getAnalyticsData(event);
 
     // Update month_ago by looking up the history entry closest to 30 days ago.
-    // This gives a fresh "vs. 30 days ago" comparison on every daily run.
-    // Costs 1 KV list + 1 KV read per day.
+    // This gives a fresh "vs. ~30 days ago" comparison on every daily run.
+    // Costs 1 KV read plus 1 or more KV list calls per day, because listKV may
+    // paginate once the number of history keys exceeds the per-call limit.
     const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
     const targetTimestamp = timestamp - THIRTY_DAYS_MS;
     const historyKeys = await listKV(event, KV_PREFIX_HISTORY);
+    let newMonthAgo = undefined;
     if (historyKeys.length > 0) {
       const prefixLen = KV_PREFIX_HISTORY.length + 1; // "history:".length
       const closestKey = historyKeys.reduce((best, entry) => {
@@ -315,18 +317,24 @@ async function processQueue(
           ? entry
           : best;
       });
+      const closestTs = Number(closestKey.name.slice(prefixLen));
       const monthAgoEntry = await event.env.KV.get<{
         integrations: Record<string, number>;
         reports_integrations: number;
       }>(closestKey.name, "json");
-      if (monthAgoEntry) {
-        storedAnalytics.month_ago = {
-          timestamp: Number(closestKey.name.slice(prefixLen)),
+      if (
+        monthAgoEntry &&
+        monthAgoEntry.integrations &&
+        Object.keys(monthAgoEntry.integrations).length > 0
+      ) {
+        newMonthAgo = {
+          timestamp: closestTs,
           integrations: monthAgoEntry.integrations,
           reports_integrations: monthAgoEntry.reports_integrations,
         };
       }
     }
+    storedAnalytics.month_ago = newMonthAgo;
 
     storedAnalytics.current = {
       ...queue_data,

@@ -37,13 +37,15 @@ title: Integrations
 
   let monthAgoLookup = null;
   if (monthAgoData && monthAgoData.integrations) {
-    const monthAgoEntries = tableEntries
-      .map(e => ({ domain: e.domain, installations: monthAgoData.integrations[e.domain] || 0 }))
+    const snapshotEntries = Object.entries(monthAgoData.integrations)
+      .map(([domain, installations]) => ({ domain, installations }))
       .sort((a, b) => b.installations - a.installations);
-    monthAgoLookup = {};
-    monthAgoEntries.forEach((e, idx) => {
-      monthAgoLookup[e.domain] = { position: idx + 1, installations: e.installations };
-    });
+    if (snapshotEntries.length > 0) {
+      monthAgoLookup = {};
+      snapshotEntries.forEach((e, idx) => {
+        monthAgoLookup[e.domain] = { position: idx + 1, installations: e.installations };
+      });
+    }
   }
 
   if (monthAgoLookup) {
@@ -52,8 +54,8 @@ title: Integrations
       <th class="idx"></th>
       <th>Name</th>
       <th class="installations">Installations</th>
-      <th class="change">± Installations<br><small>vs. 30 days ago</small></th>
-      <th class="change">± Position<br><small>vs. 30 days ago</small></th>
+      <th class="change">± Installations</th>
+      <th class="change">± Position</th>
     </tr>
     `;
   }

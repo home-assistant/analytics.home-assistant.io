@@ -259,7 +259,7 @@ describe("schedule handler", function () {
       const event = MockedScheduledEvent({
         controller: { cron: ScheduledTask.PROCESS_QUEUE },
       });
-      const historyKey = `history:${new Date().getTime() - 30 * 24 * 60 * 60 * 1000}`;
+      const historyKey = `${KV_PREFIX_HISTORY}:${new Date().getTime() - 30 * 24 * 60 * 60 * 1000}`;
       (event.env.KV.get as jest.Mock).mockImplementation(
         async (key: string) => {
           if (key === KV_KEY_QUEUE) {
