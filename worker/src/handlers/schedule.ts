@@ -300,6 +300,34 @@ async function processQueue(
     const queue_data = processQueueData(queue.data);
     const storedAnalytics = await getAnalyticsData(event);
 
+    // Update month_ago by looking up the history entry closest to 30 days ago.
+    // This gives a fresh "vs. 30 days ago" comparison on every daily run.
+    // Costs 1 KV list + 1 KV read per day.
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    const targetTimestamp = timestamp - THIRTY_DAYS_MS;
+    const historyKeys = await listKV(event, KV_PREFIX_HISTORY);
+    if (historyKeys.length > 0) {
+      const prefixLen = KV_PREFIX_HISTORY.length + 1; // "history:".length
+      const closestKey = historyKeys.reduce((best, entry) => {
+        const entryTs = Number(entry.name.slice(prefixLen));
+        const bestTs = Number(best.name.slice(prefixLen));
+        return Math.abs(entryTs - targetTimestamp) < Math.abs(bestTs - targetTimestamp)
+          ? entry
+          : best;
+      });
+      const monthAgoEntry = await event.env.KV.get<{
+        integrations: Record<string, number>;
+        reports_integrations: number;
+      }>(closestKey.name, "json");
+      if (monthAgoEntry) {
+        storedAnalytics.month_ago = {
+          timestamp: Number(closestKey.name.slice(prefixLen)),
+          integrations: monthAgoEntry.integrations,
+          reports_integrations: monthAgoEntry.reports_integrations,
+        };
+      }
+    }
+
     storedAnalytics.current = {
       ...queue_data,
       last_updated: timestamp,

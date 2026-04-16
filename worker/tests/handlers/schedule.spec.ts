@@ -5,6 +5,7 @@ import {
   KV_KEY_CORE_ANALYTICS,
   KV_KEY_CUSTOM_INTEGRATIONS,
   KV_KEY_QUEUE,
+  KV_PREFIX_HISTORY,
   ScheduledTask,
   SCHEMA_VERSION_ANALYTICS,
   SCHEMA_VERSION_QUEUE,
@@ -258,6 +259,7 @@ describe("schedule handler", function () {
       const event = MockedScheduledEvent({
         controller: { cron: ScheduledTask.PROCESS_QUEUE },
       });
+      const historyKey = `history:${new Date().getTime() - 30 * 24 * 60 * 60 * 1000}`;
       (event.env.KV.get as jest.Mock).mockImplementation(
         async (key: string) => {
           if (key === KV_KEY_QUEUE) {
@@ -268,6 +270,13 @@ describe("schedule handler", function () {
                 name: `uuid:${i}`,
               })),
               data: createQueueData(),
+            };
+          }
+
+          if (key === historyKey) {
+            return {
+              integrations: { light: 1000, switch: 500 },
+              reports_integrations: 400000,
             };
           }
 
@@ -285,10 +294,22 @@ describe("schedule handler", function () {
         }
       );
 
+      (event.env.KV.list as jest.Mock).mockImplementation(
+        async (data: { prefix: string; cursor?: string }) => ({
+          keys:
+            data.prefix === KV_PREFIX_HISTORY
+              ? [{ name: historyKey }]
+              : [],
+          list_complete: true,
+        })
+      );
+
       await handleSchedule(event, MockSentry);
 
       expect(event.env.KV.get).toBeCalledWith(KV_KEY_QUEUE, "json");
-      expect(event.env.KV.list).not.toBeCalled();
+      expect(event.env.KV.list).toBeCalledWith(
+        expect.objectContaining({ prefix: KV_PREFIX_HISTORY })
+      );
       expect(MockSentry.setTag).toBeCalledWith(
         "scheduled-task",
         "PROCESS_QUEUE"
@@ -305,6 +326,14 @@ describe("schedule handler", function () {
       expect(event.env.KV.put).toBeCalledWith(
         KV_KEY_CORE_ANALYTICS,
         expect.not.stringContaining("invalid_board")
+      );
+      expect(event.env.KV.put).toBeCalledWith(
+        KV_KEY_CORE_ANALYTICS,
+        expect.stringContaining('"month_ago"')
+      );
+      expect(event.env.KV.put).toBeCalledWith(
+        KV_KEY_CORE_ANALYTICS,
+        expect.stringContaining('"reports_integrations":400000')
       );
       expect(event.env.KV.put).toBeCalledWith(
         KV_KEY_ADDONS,
