@@ -90,6 +90,12 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
     flex-grow: 0;
     min-width: 50px;
   }
+  @media only screen and (max-width: 800px) {
+    .intro {
+      flex-direction: column;
+      row-gap: 1em;
+    }
+  }
   @media only screen and (max-width: 600px) {
     .row--pie {
       flex-direction: column;
@@ -107,7 +113,7 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
   }
 </style>
 
-<div class="row">
+<div class="row intro">
   <div class="col">
     Home Assistant allows users to share their usage data. It is used to
     influence Home Assistant development priorities and to convince
