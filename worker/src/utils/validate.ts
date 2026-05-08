@@ -60,7 +60,13 @@ export const IncomingPayloadStruct = object({
   country: optional(size(string(), 2, 2)),
   region: optional(size(string(), 2, 2)),
   custom_integrations: optional(
-    array(object({ domain: string(), version: optional(nullable(string())) }))
+    array(
+      object({
+        domain: string(),
+        issue_tracker: optional(nullable(string())),
+        version: optional(nullable(string())),
+      })
+    )
   ),
   installation_type: is_ha_installation_type,
   integration_count: optional(number()),

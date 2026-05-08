@@ -275,7 +275,11 @@ describe("schedule handler", function () {
             integrations: ["core_valid"],
             custom_integrations: [
               { domain: "custom_invalid", version: "1.2.3" },
-              { domain: "custom_valid", version: "1.2.3" },
+              {
+                domain: "custom_valid",
+                version: "1.2.3",
+                issue_tracker: "https://github.com/custom_valid/issues",
+              },
             ],
             operating_system: {
               board: "invalid_board",
@@ -312,7 +316,7 @@ describe("schedule handler", function () {
       );
       expect(event.env.KV.put).toBeCalledWith(
         KV_KEY_CUSTOM_INTEGRATIONS,
-        '{"custom_valid":{"total":500,"versions":{"1.2.3":500}}}'
+        '{"custom_valid":{"total":500,"versions":{"1.2.3":500},"issue_trackers":{"https://github.com/custom_valid/issues":500}}}'
       );
       expect(event.env.KV.put).toBeCalledWith(
         expect.stringContaining("history:"),
@@ -320,6 +324,83 @@ describe("schedule handler", function () {
       );
       expect(MockFetch).toBeCalledTimes(3);
       expect(event.env.KV.put).toBeCalledTimes(5);
+    });
+
+    it("Aggregates issue_trackers across installs", async () => {
+      const event = MockedScheduledEvent({
+        controller: { cron: ScheduledTask.PROCESS_QUEUE },
+      });
+
+      const upstreamTracker = "https://github.com/custom_valid/issues";
+      const forkTracker = "https://github.com/fork/custom_valid/issues";
+
+      // Three installs report the same brands-valid domain with three different
+      // states: upstream tracker, fork tracker, no tracker. Plus one install
+      // reports an unrelated brands-valid domain with a tracker.
+      const payloadsByUuid: Record<string, any> = {
+        "uuid:0": {
+          custom_integrations: [
+            {
+              domain: "custom_valid",
+              version: "1.2.3",
+              issue_tracker: upstreamTracker,
+            },
+          ],
+        },
+        "uuid:1": {
+          custom_integrations: [
+            {
+              domain: "custom_valid",
+              version: "1.2.3",
+              issue_tracker: upstreamTracker,
+            },
+          ],
+        },
+        "uuid:2": {
+          custom_integrations: [
+            {
+              domain: "custom_valid",
+              version: "1.2.3",
+              issue_tracker: forkTracker,
+            },
+          ],
+        },
+        "uuid:3": {
+          custom_integrations: [
+            { domain: "custom_valid", version: "1.2.3" },
+          ],
+        },
+      };
+
+      (event.env.KV.get as jest.Mock).mockImplementation(
+        async (key: string) => {
+          if (key === KV_KEY_QUEUE) {
+            return {
+              schema_version: SCHEMA_VERSION_QUEUE,
+              process_complete: false,
+              entries: Object.keys(payloadsByUuid),
+              data: createQueueData(),
+            };
+          }
+          return payloadsByUuid[key];
+        }
+      );
+
+      await handleSchedule(event, MockSentry);
+
+      expect(event.env.KV.put).toBeCalledWith(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        JSON.stringify({
+          custom_valid: {
+            total: 4,
+            versions: { "1.2.3": 4 },
+            issue_trackers: {
+              [upstreamTracker]: 2,
+              [forkTracker]: 1,
+            },
+          },
+        })
+      );
     });
 
     it("Wait for reset", async () => {

@@ -6,7 +6,7 @@ export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 800;
 
-export const SCHEMA_VERSION_QUEUE = 15;
+export const SCHEMA_VERSION_QUEUE = 16;
 export const SCHEMA_VERSION_ANALYTICS = 4;
 
 export const BRANDS_DOMAINS_URL =
@@ -102,7 +102,11 @@ export interface QueueData {
   >;
   custom_integrations: Record<
     string,
-    { total: number; versions: Record<string, number> }
+    {
+      total: number;
+      versions: Record<string, number>;
+      issue_trackers: Record<string, number>;
+    }
   >;
   reports_integrations: number;
   reports_addons: number;
@@ -215,7 +219,11 @@ export interface IncomingPayload {
   automation_count?: number;
   country?: string;
   region?: string;
-  custom_integrations?: { domain: string; version?: string | null }[];
+  custom_integrations?: {
+    domain: string;
+    issue_tracker?: string | null;
+    version?: string | null;
+  }[];
   operating_system?: { board: string; version?: string | null };
   supervisor?: { supported: boolean; healthy: boolean; arch?: string };
   installation_type: string;

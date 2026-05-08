@@ -68,7 +68,13 @@ describe("createIncomingPayload", function () {
       addons: [ADDON],
       automation_count: 1,
       country: "XX",
-      custom_integrations: [{ domain: "awesome_custom", version: null }],
+      custom_integrations: [
+        {
+          domain: "awesome_custom",
+          version: null,
+          issue_tracker: "https://github.com/awesome/custom/issues",
+        },
+      ],
       integration_count: 1,
       integrations: ["awesome"],
       operating_system: { board: "blue", version: "123" },
@@ -110,6 +116,35 @@ describe("createIncomingPayload", function () {
       addons: [{ ...ADDON, auto_update: null }],
     });
     expect(payload.addons![0].auto_update).toBe(false);
+  });
+
+  it("custom_integrations item without issue_tracker", function () {
+    const payload = createIncomingPayload({
+      ...BASE_PAYLOAD,
+      custom_integrations: [{ domain: "awesome_custom", version: "1.2.3" }],
+    });
+    expect(payload.custom_integrations![0].issue_tracker).toBeUndefined();
+  });
+
+  it("custom_integrations item with null issue_tracker", function () {
+    const payload = createIncomingPayload({
+      ...BASE_PAYLOAD,
+      custom_integrations: [
+        { domain: "awesome_custom", version: "1.2.3", issue_tracker: null },
+      ],
+    });
+    expect(payload.custom_integrations![0].issue_tracker).toBeNull();
+  });
+
+  it("custom_integrations item with non-string issue_tracker is rejected", function () {
+    expect(() => {
+      createIncomingPayload({
+        ...BASE_PAYLOAD,
+        custom_integrations: [
+          { domain: "awesome_custom", version: "1.2.3", issue_tracker: 42 },
+        ],
+      });
+    }).toThrow(/issue_tracker/);
   });
 
   it("Valid versions", function () {

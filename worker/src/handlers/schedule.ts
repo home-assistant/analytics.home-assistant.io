@@ -531,6 +531,7 @@ function combineEntryData(
         data.custom_integrations[custom_integration.domain] = {
           total: 0,
           versions: {},
+          issue_trackers: {},
         };
       }
       data.custom_integrations[custom_integration.domain].total++;
@@ -540,6 +541,15 @@ function combineEntryData(
         ] = bumpValue(
           data.custom_integrations[custom_integration.domain].versions[
             custom_integration.version
+          ]
+        );
+      }
+      if (custom_integration.issue_tracker) {
+        data.custom_integrations[custom_integration.domain].issue_trackers[
+          custom_integration.issue_tracker
+        ] = bumpValue(
+          data.custom_integrations[custom_integration.domain].issue_trackers[
+            custom_integration.issue_tracker
           ]
         );
       }
