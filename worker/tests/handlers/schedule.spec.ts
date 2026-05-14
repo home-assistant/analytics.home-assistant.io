@@ -312,13 +312,13 @@ describe("schedule handler", function () {
       );
       expect(event.env.KV.put).toBeCalledWith(
         KV_KEY_CUSTOM_INTEGRATIONS,
-        '{"custom_valid":{"total":500,"versions":{"1.2.3":500}}}'
+        '{"custom_invalid":{"total":500,"versions":{"1.2.3":500}},"custom_valid":{"total":500,"versions":{"1.2.3":500}}}'
       );
       expect(event.env.KV.put).toBeCalledWith(
         expect.stringContaining("history:"),
         expect.any(String)
       );
-      expect(MockFetch).toBeCalledTimes(3);
+      expect(MockFetch).toBeCalledTimes(2);
       expect(event.env.KV.put).toBeCalledTimes(5);
     });
 

@@ -22,7 +22,6 @@ import {
   generateUuidMetadata,
   KV_KEY_ADDONS,
   KV_KEY_CUSTOM_INTEGRATIONS,
-  BRANDS_DOMAINS_URL,
   VERSION_URL,
   VersionResponse,
   ScheduledWorkerEvent,
@@ -236,33 +235,17 @@ async function processQueue(
   }
 
   sentry.addBreadcrumb({
-    message: "Fetching external data from brands and version",
+    message: "Fetching external data from version",
   });
-  const [brandsDomainsResponse, versionResponse] = await Promise.all([
-    fetch(BRANDS_DOMAINS_URL),
-    fetch(VERSION_URL),
-  ]);
+  const versionResponse = await fetch(VERSION_URL);
 
-  sentry.setExtra("brandsDomainsResponse", brandsDomainsResponse);
   sentry.setExtra("versionResponse", versionResponse);
 
-  if (!brandsDomainsResponse.ok) {
-    throw Error("Could not get domain list from brands");
-  }
   if (!versionResponse.ok) {
-    throw Error("Could not get domain list from brands");
+    throw Error("Could not get version data");
   }
-
-  const brandsDomainsJson: {
-    core: string[];
-    custom: string[];
-  } = await brandsDomainsResponse.json();
 
   const osBoardsJson = await versionResponse.json<VersionResponse>();
-
-  const brandsDomains: Set<string> = new Set(
-    brandsDomainsJson.custom.concat(brandsDomainsJson.core)
-  );
 
   const osBoards: Set<string> = new Set(Object.keys(osBoardsJson.hassos));
 
@@ -271,12 +254,7 @@ async function processQueue(
     entryData = await event.env.KV.get<IncomingPayload>(entryKey, "json");
 
     if (entryData !== undefined && entryData !== null) {
-      queue.data = combineEntryData(
-        queue.data,
-        entryData,
-        brandsDomains,
-        osBoards
-      );
+      queue.data = combineEntryData(queue.data, entryData, osBoards);
     }
   }
 
@@ -397,7 +375,6 @@ function combineMetadataEntryData(
 function combineEntryData(
   data: QueueData,
   entrydata: IncomingPayload,
-  brandsDomains: Set<string>,
   osBoards: Set<string>
 ): QueueData {
   const reported_integrations = entrydata.integrations || [];
@@ -523,10 +500,6 @@ function combineEntryData(
 
   if (reported_custom_integrations.length) {
     for (const custom_integration of reported_custom_integrations) {
-      if (!brandsDomains.has(custom_integration.domain)) {
-        continue;
-      }
-
       if (!data.custom_integrations[custom_integration.domain]) {
         data.custom_integrations[custom_integration.domain] = {
           total: 0,

@@ -9,8 +9,6 @@ export const KV_MAX_PROCESS_ENTRIES = 800;
 export const SCHEMA_VERSION_QUEUE = 15;
 export const SCHEMA_VERSION_ANALYTICS = 4;
 
-export const BRANDS_DOMAINS_URL =
-  "https://brands.home-assistant.io/domains.json";
 export const VERSION_URL = "https://version.home-assistant.io/dev.json";
 
 export interface WorkerEnv {
