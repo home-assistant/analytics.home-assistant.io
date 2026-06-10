@@ -4,7 +4,7 @@ export const KV_KEY_CUSTOM_INTEGRATIONS = "custom_integrations";
 export const KV_KEY_ADDONS = "addons";
 export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
-export const KV_MAX_PROCESS_ENTRIES = 800;
+export const KV_MAX_PROCESS_ENTRIES = 950;
 
 export const SCHEMA_VERSION_QUEUE = 15;
 export const SCHEMA_VERSION_ANALYTICS = 4;
@@ -59,7 +59,7 @@ export enum MetadataExtra {
 }
 
 export enum ScheduledTask {
-  PROCESS_QUEUE = "*/2 * * * *",
+  PROCESS_QUEUE = "*/1 * * * *",
   RESET_QUEUE = "5 0 * * *",
   UPDATE_HISTORY = "0 * * * *",
   REGENERATE_SITE = "15 * * * *",
