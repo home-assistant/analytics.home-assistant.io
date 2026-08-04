@@ -1,9 +1,12 @@
 import {
   createQueueData,
   createQueueDefaults,
+  HACS_DOMAINS_MAX_AGE,
+  HACS_INTEGRATIONS_URL,
   KV_KEY_ADDONS,
   KV_KEY_CORE_ANALYTICS,
   KV_KEY_CUSTOM_INTEGRATIONS,
+  KV_KEY_HACS_DOMAINS,
   KV_KEY_QUEUE,
   ScheduledTask,
   SCHEMA_VERSION_ANALYTICS,
@@ -19,13 +22,20 @@ describe("schedule handler", function () {
   beforeEach(() => {
     MockSentry = MockedSentry();
     (global as any).console = MockedConsole();
-    (global as any).fetch = MockFetch = jest.fn(async () => ({
+    (global as any).fetch = MockFetch = jest.fn(async (url: string) => ({
       ok: true,
-      json: jest.fn(async () => ({
-        core: ["core_valid"],
-        custom: ["custom_valid"],
-        hassos: { rpi: "" },
-      })),
+      json: jest.fn(async () =>
+        url === HACS_INTEGRATIONS_URL
+          ? {
+              "1234": { domain: "hacs_valid" },
+              "5678": { domain: null },
+            }
+          : {
+              core: ["core_valid"],
+              custom: ["custom_valid"],
+              hassos: { rpi: "" },
+            }
+      ),
     }));
     (global as any).NETLIFY_BUILD_HOOK = "";
     (global as any).WORKER_ENV = "production";
@@ -214,7 +224,12 @@ describe("schedule handler", function () {
       );
 
       expect(event.env.KV.put).toBeCalledWith(KV_KEY_QUEUE, expect.any(String));
-      expect(event.env.KV.put).toBeCalledTimes(1);
+      // The queue, plus the refreshed HACS domain cache.
+      expect(event.env.KV.put).toBeCalledWith(
+        KV_KEY_HACS_DOMAINS,
+        expect.any(String)
+      );
+      expect(event.env.KV.put).toBeCalledTimes(2);
     });
 
     it("Continue queue - 2000 entries left", async () => {
@@ -251,7 +266,12 @@ describe("schedule handler", function () {
         KV_KEY_QUEUE,
         expect.stringContaining('"process_complete":false')
       );
-      expect(event.env.KV.put).toBeCalledTimes(1);
+      // The queue, plus the refreshed HACS domain cache.
+      expect(event.env.KV.put).toBeCalledWith(
+        KV_KEY_HACS_DOMAINS,
+        expect.any(String)
+      );
+      expect(event.env.KV.put).toBeCalledTimes(2);
     });
 
     it("Continue queue - 500 entries left", async () => {
@@ -270,12 +290,16 @@ describe("schedule handler", function () {
               data: createQueueData(),
             };
           }
+          if (key === KV_KEY_HACS_DOMAINS) {
+            return null;
+          }
 
           return {
             integrations: ["core_valid"],
             custom_integrations: [
               { domain: "custom_invalid", version: "1.2.3" },
               { domain: "custom_valid", version: "1.2.3" },
+              { domain: "hacs_valid", version: "1.2.3" },
             ],
             operating_system: {
               board: "invalid_board",
@@ -312,14 +336,131 @@ describe("schedule handler", function () {
       );
       expect(event.env.KV.put).toBeCalledWith(
         KV_KEY_CUSTOM_INTEGRATIONS,
-        '{"custom_valid":{"total":500,"versions":{"1.2.3":500}}}'
+        '{"custom_valid":{"total":500,"versions":{"1.2.3":500}},' +
+          '"hacs_valid":{"total":500,"versions":{"1.2.3":500}}}'
       );
       expect(event.env.KV.put).toBeCalledWith(
         expect.stringContaining("history:"),
         expect.any(String)
       );
-      expect(MockFetch).toBeCalledTimes(3);
-      expect(event.env.KV.put).toBeCalledTimes(5);
+      expect(event.env.KV.put).toBeCalledWith(
+        KV_KEY_HACS_DOMAINS,
+        expect.stringContaining('"domains":["hacs_valid"]')
+      );
+      expect(MockFetch).toBeCalledTimes(4);
+      expect(event.env.KV.put).toBeCalledTimes(6);
+    });
+
+    // The HACS domain list is refreshed at most once a day and cached in KV,
+    // so these cover the cache being fresh, and HACS being unreachable with
+    // and without something cached to fall back on.
+    const hacsCacheEvent = (hacsCache: any) => {
+      const event = MockedScheduledEvent({
+        controller: { cron: ScheduledTask.PROCESS_QUEUE },
+      });
+      (event.env.KV.get as jest.Mock).mockImplementation(
+        async (key: string) => {
+          if (key === KV_KEY_QUEUE) {
+            return {
+              schema_version: SCHEMA_VERSION_QUEUE,
+              process_complete: false,
+              entries: [{ name: "uuid:1" }],
+              data: createQueueData(),
+            };
+          }
+          if (key === KV_KEY_HACS_DOMAINS) {
+            return hacsCache;
+          }
+
+          return {
+            custom_integrations: [
+              { domain: "custom_valid", version: "1.2.3" },
+              { domain: "hacs_valid", version: "1.2.3" },
+            ],
+          };
+        }
+      );
+      return event;
+    };
+
+    const bothCounted =
+      '{"custom_valid":{"total":1,"versions":{"1.2.3":1}},' +
+      '"hacs_valid":{"total":1,"versions":{"1.2.3":1}}}';
+
+    it("Cached HACS domains are still fresh - no refetch", async () => {
+      const event = hacsCacheEvent({
+        last_updated: new Date().getTime(),
+        domains: ["hacs_valid"],
+      });
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockFetch).not.toBeCalledWith(HACS_INTEGRATIONS_URL);
+      expect(event.env.KV.put).not.toBeCalledWith(
+        KV_KEY_HACS_DOMAINS,
+        expect.any(String)
+      );
+      expect(event.env.KV.put).toBeCalledWith(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        bothCounted
+      );
+    });
+
+    it("Cached HACS domains are stale and HACS is down - use the cache", async () => {
+      const event = hacsCacheEvent({
+        last_updated: new Date().getTime() - HACS_DOMAINS_MAX_AGE - 1,
+        domains: ["hacs_valid"],
+      });
+      (global as any).fetch = MockFetch = jest.fn(async (url: string) => ({
+        ok: url !== HACS_INTEGRATIONS_URL,
+        json: jest.fn(async () => ({
+          core: ["core_valid"],
+          custom: ["custom_valid"],
+          hassos: { rpi: "" },
+        })),
+      }));
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockFetch).toBeCalledWith(HACS_INTEGRATIONS_URL);
+      expect(MockSentry.captureException).not.toBeCalled();
+      expect(MockSentry.captureMessage).toBeCalledWith(
+        "Could not get integration list from HACS (using the cached list)",
+        "warning"
+      );
+      // The stale cache is kept rather than overwritten with a worse one.
+      expect(event.env.KV.put).not.toBeCalledWith(
+        KV_KEY_HACS_DOMAINS,
+        expect.any(String)
+      );
+      expect(event.env.KV.put).toBeCalledWith(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        bothCounted
+      );
+    });
+
+    it("HACS is down with nothing cached - keep processing on brands", async () => {
+      const event = hacsCacheEvent(null);
+      (global as any).fetch = MockFetch = jest.fn(async (url: string) => ({
+        ok: url !== HACS_INTEGRATIONS_URL,
+        json: jest.fn(async () => ({
+          core: ["core_valid"],
+          custom: ["custom_valid"],
+          hassos: { rpi: "" },
+        })),
+      }));
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockSentry.captureException).not.toBeCalled();
+      expect(MockSentry.captureMessage).toBeCalledWith(
+        "Could not get integration list from HACS (using brands only)",
+        "warning"
+      );
+      expect(event.env.KV.put).toBeCalledWith(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        '{"custom_valid":{"total":1,"versions":{"1.2.3":1}}}'
+      );
     });
 
     it("Wait for reset", async () => {

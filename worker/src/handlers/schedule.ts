@@ -22,11 +22,18 @@ import {
   generateUuidMetadata,
   KV_KEY_ADDONS,
   KV_KEY_CUSTOM_INTEGRATIONS,
+  KV_KEY_HACS_DOMAINS,
   BRANDS_DOMAINS_URL,
+  BrandsDomainsResponse,
+  CachedHacsDomains,
+  HACS_DOMAINS_MAX_AGE,
+  HACS_INTEGRATIONS_URL,
+  HacsIntegrationsResponse,
   VERSION_URL,
   VersionResponse,
   ScheduledWorkerEvent,
 } from "../data";
+import { fetchJson } from "../utils/fetch-json";
 import { groupVersions } from "../utils/group-versions";
 import { median } from "../utils/median";
 import { migrateAnalyticsData } from "../utils/migrate";
@@ -236,35 +243,9 @@ async function processQueue(
   }
 
   sentry.addBreadcrumb({
-    message: "Fetching external data from brands and version",
+    message: "Fetching external data from brands, HACS and version",
   });
-  const [brandsDomainsResponse, versionResponse] = await Promise.all([
-    fetch(BRANDS_DOMAINS_URL),
-    fetch(VERSION_URL),
-  ]);
-
-  sentry.setExtra("brandsDomainsResponse", brandsDomainsResponse);
-  sentry.setExtra("versionResponse", versionResponse);
-
-  if (!brandsDomainsResponse.ok) {
-    throw Error("Could not get domain list from brands");
-  }
-  if (!versionResponse.ok) {
-    throw Error("Could not get domain list from brands");
-  }
-
-  const brandsDomainsJson: {
-    core: string[];
-    custom: string[];
-  } = await brandsDomainsResponse.json();
-
-  const osBoardsJson = await versionResponse.json<VersionResponse>();
-
-  const brandsDomains: Set<string> = new Set(
-    brandsDomainsJson.custom.concat(brandsDomainsJson.core)
-  );
-
-  const osBoards: Set<string> = new Set(Object.keys(osBoardsJson.hassos));
+  const { knownDomains, osBoards } = await fetchExternalData(event, sentry);
 
   async function handleEntry(entryKey: string) {
     let entryData;
@@ -274,7 +255,7 @@ async function processQueue(
       queue.data = combineEntryData(
         queue.data,
         entryData,
-        brandsDomains,
+        knownDomains,
         osBoards
       );
     }
@@ -331,6 +312,89 @@ async function processQueue(
   }
   sentry.addBreadcrumb({ message: "Process complete" });
   await event.env.KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
+}
+
+// The documents backing these sets are large compared to what we keep from
+// them, so they are parsed and reduced here, out of the scope that stays alive
+// while the queue entries are processed.
+async function fetchExternalData(
+  event: ScheduledWorkerEvent,
+  sentry: Toucan
+): Promise<{
+  knownDomains: Set<string>;
+  osBoards: Set<string>;
+}> {
+  const [brandsDomainsJson, hacsDomains, osBoardsJson] = await Promise.all([
+    fetchJson<BrandsDomainsResponse>(sentry, BRANDS_DOMAINS_URL, {
+      sentryExtra: "brandsDomainsResponse",
+      errorMessage: "Could not get domain list from brands",
+    }),
+    getHacsDomains(event, sentry),
+    fetchJson<VersionResponse>(sentry, VERSION_URL, {
+      sentryExtra: "versionResponse",
+      errorMessage: "Could not get board list from version",
+    }),
+  ]);
+
+  // Reported custom integrations are only counted when we know the domain.
+  // brands no longer accepts new custom_integrations entries (HA 2026.3.0), so
+  // the HACS default repositories are used as an additional source of domains.
+  const knownDomains: Set<string> = new Set(
+    brandsDomainsJson.custom.concat(brandsDomainsJson.core)
+  );
+
+  for (const domain of hacsDomains) {
+    knownDomains.add(domain);
+  }
+
+  return {
+    knownDomains,
+    osBoards: new Set(Object.keys(osBoardsJson.hassos)),
+  };
+}
+
+// The domains of the HACS default repositories, refreshed at most once a day.
+// HACS is not ours and it only widens the set of domains we recognise, so a
+// failure to refresh falls back to the cached list rather than failing the run.
+async function getHacsDomains(
+  event: ScheduledWorkerEvent,
+  sentry: Toucan
+): Promise<string[]> {
+  const cached = await event.env.KV.get<CachedHacsDomains>(
+    KV_KEY_HACS_DOMAINS,
+    "json"
+  );
+  const timestamp = new Date().getTime();
+
+  if (cached && timestamp - cached.last_updated < HACS_DOMAINS_MAX_AGE) {
+    return cached.domains;
+  }
+
+  try {
+    const hacsIntegrationsJson = await fetchJson<HacsIntegrationsResponse>(
+      sentry,
+      HACS_INTEGRATIONS_URL,
+      {
+        sentryExtra: "hacsIntegrationsResponse",
+        errorMessage: "Could not get integration list from HACS",
+      }
+    );
+
+    const domains = Object.values(hacsIntegrationsJson)
+      .map((repository) => repository.domain)
+      .filter((domain): domain is string => !!domain);
+
+    await event.env.KV.put(
+      KV_KEY_HACS_DOMAINS,
+      JSON.stringify({ last_updated: timestamp, domains })
+    );
+
+    return domains;
+  } catch (e: any) {
+    const fallback = cached ? "the cached list" : "brands only";
+    sentry.captureMessage(`${e?.message} (using ${fallback})`, "warning");
+    return cached?.domains || [];
+  }
 }
 
 async function listKV(
@@ -397,7 +461,7 @@ function combineMetadataEntryData(
 function combineEntryData(
   data: QueueData,
   entrydata: IncomingPayload,
-  brandsDomains: Set<string>,
+  knownDomains: Set<string>,
   osBoards: Set<string>
 ): QueueData {
   const reported_integrations = entrydata.integrations || [];
@@ -523,7 +587,7 @@ function combineEntryData(
 
   if (reported_custom_integrations.length) {
     for (const custom_integration of reported_custom_integrations) {
-      if (!brandsDomains.has(custom_integration.domain)) {
+      if (!knownDomains.has(custom_integration.domain)) {
         continue;
       }
 

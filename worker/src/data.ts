@@ -2,15 +2,22 @@ export const KV_KEY_QUEUE = "queue";
 export const KV_KEY_CORE_ANALYTICS = "core_analytics";
 export const KV_KEY_CUSTOM_INTEGRATIONS = "custom_integrations";
 export const KV_KEY_ADDONS = "addons";
+export const KV_KEY_HACS_DOMAINS = "hacs_domains";
 export const KV_PREFIX_HISTORY = "history";
 export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 800;
+
+// The HACS default repository list changes a few times a day, and this runs
+// every minute, so it is refreshed at most daily and cached in KV.
+export const HACS_DOMAINS_MAX_AGE = 86_400_000;
 
 export const SCHEMA_VERSION_QUEUE = 15;
 export const SCHEMA_VERSION_ANALYTICS = 4;
 
 export const BRANDS_DOMAINS_URL =
   "https://brands.home-assistant.io/domains.json";
+export const HACS_INTEGRATIONS_URL =
+  "https://data-v2.hacs.xyz/integration/data.json";
 export const VERSION_URL = "https://version.home-assistant.io/dev.json";
 
 export interface WorkerEnv {
@@ -78,6 +85,20 @@ export interface UuidMetadata {
 export interface VersionResponse {
   channel: string;
   hassos: Record<string, string>;
+}
+
+export interface BrandsDomainsResponse {
+  core: string[];
+  custom: string[];
+}
+
+export interface HacsIntegrationsResponse {
+  [repository_id: string]: { domain?: string | null };
+}
+
+export interface CachedHacsDomains {
+  last_updated: number;
+  domains: string[];
 }
 
 export interface CfRequest extends Request {
