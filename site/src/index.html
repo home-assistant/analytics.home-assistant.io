@@ -6,103 +6,212 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
   <script src="/static/svgMap.min.js"></script>
   <script src="/static/chart.umd.js"></script>
   <script src="/static/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script src="/static/chartjs-html-legend-plugin.js"></script>
   <link href="/static/svgMap.min.css" rel="stylesheet">
 ---
 
 <style>
-  .intro {
+  .row {
     display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  .col {
+    flex: 1 0 0;
+  }
+  .chart {
+    --chart-spacing: 8px;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--chart-spacing);
+  }
+  .chart--pie {
     flex-direction: row;
-    column-gap: 3em;
-    row-gap: 1em;
-    margin-bottom: 1em;
   }
-  .intro > * {
-    flex: 1;
+  .chart__title {
+    color: var(--secondary-text-color);
+    margin-bottom: 0.5rem;
   }
-  .chart-title {
+  .chart__canvas {
+    width: 100% !important; /* !important to be stronger that inline styling added by Chart.js */
+  }
+  .chart--pie .chart__canvas {
+    width: 50% !important; /* !important to be stronger that inline styling added by Chart.js */
+    height: auto !important; /* !important to be stronger that inline styling added by Chart.js */
+  }
+  .chart__legend {
     color: var(--secondary-text-color);
   }
-  canvas {
-    margin-bottom: 32px;
-  }
-  .half {
+  .chart__legend__container {
     display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--chart-spacing);
   }
-  .half > * {
-    flex: 1;
-    margin: 0 16px;
+  @media only screen and (min-width: 600px) {
+    .chart__legend__container--column {
+      flex-direction: column;
+    }
+  }
+  .chart__legend__button {
+    display: flex;
+    align-items: center;
+    gap: var(--chart-spacing);
+    padding: var(--chart-spacing);
+    border: 1px solid var(--secondary-text-color);
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .chart__legend__color {
+    width: 10px;
+    min-width: 10px; /* To avoid parent flexbox compression */
+    height: 10px;
+    border-radius: 100%;
+  }
+  .chart__legend__text {
+    flex-grow: 1;
+    white-space: pre;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .chart__legend__text--bold {
+    font-weight: 700;
+    text-align: right;
+  }
+  @media only screen and (min-width: 600px) and (max-width: 1024px) {
+    .chart__legend__text--bold {
+      display: none;
+    }
+  }
+  .chart__legend__text--percent {
+    flex-grow: 0;
+    min-width: 50px;
   }
   @media only screen and (max-width: 800px) {
     .intro {
       flex-direction: column;
+      row-gap: 1em;
     }
   }
   @media only screen and (max-width: 600px) {
-    .half {
-      flex-direction: column-reverse;
+    .row--pie {
+      flex-direction: column;
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
+    }
+
+    .chart {
+      align-items: center;
+    }
+
+    .chart--pie {
+      flex-direction: column;
     }
   }
 </style>
 
-<div class="intro">
-  <div>
+<div class="row intro">
+  <div class="col">
     Home Assistant allows users to share their usage data. It is used to
     influence Home Assistant development priorities and to convince
     manufacturers to add local control and privacy-focused features.
   </div>
-  <div>
+
+  <div class="col">
     Analytics in Home Assistant are opt-in and do not reflect the entire Home
     Assistant userbase. We estimate that less than a fourth of all Home Assistant
     users opt in.
   </div>
 </div>
 
-<div class="chart-title">
-  {{ data.history.last.active_installations | formatNumber }} Active Home
-  Assistant Installations
-</div>
-<canvas id="installationsChart" style="width: 100%"></canvas>
-
-<div class="chart-title">Version history</div>
-<canvas id="versionHistoryChart" style="width: 100%"></canvas>
-
-<div class="half">
-  <div>
-    <div class="chart-title">Last releases</div>
-    <canvas id="lastReleaseChart" style="width: 100%"></canvas>
-  </div>
-  <div>
-    <div class="chart-title">Installation types</div>
-    <canvas id="installationTypesChart" style="width: 100%"></canvas>
+<div class="row">
+  <div class="col">
+    <div class="chart__title">
+      {{ data.history.last.active_installations | formatNumber }} Active Home
+      Assistant Installations
+    </div>
+    <div class="chart">
+      <canvas class="chart__canvas" id="installationsChart"></canvas>
+      <div class="chart__legend"></div>
+    </div>
   </div>
 </div>
 
-<div class="half">
-  <div>
-    <div class="chart-title">Top 5 used operating system versions</div>
-    <canvas id="top5OSversionChart" style="width: 100%"></canvas>
-  </div>
-  <div>
-    <div class="chart-title">Board types</div>
-    <canvas id="boardTypesChart" style="width: 100%"></canvas>
+<div class="row">
+  <div class="col">
+    <div class="chart__title">Version history</div>
+    <div class="chart">
+      <canvas class="chart__canvas" id="versionHistoryChart"></canvas>
+      <div class="chart__legend"></div>
+    </div>
   </div>
 </div>
 
-<div id="svgMap"></div>
+<div class="row row--pie">
+  <div class="col">
+    <div class="chart__title">Last releases</div>
+    <div class="chart chart--pie">
+      <canvas class="chart__canvas" id="lastReleaseChart"></canvas>
+      <div class="chart__legend"></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="chart__title">Installation types</div>
+    <div class="chart chart--pie">
+      <canvas class="chart__canvas" id="installationTypesChart"></canvas>
+      <div class="chart__legend"></div>
+    </div>
+  </div>
+</div>
+
+<div class="row row--pie">
+  <div class="col">
+    <div class="chart__title">Top 5 used operating system versions</div>
+    <div class="chart chart--pie">
+      <canvas class="chart__canvas" id="top5OSversionChart"></canvas>
+      <div class="chart__legend"></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="chart__title">Board types</div>
+    <div class="chart chart--pie">
+      <canvas class="chart__canvas" id="boardTypesChart"></canvas>
+      <div class="chart__legend"></div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div id="installationsPerCountry" class="col"></div>
+</div>
 
 <script>
+  function tooltipFooterCallback(item) {
+    const sum = item[0].dataset.data.reduce((accumulator, value) => accumulator + value, 0);
+    return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
+  }
   const darkMode = window.matchMedia("(prefers-color-scheme:dark)").matches;
 
   Chart.defaults.color = darkMode ? "#9b9b9b" : "#727272";
   Chart.defaults.borderColor = darkMode ? "#202020" : "#ffffff";
+  Chart.defaults.responsive = true;
   Chart.defaults.plugins.legend.position = "right";
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
 
   new Chart("installationsChart", {
     type: "line",
     options: {
       parsing: false,
-      responsive: false,
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
       scales: {
         x: {
           type: 'time',
@@ -111,14 +220,19 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
     },
     data: {
       datasets: {{ data.history | mergeInstallationHistory }},
-    }
+    },
+    plugins: [chartJsHtmlLegendPlugin],
   });
 
   new Chart("versionHistoryChart", {
     type: "line",
     options: {
       parsing: false,
-      responsive: false,
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
       scales: {
         x: {
           type: 'time',
@@ -127,21 +241,21 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
     },
     data: {
       datasets: {{ data.history | mergeVersionHistory }},
-    }
+    },
+    plugins: [chartJsHtmlLegendPlugin],
   });
 
   new Chart("lastReleaseChart", {
     type: "pie",
     options: {
       plugins: {
+        legend: {
+          display: false,
+        },
         tooltip: {
           enabled: true,
           callbacks: {
-            footer: (item) => {
-              let sum = 0;
-              item[0].dataset.data.forEach(data => { sum += Number(data) });
-              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
-            }
+            footer: tooltipFooterCallback
           }
         },
       },
@@ -152,21 +266,21 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
         data: {{ data.current.versions | versionSummary | values | json }},
         backgroundColor: {{ data.current.versions | versionSummary | keys | randomColors }}
       }]
-    }
+    },
+    plugins: [chartJsHtmlLegendPlugin],
   });
 
   new Chart("installationTypesChart", {
     type: "pie",
     options: {
       plugins: {
+        legend: {
+          display: false,
+        },
         tooltip: {
           enabled: true,
           callbacks: {
-            footer: (item) => {
-              let sum = 0;
-              item[0].dataset.data.forEach(data => { sum += Number(data) });
-              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
-            }
+            footer: tooltipFooterCallback
           }
         },
       },
@@ -192,21 +306,21 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
           "{{ "Core" | randomColor }}"
         ]
       }]
-    }
+    },
+    plugins: [chartJsHtmlLegendPlugin],
   });
 
   new Chart("top5OSversionChart", {
     type: "pie",
     options: {
       plugins: {
+        legend: {
+          display: false,
+        },
         tooltip: {
           enabled: true,
           callbacks: {
-            footer: (item) => {
-              let sum = 0;
-              item[0].dataset.data.forEach(data => { sum += Number(data) });
-              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
-            }
+            footer: tooltipFooterCallback
           }
         },
       },
@@ -217,7 +331,8 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
         data: {{ data.current.operating_system.versions | osVersionSummary | values | json }},
         backgroundColor: {{ data.current.operating_system.versions | osVersionSummary | keys | randomColors }}
       }]
-    }
+    },
+    plugins: [chartJsHtmlLegendPlugin],
   });
 
   new Chart("boardTypesChart", {
@@ -225,14 +340,13 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
     type: "pie",
     options: {
       plugins: {
+        legend: {
+          display: false,
+        },
         tooltip: {
           enabled: true,
           callbacks: {
-            footer: (item) => {
-              let sum = 0;
-              item[0].dataset.data.forEach(data => { sum += Number(data) });
-              return `${(item[0].parsed * 100 / sum).toFixed(2)}%`;
-            }
+            footer: tooltipFooterCallback
           }
         },
       },
@@ -243,23 +357,24 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
         data: {{ sorted.data | json }},
         backgroundColor: {{ sorted.backgroundColor | json }},
       }]
-    }
+    },
+    plugins: [chartJsHtmlLegendPlugin],
   });
 
   new svgMap({
-    targetElementID: 'svgMap',
+    targetElementID: 'installationsPerCountry',
     colorMin: "#80CBC4",
     colorMax: "#004D40",
     hideFlag: true,
     initialZoom: 1.0,
     data: {
-            data: {
-              installations: {
-                format: "{0} Installations",
-              },
-            },
-            applyData: "installations",
-            values: {{ data.current.countries | countriesForMap }},
-          },
+      data: {
+        installations: {
+          format: "{0} Installations",
+        },
+      },
+      applyData: "installations",
+      values: {{ data.current.countries | countriesForMap }},
+    },
   });
 </script>
