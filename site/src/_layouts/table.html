@@ -118,7 +118,7 @@ layout: base
   const paginator = document.getElementById("paginator");
   let tableStart = 1;
   let tableLimit = tableLimitSelector.value;
-  const tableHeader = `
+  const tableHeader = typeof customTableHeader !== 'undefined' ? customTableHeader : `
     <tr class="table-header">
       <th class="idx"></th>
       <th>Name</th>
