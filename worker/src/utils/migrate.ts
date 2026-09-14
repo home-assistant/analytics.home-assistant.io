@@ -82,5 +82,10 @@ export const migrateAnalyticsData = (data: any): AnalyticsData => {
     }
   }
 
+  // Preserve month_ago snapshot across migrations
+  if (data.month_ago) {
+    analyticsData.month_ago = data.month_ago;
+  }
+
   return analyticsData;
 };

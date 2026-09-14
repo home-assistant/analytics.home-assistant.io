@@ -3,24 +3,101 @@ layout: table
 title: Integrations
 ---
 
+<style>
+  .change {
+    text-align: right;
+    white-space: nowrap;
+    font-size: 0.85em;
+  }
+  .change.positive {
+    color: #4caf50;
+  }
+  .change.negative {
+    color: #f44336;
+  }
+  .change.neutral {
+    color: var(--secondary-text-color);
+  }
+  @media only screen and (max-width: 600px) {
+    .change {
+      font-size: 0.75em;
+    }
+  }
+</style>
+
 <script>
   const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details | json }};
   const reportsIntegrations = Number({{ data.current.reports_integrations }});
-  const createTableRow = (entry) =>  `
-  <tr>
-    <td class="idx">${entry.idx}</td>
-    <td>
-      <a title="Documentation" href="https://www.home-assistant.io/integrations/${entry.domain}" target="_blank">
-        <img src="https://brands.home-assistant.io/_/${entry.domain}/${darkMode ? 'dark_' : ''}icon.png">
-        <span>${entry.name}</span>
-      </a>
-    </td>
-    <td class="installations">
-      <span>${Intl.NumberFormat().format(entry.installations)}</span>
-      <span>(${((100 * entry.installations) / reportsIntegrations).toFixed(1)}%)</span>
-    </td>
-  </tr>
-  `
+
+  {% if data.month_ago %}
+  const monthAgoData = {{ data.month_ago | json }};
+  {% else %}
+  const monthAgoData = null;
+  {% endif %}
+
+  let monthAgoLookup = null;
+  if (monthAgoData && monthAgoData.integrations) {
+    const snapshotEntries = Object.entries(monthAgoData.integrations)
+      .map(([domain, installations]) => ({ domain, installations }))
+      .sort((a, b) => b.installations - a.installations);
+    if (snapshotEntries.length > 0) {
+      monthAgoLookup = {};
+      snapshotEntries.forEach((e, idx) => {
+        monthAgoLookup[e.domain] = { position: idx + 1, installations: e.installations };
+      });
+    }
+  }
+
+  if (monthAgoLookup) {
+    var customTableHeader = `
+    <tr class="table-header">
+      <th class="idx"></th>
+      <th>Name</th>
+      <th class="installations">Installations</th>
+      <th class="change">± Installations</th>
+      <th class="change">± Position</th>
+    </tr>
+    `;
+  }
+
+  const createTableRow = (entry) => {
+    let changeHtml = '';
+    if (monthAgoLookup) {
+      const old = monthAgoLookup[entry.domain];
+      const isNew = !old || old.installations === 0;
+      const oldCount = old ? old.installations : 0;
+      const diff = entry.installations - oldCount;
+      const diffStr = isNew ? 'NEW' : diff === 0 ? '—' : diff > 0 ? `+${Intl.NumberFormat().format(diff)}` : Intl.NumberFormat().format(diff);
+      const diffClass = isNew ? 'positive' : diff > 0 ? 'positive' : diff < 0 ? 'negative' : 'neutral';
+
+      const oldPos = old ? old.position : null;
+      const posDiff = oldPos !== null ? oldPos - entry.idx : null;
+      const posStr = isNew ? 'NEW' : posDiff > 0 ? `▲ ${posDiff}` : posDiff < 0 ? `▼ ${Math.abs(posDiff)}` : '—';
+      const posClass = isNew ? 'positive' : posDiff > 0 ? 'positive' : posDiff < 0 ? 'negative' : 'neutral';
+
+      changeHtml = `
+        <td class="change ${diffClass}"><span>${diffStr}</span></td>
+        <td class="change ${posClass}"><span>${posStr}</span></td>
+      `;
+    }
+
+    return `
+    <tr>
+      <td class="idx">${entry.idx}</td>
+      <td>
+        <a title="Documentation" href="https://www.home-assistant.io/integrations/${entry.domain}" target="_blank">
+          <img src="https://brands.home-assistant.io/_/${entry.domain}/${darkMode ? 'dark_' : ''}icon.png">
+          <span>${entry.name}</span>
+        </a>
+      </td>
+      <td class="installations">
+        <span>${Intl.NumberFormat().format(entry.installations)}</span>
+        <span>(${((100 * entry.installations) / reportsIntegrations).toFixed(1)}%)</span>
+      </td>
+      ${changeHtml}
+    </tr>
+    `;
+  }
 </script>
 
 <div class="note">
@@ -28,3 +105,11 @@ title: Integrations
   ({{ data.current.extended_data_from | calculatePercentage: data.current.reports_integrations }}%)
   installations have chosen to share their used integrations
 </div>
+{% if data.month_ago %}
+<div class="note">
+  ± Installations and ± Position compared to
+  <script>
+    document.write(new Date({{ data.month_ago.timestamp }}).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }));
+  </script>
+</div>
+{% endif %}

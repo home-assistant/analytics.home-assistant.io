@@ -58,4 +58,19 @@ describe("migrateAnalyticsData", function () {
         .active_installations
     ).toBe(1337);
   });
+
+  it("preserves month_ago across migrations", function () {
+    const monthAgo = {
+      timestamp: 1700000000000,
+      integrations: { light: 5000, switch: 3000 },
+      reports_integrations: 400000,
+    };
+    const migrated = migrateAnalyticsData({ month_ago: monthAgo });
+    expect(migrated.month_ago).toEqual(monthAgo);
+  });
+
+  it("leaves month_ago undefined when not present", function () {
+    const migrated = migrateAnalyticsData({});
+    expect(migrated.month_ago).toBeUndefined();
+  });
 });
