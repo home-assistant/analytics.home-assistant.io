@@ -20,7 +20,7 @@
     "typescript": "^4.9.5",
     "webpack": "^5.110.3",
     "webpack-cli": "^7.2.3",
-    "wrangler": "^4.129.0"
+    "wrangler": "^4.131.0"
   },
   "jest": {
     "transform": {
