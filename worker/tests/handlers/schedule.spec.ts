@@ -37,7 +37,7 @@ describe("schedule handler", function () {
     });
     it("Unexpected cron trigger", async () => {
       await handleSchedule(event, MockSentry);
-      expect(MockSentry.captureException).toBeCalledWith(
+      expect(MockSentry.captureException).toHaveBeenCalledWith(
         Error("Unexpected schedule task: test")
       );
     });
@@ -55,9 +55,9 @@ describe("schedule handler", function () {
 
       await handleSchedule(event, MockSentry);
 
-      expect(event.env.KV.get).toBeCalledWith(KV_KEY_QUEUE, "json");
-      expect(MockSentry.setTag).toBeCalledWith("scheduled-task", "RESET_QUEUE");
-      expect(event.env.KV.put).toBeCalledTimes(0);
+      expect(event.env.KV.get).toHaveBeenCalledWith(KV_KEY_QUEUE, "json");
+      expect(MockSentry.setTag).toHaveBeenCalledWith("scheduled-task", "RESET_QUEUE");
+      expect(event.env.KV.put).toHaveBeenCalledTimes(0);
     });
 
     it("Queue handing is done, reset queue", async () => {
@@ -70,8 +70,8 @@ describe("schedule handler", function () {
       }));
 
       await handleSchedule(event, MockSentry);
-      expect(event.env.KV.put).toBeCalledTimes(1);
-      expect(event.env.KV.put).toBeCalledWith(
+      expect(event.env.KV.put).toHaveBeenCalledTimes(1);
+      expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_QUEUE,
         JSON.stringify(createQueueDefaults())
       );
@@ -96,13 +96,13 @@ describe("schedule handler", function () {
 
       await handleSchedule(event, MockSentry);
 
-      expect(event.env.KV.get).toBeCalledWith(KV_KEY_CORE_ANALYTICS, "json");
-      expect(MockSentry.setTag).toBeCalledWith(
+      expect(event.env.KV.get).toHaveBeenCalledWith(KV_KEY_CORE_ANALYTICS, "json");
+      expect(MockSentry.setTag).toHaveBeenCalledWith(
         "scheduled-task",
         "UPDATE_HISTORY"
       );
-      expect(event.env.KV.put).toBeCalledTimes(1);
-      expect(event.env.KV.put).toBeCalledWith(
+      expect(event.env.KV.put).toHaveBeenCalledTimes(1);
+      expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_CORE_ANALYTICS,
         expect.stringContaining('"extended_data_from":3')
       );
@@ -130,18 +130,18 @@ describe("schedule handler", function () {
 
       await handleSchedule(event, MockSentry);
 
-      expect(event.env.KV.get).toBeCalledWith(KV_KEY_CORE_ANALYTICS, "json");
-      expect(MockSentry.setTag).toBeCalledWith(
+      expect(event.env.KV.get).toHaveBeenCalledWith(KV_KEY_CORE_ANALYTICS, "json");
+      expect(MockSentry.setTag).toHaveBeenCalledWith(
         "scheduled-task",
         "UPDATE_HISTORY"
       );
 
-      expect(event.env.KV.put).toBeCalledTimes(1);
-      expect(event.env.KV.put).toBeCalledWith(
+      expect(event.env.KV.put).toHaveBeenCalledTimes(1);
+      expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_CORE_ANALYTICS,
         expect.stringContaining('"extended_data_from":3')
       );
-      expect(event.env.KV.put).toBeCalledWith(
+      expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_CORE_ANALYTICS,
         expect.stringContaining('"active_installations":4')
       );
@@ -171,13 +171,13 @@ describe("schedule handler", function () {
       }));
 
       await handleSchedule(event, MockSentry);
-      expect(MockFetch).not.toBeCalled();
-      expect(event.env.KV.get).toBeCalledWith(KV_KEY_CORE_ANALYTICS, "json");
-      expect(MockSentry.setTag).toBeCalledWith(
+      expect(MockFetch).not.toHaveBeenCalled();
+      expect(event.env.KV.get).toHaveBeenCalledWith(KV_KEY_CORE_ANALYTICS, "json");
+      expect(MockSentry.setTag).toHaveBeenCalledWith(
         "scheduled-task",
         "UPDATE_HISTORY"
       );
-      expect(event.env.KV.put).toBeCalledWith(
+      expect(event.env.KV.put).toHaveBeenCalledWith(
         "uuid:1",
         expect.any(String),
         expect.objectContaining({
@@ -206,15 +206,15 @@ describe("schedule handler", function () {
 
       await handleSchedule(event, MockSentry);
 
-      expect(event.env.KV.get).toBeCalledWith(KV_KEY_QUEUE, "json");
-      expect(event.env.KV.list).toBeCalledTimes(2);
-      expect(MockSentry.setTag).toBeCalledWith(
+      expect(event.env.KV.get).toHaveBeenCalledWith(KV_KEY_QUEUE, "json");
+      expect(event.env.KV.list).toHaveBeenCalledTimes(2);
+      expect(MockSentry.setTag).toHaveBeenCalledWith(
         "scheduled-task",
         "PROCESS_QUEUE"
       );
 
-      expect(event.env.KV.put).toBeCalledWith(KV_KEY_QUEUE, expect.any(String));
-      expect(event.env.KV.put).toBeCalledTimes(1);
+      expect(event.env.KV.put).toHaveBeenCalledWith(KV_KEY_QUEUE, expect.any(String));
+      expect(event.env.KV.put).toHaveBeenCalledTimes(1);
     });
 
     it("Continue queue - 2000 entries left", async () => {
@@ -240,18 +240,18 @@ describe("schedule handler", function () {
 
       await handleSchedule(event, MockSentry);
 
-      expect(event.env.KV.get).toBeCalledWith(KV_KEY_QUEUE, "json");
-      expect(event.env.KV.list).not.toBeCalled();
-      expect(MockSentry.setTag).toBeCalledWith(
+      expect(event.env.KV.get).toHaveBeenCalledWith(KV_KEY_QUEUE, "json");
+      expect(event.env.KV.list).not.toHaveBeenCalled();
+      expect(MockSentry.setTag).toHaveBeenCalledWith(
         "scheduled-task",
         "PROCESS_QUEUE"
       );
 
-      expect(event.env.KV.put).toBeCalledWith(
+      expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_QUEUE,
         expect.stringContaining('"process_complete":false')
       );
-      expect(event.env.KV.put).toBeCalledTimes(1);
+      expect(event.env.KV.put).toHaveBeenCalledTimes(1);
     });
 
     it("Continue queue - 500 entries left", async () => {
@@ -287,39 +287,39 @@ describe("schedule handler", function () {
 
       await handleSchedule(event, MockSentry);
 
-      expect(event.env.KV.get).toBeCalledWith(KV_KEY_QUEUE, "json");
-      expect(event.env.KV.list).not.toBeCalled();
-      expect(MockSentry.setTag).toBeCalledWith(
+      expect(event.env.KV.get).toHaveBeenCalledWith(KV_KEY_QUEUE, "json");
+      expect(event.env.KV.list).not.toHaveBeenCalled();
+      expect(MockSentry.setTag).toHaveBeenCalledWith(
         "scheduled-task",
         "PROCESS_QUEUE"
       );
 
-      expect(event.env.KV.put).toBeCalledWith(
+      expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_QUEUE,
         expect.stringContaining('"process_complete":true')
       );
-      expect(event.env.KV.put).toBeCalledWith(
+      expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_CORE_ANALYTICS,
         expect.stringContaining("core_valid")
       );
-      expect(event.env.KV.put).toBeCalledWith(
+      expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_CORE_ANALYTICS,
         expect.not.stringContaining("invalid_board")
       );
-      expect(event.env.KV.put).toBeCalledWith(
+      expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_ADDONS,
         expect.any(String)
       );
-      expect(event.env.KV.put).toBeCalledWith(
+      expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_CUSTOM_INTEGRATIONS,
         '{"custom_valid":{"total":500,"versions":{"1.2.3":500}}}'
       );
-      expect(event.env.KV.put).toBeCalledWith(
+      expect(event.env.KV.put).toHaveBeenCalledWith(
         expect.stringContaining("history:"),
         expect.any(String)
       );
-      expect(MockFetch).toBeCalledTimes(3);
-      expect(event.env.KV.put).toBeCalledTimes(5);
+      expect(MockFetch).toHaveBeenCalledTimes(3);
+      expect(event.env.KV.put).toHaveBeenCalledTimes(5);
     });
 
     it("Wait for reset", async () => {
@@ -335,16 +335,16 @@ describe("schedule handler", function () {
 
       await handleSchedule(event, MockSentry);
 
-      expect(event.env.KV.get).toBeCalledWith(KV_KEY_QUEUE, "json");
-      expect(MockSentry.setTag).toBeCalledWith(
+      expect(event.env.KV.get).toHaveBeenCalledWith(KV_KEY_QUEUE, "json");
+      expect(MockSentry.setTag).toHaveBeenCalledWith(
         "scheduled-task",
         "PROCESS_QUEUE"
       );
 
-      expect(event.env.KV.put).not.toBeCalled();
-      expect(event.env.KV.list).not.toBeCalled();
+      expect(event.env.KV.put).not.toHaveBeenCalled();
+      expect(event.env.KV.list).not.toHaveBeenCalled();
 
-      expect(MockSentry.addBreadcrumb).toBeCalledWith({
+      expect(MockSentry.addBreadcrumb).toHaveBeenCalledWith({
         message: "Process complete, waiting for reset",
       });
     });
