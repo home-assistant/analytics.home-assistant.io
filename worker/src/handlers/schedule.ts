@@ -40,7 +40,7 @@ export async function handleSchedule(
   try {
     switch (scheduledTask) {
       case ScheduledTask.PROCESS_QUEUE:
-        // Runs every 2 minutes
+        // Runs every minute
         await processQueue(event, sentry);
         break;
       case ScheduledTask.RESET_QUEUE:
