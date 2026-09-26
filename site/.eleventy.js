@@ -134,23 +134,44 @@ module.exports = function (eleventyConfig) {
     );
   });
 
+  const sortIntegrations = (integrations, integration_details) =>
+    dataTable.SortTableData(
+      Object.keys(integration_details)
+        .filter(
+          (domain) =>
+            ["integration", "hub", "device", "helper", "service"].includes(
+              integration_details[domain].integration_type
+            )
+        )
+        .map((domain) => ({
+          domain,
+          name: integration_details[domain].title,
+          installations: integrations[domain] || 0,
+        }))
+    );
+
+  eleventyConfig.addFilter("sortIntegrations", sortIntegrations);
+
+  // Ranks the month-ago snapshot over the same rows as the table, so a
+  // position only changes when the ranking did.
   eleventyConfig.addFilter(
-    "sortIntegrations",
-    (integrations, integration_details) =>
-      dataTable.SortTableData(
-        Object.keys(integration_details)
-          .filter(
-            (domain) =>
-              ["integration", "hub", "device", "helper", "service"].includes(
-                integration_details[domain].integration_type
-              )
-          )
-          .map((domain) => ({
-            domain,
-            name: integration_details[domain].title,
-            installations: integrations[domain] || 0,
-          }))
+    "compareIntegrations",
+    (entries, month_ago, reports, integration_details) =>
+      dataTable.CompareTableData(
+        entries,
+        sortIntegrations(month_ago.integrations, integration_details),
+        reports,
+        month_ago.reports_integrations
       )
+  );
+
+  eleventyConfig.addFilter("formatDate", (timestamp) =>
+    new Date(Number(timestamp)).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "UTC",
+    })
   );
 
   eleventyConfig.addFilter("sortAddons", (addons, addons_details) =>

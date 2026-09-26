@@ -5,15 +5,23 @@ title: Integrations
 
 <style>
   .change {
+    --change-up: #2e7d32;
+    --change-down: #c62828;
     text-align: right;
     white-space: nowrap;
     font-size: 0.85em;
   }
+  @media (prefers-color-scheme: dark) {
+    .change {
+      --change-up: #81c784;
+      --change-down: #e57373;
+    }
+  }
   .change.positive {
-    color: #4caf50;
+    color: var(--change-up);
   }
   .change.negative {
-    color: #f44336;
+    color: var(--change-down);
   }
   .change.neutral {
     color: var(--secondary-text-color);
@@ -22,66 +30,60 @@ title: Integrations
     .change {
       font-size: 0.75em;
     }
+    .change.position {
+      display: none;
+    }
   }
 </style>
 
 <script>
-  const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details | json }};
-  const reportsIntegrations = Number({{ data.current.reports_integrations }});
-
   {% if data.month_ago %}
-  const monthAgoData = {{ data.month_ago | json }};
-  {% else %}
-  const monthAgoData = null;
-  {% endif %}
-
-  let monthAgoLookup = null;
-  if (monthAgoData && monthAgoData.integrations) {
-    const snapshotEntries = Object.entries(monthAgoData.integrations)
-      .map(([domain, installations]) => ({ domain, installations }))
-      .sort((a, b) => b.installations - a.installations);
-    if (snapshotEntries.length > 0) {
-      monthAgoLookup = {};
-      snapshotEntries.forEach((e, idx) => {
-        monthAgoLookup[e.domain] = { position: idx + 1, installations: e.installations };
-      });
-    }
-  }
-
-  if (monthAgoLookup) {
-    var customTableHeader = `
+  const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details | compareIntegrations: data.month_ago, data.current.reports_integrations, integration_details | json }};
+  const hasComparison = true;
+  const comparedWith = "Compared with {{ data.month_ago.timestamp | formatDate }}";
+  var customTableHeader = `
     <tr class="table-header">
       <th class="idx"></th>
       <th>Name</th>
       <th class="installations">Installations</th>
-      <th class="change">± Installations</th>
-      <th class="change">± Position</th>
+      <th class="change" title="${comparedWith}, in percentage points of the installations sharing their integrations">± Share</th>
+      <th class="change position" title="${comparedWith}">± Position</th>
     </tr>
-    `;
-  }
+  `;
+  {% else %}
+  const hasComparison = false;
+  const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details | json }};
+  {% endif %}
+  const reportsIntegrations = Number({{ data.current.reports_integrations }});
 
-  const createTableRow = (entry) => {
-    let changeHtml = '';
-    if (monthAgoLookup) {
-      const old = monthAgoLookup[entry.domain];
-      const isNew = !old || old.installations === 0;
-      const oldCount = old ? old.installations : 0;
-      const diff = entry.installations - oldCount;
-      const diffStr = isNew ? 'NEW' : diff === 0 ? '—' : diff > 0 ? `+${Intl.NumberFormat().format(diff)}` : Intl.NumberFormat().format(diff);
-      const diffClass = isNew ? 'positive' : diff > 0 ? 'positive' : diff < 0 ? 'negative' : 'neutral';
+  const changeClass = (value) =>
+    value > 0 ? "positive" : value < 0 ? "negative" : "neutral";
 
-      const oldPos = old ? old.position : null;
-      const posDiff = oldPos !== null ? oldPos - entry.idx : null;
-      const posStr = isNew ? 'NEW' : posDiff > 0 ? `▲ ${posDiff}` : posDiff < 0 ? `▼ ${Math.abs(posDiff)}` : '—';
-      const posClass = isNew ? 'positive' : posDiff > 0 ? 'positive' : posDiff < 0 ? 'negative' : 'neutral';
-
-      changeHtml = `
-        <td class="change ${diffClass}"><span>${diffStr}</span></td>
-        <td class="change ${posClass}"><span>${posStr}</span></td>
+  const createChangeCells = (entry) => {
+    if (!hasComparison) {
+      return "";
+    }
+    if (entry.is_new) {
+      return `
+        <td class="change positive"><span>NEW</span></td>
+        <td class="change position positive"><span>NEW</span></td>
       `;
     }
-
+    const share = Math.round((entry.share_change || 0) * 100) / 100;
+    const shareStr =
+      share === 0 ? "—" : `${share > 0 ? "+" : ""}${share.toFixed(2)} pp`;
+    const installations = entry.installations_change || 0;
+    const installationsStr = `${installations > 0 ? "+" : ""}${Intl.NumberFormat().format(installations)} installations`;
+    const position = entry.position_change || 0;
+    const positionStr =
+      position > 0 ? `▲ ${position}` : position < 0 ? `▼ ${-position}` : "—";
     return `
+      <td class="change ${changeClass(share)}" title="${installationsStr}"><span>${shareStr}</span></td>
+      <td class="change position ${changeClass(position)}"><span>${positionStr}</span></td>
+    `;
+  };
+
+  const createTableRow = (entry) => `
     <tr>
       <td class="idx">${entry.idx}</td>
       <td>
@@ -94,10 +96,9 @@ title: Integrations
         <span>${Intl.NumberFormat().format(entry.installations)}</span>
         <span>(${((100 * entry.installations) / reportsIntegrations).toFixed(1)}%)</span>
       </td>
-      ${changeHtml}
+      ${createChangeCells(entry)}
     </tr>
-    `;
-  }
+  `;
 </script>
 
 <div class="note">
@@ -107,9 +108,8 @@ title: Integrations
 </div>
 {% if data.month_ago %}
 <div class="note">
-  ± Installations and ± Position compared to
-  <script>
-    document.write(new Date({{ data.month_ago.timestamp }}).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }));
-  </script>
+  ± Share is the change in the share of installations using an integration, in
+  percentage points, compared with {{ data.month_ago.timestamp | formatDate }}.
+  Installation counts cover the last 60 days, so a change shows up gradually.
 </div>
 {% endif %}
