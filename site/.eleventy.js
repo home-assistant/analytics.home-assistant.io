@@ -156,13 +156,15 @@ module.exports = function (eleventyConfig) {
   // position only changes when the ranking did.
   eleventyConfig.addFilter(
     "compareIntegrations",
-    (entries, month_ago, reports, integration_details) =>
+    (entries, month_ago, integration_details) =>
       dataTable.CompareTableData(
         entries,
-        sortIntegrations(month_ago.integrations, integration_details),
-        reports,
-        month_ago.reports_integrations
+        sortIntegrations(month_ago.integrations, integration_details)
       )
+  );
+
+  eleventyConfig.addFilter("percentChange", (current, previous) =>
+    ((100 * (current - previous)) / previous).toFixed(1)
   );
 
   eleventyConfig.addFilter("formatDate", (timestamp) =>

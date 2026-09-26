@@ -17,7 +17,7 @@ const SortTableData = (tableData) =>
 // Adds the change against an earlier ranking of the same rows. Only fields
 // derived from the known rows are added, so no reported key reaches the page.
 // Zero and false values are left out to keep the page small.
-const CompareTableData = (entries, previous, reports, previousReports) => {
+const CompareTableData = (entries, previous) => {
   const before = Object.fromEntries(previous.map((entry) => [entry.domain, entry]));
   return entries.map((entry) => {
     const old = before[entry.domain];
@@ -28,16 +28,6 @@ const CompareTableData = (entries, previous, reports, previousReports) => {
     }
     if (entry.installations !== oldInstallations) {
       change.installations_change = entry.installations - oldInstallations;
-    }
-    // Percentage points, rounded to three decimals.
-    const share =
-      Math.round(
-        ((100 * entry.installations) / reports -
-          (100 * oldInstallations) / previousReports) *
-          1000
-      ) / 1000;
-    if (share !== 0) {
-      change.share_change = share;
     }
     if (old && old.idx !== entry.idx) {
       change.position_change = old.idx - entry.idx;

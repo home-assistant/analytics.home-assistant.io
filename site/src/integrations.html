@@ -28,17 +28,25 @@ title: Integrations
   }
   @media only screen and (max-width: 600px) {
     .change {
-      font-size: 0.75em;
+      font-size: 0.7em;
+      padding-left: 0;
+      padding-right: 4px;
     }
     .change.position {
       display: none;
+    }
+    .change .percent {
+      display: block;
+    }
+    th.change {
+      white-space: normal;
     }
   }
 </style>
 
 <script>
   {% if data.month_ago %}
-  const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details | compareIntegrations: data.month_ago, data.current.reports_integrations, integration_details | json }};
+  const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details | compareIntegrations: data.month_ago, integration_details | json }};
   const hasComparison = true;
   const comparedWith = "Compared with {{ data.month_ago.timestamp | formatDate }}";
   var customTableHeader = `
@@ -46,7 +54,7 @@ title: Integrations
       <th class="idx"></th>
       <th>Name</th>
       <th class="installations">Installations</th>
-      <th class="change" title="${comparedWith}, in percentage points of the installations sharing their integrations">± Share</th>
+      <th class="change" title="${comparedWith}">± Installations</th>
       <th class="change position" title="${comparedWith}">± Position</th>
     </tr>
   `;
@@ -59,6 +67,9 @@ title: Integrations
   const changeClass = (value) =>
     value > 0 ? "positive" : value < 0 ? "negative" : "neutral";
 
+  const formatChange = (value) =>
+    `${value > 0 ? "+" : ""}${Intl.NumberFormat().format(value)}`;
+
   const createChangeCells = (entry) => {
     if (!hasComparison) {
       return "";
@@ -69,16 +80,19 @@ title: Integrations
         <td class="change position positive"><span>NEW</span></td>
       `;
     }
-    const share = Math.round((entry.share_change || 0) * 100) / 100;
-    const shareStr =
-      share === 0 ? "—" : `${share > 0 ? "+" : ""}${share.toFixed(2)} pp`;
     const installations = entry.installations_change || 0;
-    const installationsStr = `${installations > 0 ? "+" : ""}${Intl.NumberFormat().format(installations)} installations`;
+    const previous = entry.installations - installations;
+    const percent =
+      previous > 0 ? ((100 * installations) / previous).toFixed(1) : null;
+    const installationsStr =
+      installations === 0
+        ? "—"
+        : `${formatChange(installations)}${percent === null ? "" : ` <span class="percent">(${installations > 0 ? "+" : ""}${percent}%)</span>`}`;
     const position = entry.position_change || 0;
     const positionStr =
       position > 0 ? `▲ ${position}` : position < 0 ? `▼ ${-position}` : "—";
     return `
-      <td class="change ${changeClass(share)}" title="${installationsStr}"><span>${shareStr}</span></td>
+      <td class="change ${changeClass(installations)}"><span>${installationsStr}</span></td>
       <td class="change position ${changeClass(position)}"><span>${positionStr}</span></td>
     `;
   };
@@ -108,8 +122,9 @@ title: Integrations
 </div>
 {% if data.month_ago %}
 <div class="note">
-  ± Share is the change in the share of installations using an integration, in
-  percentage points, compared with {{ data.month_ago.timestamp | formatDate }}.
+  ± Installations and ± Position compare with {{ data.month_ago.timestamp | formatDate }}.
+  In the same period, the number of installations sharing their integrations changed by
+  {{ data.current.reports_integrations | percentChange: data.month_ago.reports_integrations }}%.
   Installation counts cover the last 60 days, so a change shows up gradually.
 </div>
 {% endif %}
