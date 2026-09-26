@@ -125,6 +125,6 @@ title: Integrations
   ± Installations and ± Position compare with {{ data.month_ago.timestamp | formatDate }}.
   In the same period, the number of installations sharing their integrations changed by
   {{ data.current.reports_integrations | percentChange: data.month_ago.reports_integrations }}%.
-  Installation counts cover the last 60 days, so a change shows up gradually.
+  Installations that stop reporting are still counted for up to 60 days, so declines show up late.
 </div>
 {% endif %}

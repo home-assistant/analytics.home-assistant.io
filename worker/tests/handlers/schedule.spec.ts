@@ -388,7 +388,8 @@ describe("schedule handler", function () {
 
     const runFinalBatch = async (
       historyAgesDays: number[],
-      getHistory: (key: string) => Promise<unknown>
+      getHistory: (key: string) => Promise<unknown>,
+      storedAnalytics: unknown = null
     ) => {
       const event = MockedScheduledEvent({
         controller: { cron: ScheduledTask.PROCESS_QUEUE },
@@ -409,6 +410,9 @@ describe("schedule handler", function () {
           }
           if (key.startsWith(`${KV_PREFIX_HISTORY}:`)) {
             return getHistory(key);
+          }
+          if (key === KV_KEY_CORE_ANALYTICS) {
+            return storedAnalytics;
           }
           return null;
         }
@@ -453,15 +457,26 @@ describe("schedule handler", function () {
       expect(stored.month_ago).toBeUndefined();
     });
 
-    it("still stores the day when the lookup fails", async () => {
+    it("prefers an older snapshot over a closer one that is too young", async () => {
+      const getHistory = jest.fn(async () => snapshot);
+      const { historyKeys } = await runFinalBatch([40, 24], getHistory);
+
+      expect(getHistory).toHaveBeenCalledWith(historyKeys[0]);
+    });
+
+    it("keeps the stored snapshot and the day when the lookup fails", async () => {
       const error = new SyntaxError("corrupt history");
-      const { stored } = await runFinalBatch([30], async () => {
-        throw error;
-      });
+      const previous = { timestamp: 1, ...snapshot };
+      const { stored } = await runFinalBatch(
+        [30],
+        async () => {
+          throw error;
+        },
+        { schema_version: SCHEMA_VERSION_ANALYTICS, month_ago: previous }
+      );
 
       expect(MockSentry.captureException).toHaveBeenCalledWith(error);
-      expect(stored).toBeDefined();
-      expect(stored.month_ago).toBeUndefined();
+      expect(stored.month_ago).toEqual(previous);
     });
   });
 });

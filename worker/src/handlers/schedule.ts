@@ -364,13 +364,14 @@ async function findMonthAgo(
     const ts = Number(entry.name.slice(prefixLen));
     if (
       Number.isFinite(ts) &&
+      timestamp - ts >= MONTH_AGO_MIN_AGE_MS &&
       (closest === undefined ||
         Math.abs(ts - target) < Math.abs(closest.ts - target))
     ) {
       closest = { name: entry.name, ts };
     }
   }
-  if (closest === undefined || timestamp - closest.ts < MONTH_AGO_MIN_AGE_MS) {
+  if (closest === undefined) {
     return undefined;
   }
 
