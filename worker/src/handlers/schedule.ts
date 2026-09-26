@@ -11,6 +11,7 @@ import {
   KV_PREFIX_HISTORY,
   KV_PREFIX_UUID,
   ListEntry,
+  MonthAgoData,
   SCHEMA_VERSION_QUEUE,
   Queue,
   QueueData,
@@ -298,7 +299,20 @@ async function processQueue(
     const timestampString = String(timestamp);
 
     const queue_data = processQueueData(queue.data);
+
+    // Looked up before reading the stored analytics, so the read-modify-write
+    // window shared with UPDATE_HISTORY does not grow. The comparison is
+    // optional: a failed lookup keeps the stored snapshot, no candidate clears it.
+    let monthAgo: MonthAgoData | undefined | null = null;
+    try {
+      monthAgo = await findMonthAgo(event, timestamp);
+    } catch (err) {
+      sentry.captureException(err);
+    }
     const storedAnalytics = await getAnalyticsData(event);
+    if (monthAgo !== null) {
+      storedAnalytics.month_ago = monthAgo;
+    }
 
     storedAnalytics.current = {
       ...queue_data,
@@ -331,6 +345,52 @@ async function processQueue(
   }
   sentry.addBreadcrumb({ message: "Process complete" });
   await event.env.KV.put(KV_KEY_QUEUE, JSON.stringify(queue));
+}
+
+const MONTH_AGO_TARGET_MS = 30 * 24 * 60 * 60 * 1000;
+// A snapshot younger than this is no month-ago comparison, e.g. on a fresh namespace.
+const MONTH_AGO_MIN_AGE_MS = 25 * 24 * 60 * 60 * 1000;
+
+// Finds the history entry closest to 30 days before timestamp. Costs one KV
+// read plus one KV list call per 1000 history keys.
+async function findMonthAgo(
+  event: ScheduledWorkerEvent,
+  timestamp: number
+): Promise<MonthAgoData | undefined> {
+  const target = timestamp - MONTH_AGO_TARGET_MS;
+  const prefixLen = KV_PREFIX_HISTORY.length + 1; // "history:".length
+  let closest: { name: string; ts: number } | undefined;
+  for (const entry of await listKV(event, KV_PREFIX_HISTORY)) {
+    const ts = Number(entry.name.slice(prefixLen));
+    if (
+      Number.isFinite(ts) &&
+      timestamp - ts >= MONTH_AGO_MIN_AGE_MS &&
+      (closest === undefined ||
+        Math.abs(ts - target) < Math.abs(closest.ts - target))
+    ) {
+      closest = { name: entry.name, ts };
+    }
+  }
+  if (closest === undefined) {
+    return undefined;
+  }
+
+  const entry = await event.env.KV.get<{
+    integrations: Record<string, number>;
+    reports_integrations: number;
+  }>(closest.name, "json");
+  if (
+    !entry?.integrations ||
+    Object.keys(entry.integrations).length === 0 ||
+    !entry.reports_integrations
+  ) {
+    return undefined;
+  }
+  return {
+    timestamp: closest.ts,
+    integrations: entry.integrations,
+    reports_integrations: entry.reports_integrations,
+  };
 }
 
 async function listKV(

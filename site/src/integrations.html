@@ -3,24 +3,116 @@ layout: table
 title: Integrations
 ---
 
+<style>
+  .change {
+    --change-up: #2e7d32;
+    --change-down: #c62828;
+    text-align: right;
+    white-space: nowrap;
+    font-size: 0.85em;
+  }
+  @media (prefers-color-scheme: dark) {
+    .change {
+      --change-up: #81c784;
+      --change-down: #e57373;
+    }
+  }
+  .change.positive {
+    color: var(--change-up);
+  }
+  .change.negative {
+    color: var(--change-down);
+  }
+  .change.neutral {
+    color: var(--secondary-text-color);
+  }
+  @media only screen and (max-width: 600px) {
+    .change {
+      font-size: 0.7em;
+      padding-left: 0;
+      padding-right: 4px;
+    }
+    .change.position {
+      display: none;
+    }
+    .change .percent {
+      display: block;
+    }
+    th.change {
+      white-space: normal;
+    }
+  }
+</style>
+
 <script>
+  {% if data.month_ago %}
+  const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details | compareIntegrations: data.month_ago, integration_details | json }};
+  const hasComparison = true;
+  const comparedWith = "Compared with {{ data.month_ago.timestamp | formatDate }}";
+  var customTableHeader = `
+    <tr class="table-header">
+      <th class="idx"></th>
+      <th>Name</th>
+      <th class="installations">Installations</th>
+      <th class="change" title="${comparedWith}">± Installations</th>
+      <th class="change position" title="${comparedWith}">± Position</th>
+    </tr>
+  `;
+  {% else %}
+  const hasComparison = false;
   const tableEntries = {{ data.current.integrations | sortIntegrations: integration_details | json }};
+  {% endif %}
   const reportsIntegrations = Number({{ data.current.reports_integrations }});
-  const createTableRow = (entry) =>  `
-  <tr>
-    <td class="idx">${entry.idx}</td>
-    <td>
-      <a title="Documentation" href="https://www.home-assistant.io/integrations/${entry.domain}" target="_blank">
-        <img src="https://brands.home-assistant.io/_/${entry.domain}/${darkMode ? 'dark_' : ''}icon.png">
-        <span>${entry.name}</span>
-      </a>
-    </td>
-    <td class="installations">
-      <span>${Intl.NumberFormat().format(entry.installations)}</span>
-      <span>(${((100 * entry.installations) / reportsIntegrations).toFixed(1)}%)</span>
-    </td>
-  </tr>
-  `
+
+  const changeClass = (value) =>
+    value > 0 ? "positive" : value < 0 ? "negative" : "neutral";
+
+  const formatChange = (value) =>
+    `${value > 0 ? "+" : ""}${Intl.NumberFormat().format(value)}`;
+
+  const createChangeCells = (entry) => {
+    if (!hasComparison) {
+      return "";
+    }
+    if (entry.is_new) {
+      return `
+        <td class="change positive"><span>NEW</span></td>
+        <td class="change position positive"><span>NEW</span></td>
+      `;
+    }
+    const installations = entry.installations_change || 0;
+    const previous = entry.installations - installations;
+    const percent =
+      previous > 0 ? ((100 * installations) / previous).toFixed(1) : null;
+    const installationsStr =
+      installations === 0
+        ? "—"
+        : `${formatChange(installations)}${percent === null ? "" : ` <span class="percent">(${installations > 0 ? "+" : ""}${percent}%)</span>`}`;
+    const position = entry.position_change || 0;
+    const positionStr =
+      position > 0 ? `▲ ${position}` : position < 0 ? `▼ ${-position}` : "—";
+    return `
+      <td class="change ${changeClass(installations)}"><span>${installationsStr}</span></td>
+      <td class="change position ${changeClass(position)}"><span>${positionStr}</span></td>
+    `;
+  };
+
+  const createTableRow = (entry) => `
+    <tr>
+      <td class="idx">${entry.idx}</td>
+      <td>
+        <a title="Documentation" href="https://www.home-assistant.io/integrations/${entry.domain}" target="_blank">
+          <img src="https://brands.home-assistant.io/_/${entry.domain}/${darkMode ? 'dark_' : ''}icon.png">
+          <span>${entry.name}</span>
+        </a>
+      </td>
+      <td class="installations">
+        <span>${Intl.NumberFormat().format(entry.installations)}</span>
+        <span>(${((100 * entry.installations) / reportsIntegrations).toFixed(1)}%)</span>
+      </td>
+      ${createChangeCells(entry)}
+    </tr>
+  `;
 </script>
 
 <div class="note">
@@ -28,3 +120,11 @@ title: Integrations
   ({{ data.current.extended_data_from | calculatePercentage: data.current.reports_integrations }}%)
   installations have chosen to share their used integrations
 </div>
+{% if data.month_ago %}
+<div class="note">
+  ± Installations and ± Position compare with {{ data.month_ago.timestamp | formatDate }}.
+  In the same period, the number of installations sharing their integrations changed by
+  {{ data.current.reports_integrations | percentChange: data.month_ago.reports_integrations }}%.
+  Installations that stop reporting are still counted for up to 60 days, so declines show up late.
+</div>
+{% endif %}
