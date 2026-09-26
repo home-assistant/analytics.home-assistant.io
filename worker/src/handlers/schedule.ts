@@ -299,14 +299,19 @@ async function processQueue(
     const timestampString = String(timestamp);
 
     const queue_data = processQueueData(queue.data);
-    const storedAnalytics = await getAnalyticsData(event);
 
-    // The comparison is optional, so a failed lookup keeps the previous
-    // snapshot instead of blocking the daily store.
+    // Looked up before reading the stored analytics, so the read-modify-write
+    // window shared with UPDATE_HISTORY does not grow. The comparison is
+    // optional: a failed lookup keeps the stored snapshot, no candidate clears it.
+    let monthAgo: MonthAgoData | undefined | null = null;
     try {
-      storedAnalytics.month_ago = await findMonthAgo(event, timestamp);
+      monthAgo = await findMonthAgo(event, timestamp);
     } catch (err) {
       sentry.captureException(err);
+    }
+    const storedAnalytics = await getAnalyticsData(event);
+    if (monthAgo !== null) {
+      storedAnalytics.month_ago = monthAgo;
     }
 
     storedAnalytics.current = {
