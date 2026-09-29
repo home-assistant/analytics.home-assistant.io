@@ -29,6 +29,7 @@ describe("schedule handler", function () {
           ? {
               "1234": { domain: "hacs_valid" },
               "5678": { domain: null },
+              "9012": { domain: "hacs_valid" },
             }
           : {
               core: ["core_valid"],

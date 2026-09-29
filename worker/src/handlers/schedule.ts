@@ -380,9 +380,13 @@ async function getHacsDomains(
       }
     );
 
-    const domains = Object.values(hacsIntegrationsJson)
-      .map((repository) => repository.domain)
-      .filter((domain): domain is string => !!domain);
+    const domains = Array.from(
+      new Set(
+        Object.values(hacsIntegrationsJson)
+          .map((repository) => repository.domain)
+          .filter((domain): domain is string => !!domain)
+      )
+    );
 
     await event.env.KV.put(
       KV_KEY_HACS_DOMAINS,
