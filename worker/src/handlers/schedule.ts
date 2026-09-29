@@ -27,6 +27,8 @@ import {
   BrandsDomainsResponse,
   CachedHacsDomains,
   HACS_DOMAINS_MAX_AGE,
+  HACS_DOMAINS_RETRY_DELAY,
+  HACS_FETCH_TIMEOUT,
   HACS_INTEGRATIONS_URL,
   HacsIntegrationsResponse,
   VERSION_URL,
@@ -355,7 +357,8 @@ async function fetchExternalData(
 
 // The domains of the HACS default repositories, refreshed at most once a day.
 // HACS is not ours and it only widens the set of domains we recognise, so a
-// failure to refresh falls back to the cached list rather than failing the run.
+// failed or slow refresh falls back to the cached list rather than failing or
+// holding up the run, and is retried an hour later.
 async function getHacsDomains(
   event: ScheduledWorkerEvent,
   sentry: Toucan
@@ -366,9 +369,15 @@ async function getHacsDomains(
   );
   const timestamp = new Date().getTime();
 
-  if (cached && timestamp - cached.last_updated < HACS_DOMAINS_MAX_AGE) {
+  if (cached && timestamp < cached.refresh_after) {
     return cached.domains;
   }
+
+  const storeDomains = (domains: string[], refreshAfter: number) =>
+    event.env.KV.put(
+      KV_KEY_HACS_DOMAINS,
+      JSON.stringify({ refresh_after: refreshAfter, domains })
+    );
 
   try {
     const hacsIntegrationsJson = await fetchJson<HacsIntegrationsResponse>(
@@ -377,6 +386,7 @@ async function getHacsDomains(
       {
         sentryExtra: "hacsIntegrationsResponse",
         errorMessage: "Could not get integration list from HACS",
+        signal: AbortSignal.timeout(HACS_FETCH_TIMEOUT),
       }
     );
 
@@ -388,16 +398,15 @@ async function getHacsDomains(
       )
     );
 
-    await event.env.KV.put(
-      KV_KEY_HACS_DOMAINS,
-      JSON.stringify({ last_updated: timestamp, domains })
-    );
+    await storeDomains(domains, timestamp + HACS_DOMAINS_MAX_AGE);
 
     return domains;
   } catch (e: any) {
     const fallback = cached ? "the cached list" : "brands only";
     sentry.captureMessage(`${e?.message} (using ${fallback})`, "warning");
-    return cached?.domains || [];
+    const domains = cached?.domains || [];
+    await storeDomains(domains, timestamp + HACS_DOMAINS_RETRY_DELAY);
+    return domains;
   }
 }
 

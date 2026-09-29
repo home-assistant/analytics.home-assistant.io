@@ -9,9 +9,10 @@ export const fetchJson = async <T>(
   options: {
     sentryExtra: string;
     errorMessage: string;
+    signal?: AbortSignal;
   }
 ): Promise<T> => {
-  const response = await fetch(url);
+  const response = await fetch(url, { signal: options.signal });
 
   sentry.setExtra(options.sentryExtra, response);
 
