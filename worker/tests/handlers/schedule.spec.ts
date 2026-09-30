@@ -5,6 +5,7 @@ import {
   KV_KEY_CORE_ANALYTICS,
   KV_KEY_CUSTOM_INTEGRATIONS,
   KV_KEY_QUEUE,
+  KV_PREFIX_HISTORY,
   ScheduledTask,
   SCHEMA_VERSION_ANALYTICS,
   SCHEMA_VERSION_QUEUE,
@@ -258,6 +259,7 @@ describe("schedule handler", function () {
       const event = MockedScheduledEvent({
         controller: { cron: ScheduledTask.PROCESS_QUEUE },
       });
+      const historyKey = `${KV_PREFIX_HISTORY}:${new Date().getTime() - 30 * 24 * 60 * 60 * 1000}`;
       (event.env.KV.get as jest.Mock).mockImplementation(
         async (key: string) => {
           if (key === KV_KEY_QUEUE) {
@@ -268,6 +270,13 @@ describe("schedule handler", function () {
                 name: `uuid:${i}`,
               })),
               data: createQueueData(),
+            };
+          }
+
+          if (key === historyKey) {
+            return {
+              integrations: { light: 1000, switch: 500 },
+              reports_integrations: 400000,
             };
           }
 
@@ -285,10 +294,22 @@ describe("schedule handler", function () {
         }
       );
 
+      (event.env.KV.list as jest.Mock).mockImplementation(
+        async (data: { prefix: string; cursor?: string }) => ({
+          keys:
+            data.prefix === KV_PREFIX_HISTORY
+              ? [{ name: historyKey }]
+              : [],
+          list_complete: true,
+        })
+      );
+
       await handleSchedule(event, MockSentry);
 
       expect(event.env.KV.get).toHaveBeenCalledWith(KV_KEY_QUEUE, "json");
-      expect(event.env.KV.list).not.toHaveBeenCalled();
+      expect(event.env.KV.list).toHaveBeenCalledWith(
+        expect.objectContaining({ prefix: KV_PREFIX_HISTORY })
+      );
       expect(MockSentry.setTag).toHaveBeenCalledWith(
         "scheduled-task",
         "PROCESS_QUEUE"
@@ -305,6 +326,14 @@ describe("schedule handler", function () {
       expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_CORE_ANALYTICS,
         expect.not.stringContaining("invalid_board")
+      );
+      expect(event.env.KV.put).toHaveBeenCalledWith(
+        KV_KEY_CORE_ANALYTICS,
+        expect.stringContaining('"month_ago"')
+      );
+      expect(event.env.KV.put).toHaveBeenCalledWith(
+        KV_KEY_CORE_ANALYTICS,
+        expect.stringContaining('"reports_integrations":400000')
       );
       expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_ADDONS,
@@ -347,6 +376,107 @@ describe("schedule handler", function () {
       expect(MockSentry.addBreadcrumb).toHaveBeenCalledWith({
         message: "Process complete, waiting for reset",
       });
+    });
+  });
+
+  describe("PROCESS_QUEUE month_ago", function () {
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const snapshot = {
+      integrations: { light: 1000, switch: 500 },
+      reports_integrations: 400000,
+    };
+
+    const runFinalBatch = async (
+      historyAgesDays: number[],
+      getHistory: (key: string) => Promise<unknown>,
+      storedAnalytics: unknown = null
+    ) => {
+      const event = MockedScheduledEvent({
+        controller: { cron: ScheduledTask.PROCESS_QUEUE },
+      });
+      const now = new Date().getTime();
+      const historyKeys = historyAgesDays.map(
+        (days) => `${KV_PREFIX_HISTORY}:${now - days * DAY_MS}`
+      );
+      (event.env.KV.get as jest.Mock).mockImplementation(
+        async (key: string) => {
+          if (key === KV_KEY_QUEUE) {
+            return {
+              schema_version: SCHEMA_VERSION_QUEUE,
+              process_complete: false,
+              entries: [],
+              data: createQueueData(),
+            };
+          }
+          if (key.startsWith(`${KV_PREFIX_HISTORY}:`)) {
+            return getHistory(key);
+          }
+          if (key === KV_KEY_CORE_ANALYTICS) {
+            return storedAnalytics;
+          }
+          return null;
+        }
+      );
+      (event.env.KV.list as jest.Mock).mockImplementation(
+        async (data: { prefix: string }) => ({
+          keys:
+            data.prefix === KV_PREFIX_HISTORY
+              ? historyKeys.map((name) => ({ name }))
+              : [],
+          list_complete: true,
+        })
+      );
+
+      await handleSchedule(event, MockSentry);
+
+      const stored = (event.env.KV.put as jest.Mock).mock.calls.find(
+        ([key]) => key === KV_KEY_CORE_ANALYTICS
+      );
+      return { historyKeys, stored: stored && JSON.parse(stored[1]) };
+    };
+
+    it("uses the history entry closest to 30 days ago", async () => {
+      const getHistory = jest.fn(async () => snapshot);
+      const { historyKeys, stored } = await runFinalBatch(
+        [45, 31, 20],
+        getHistory
+      );
+
+      expect(getHistory).toHaveBeenCalledWith(historyKeys[1]);
+      expect(stored.month_ago).toEqual({
+        timestamp: Number(historyKeys[1].split(":")[1]),
+        ...snapshot,
+      });
+    });
+
+    it("skips a snapshot younger than 25 days", async () => {
+      const getHistory = jest.fn(async () => snapshot);
+      const { stored } = await runFinalBatch([3], getHistory);
+
+      expect(getHistory).not.toHaveBeenCalled();
+      expect(stored.month_ago).toBeUndefined();
+    });
+
+    it("prefers an older snapshot over a closer one that is too young", async () => {
+      const getHistory = jest.fn(async () => snapshot);
+      const { historyKeys } = await runFinalBatch([40, 24], getHistory);
+
+      expect(getHistory).toHaveBeenCalledWith(historyKeys[0]);
+    });
+
+    it("keeps the stored snapshot and the day when the lookup fails", async () => {
+      const error = new SyntaxError("corrupt history");
+      const previous = { timestamp: 1, ...snapshot };
+      const { stored } = await runFinalBatch(
+        [30],
+        async () => {
+          throw error;
+        },
+        { schema_version: SCHEMA_VERSION_ANALYTICS, month_ago: previous }
+      );
+
+      expect(MockSentry.captureException).toHaveBeenCalledWith(error);
+      expect(stored.month_ago).toEqual(previous);
     });
   });
 });
