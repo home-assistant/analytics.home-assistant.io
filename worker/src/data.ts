@@ -12,7 +12,8 @@ export const KV_MAX_PROCESS_ENTRIES = 800;
 // refresh is retried hourly rather than on every run.
 export const HACS_DOMAINS_MAX_AGE = 86_400_000;
 export const HACS_DOMAINS_RETRY_DELAY = 3_600_000;
-export const HACS_FETCH_TIMEOUT = 10_000;
+
+export const FETCH_TIMEOUT = 10_000;
 
 export const SCHEMA_VERSION_QUEUE = 15;
 export const SCHEMA_VERSION_ANALYTICS = 4;

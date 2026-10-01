@@ -28,7 +28,6 @@ import {
   CachedHacsDomains,
   HACS_DOMAINS_MAX_AGE,
   HACS_DOMAINS_RETRY_DELAY,
-  HACS_FETCH_TIMEOUT,
   HACS_INTEGRATIONS_URL,
   HacsIntegrationsResponse,
   VERSION_URL,
@@ -386,7 +385,6 @@ async function getHacsDomains(
       {
         sentryExtra: "hacsIntegrationsResponse",
         errorMessage: "Could not get integration list from HACS",
-        signal: AbortSignal.timeout(HACS_FETCH_TIMEOUT),
       }
     );
 

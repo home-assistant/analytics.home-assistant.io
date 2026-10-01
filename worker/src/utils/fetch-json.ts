@@ -1,4 +1,5 @@
 import { Toucan } from "toucan-js";
+import { FETCH_TIMEOUT } from "../data";
 
 // Fetch a JSON document from one of the external sources we depend on.
 // Keeps the URL, the Sentry extra and the error message for a source together,
@@ -9,10 +10,11 @@ export const fetchJson = async <T>(
   options: {
     sentryExtra: string;
     errorMessage: string;
-    signal?: AbortSignal;
   }
 ): Promise<T> => {
-  const response = await fetch(url, { signal: options.signal });
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(FETCH_TIMEOUT),
+  });
 
   sentry.setExtra(options.sentryExtra, response);
 

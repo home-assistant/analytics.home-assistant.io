@@ -1,9 +1,10 @@
 import {
+  BRANDS_DOMAINS_URL,
   createQueueData,
   createQueueDefaults,
+  FETCH_TIMEOUT,
   HACS_DOMAINS_MAX_AGE,
   HACS_DOMAINS_RETRY_DELAY,
-  HACS_FETCH_TIMEOUT,
   HACS_INTEGRATIONS_URL,
   KV_KEY_ADDONS,
   KV_KEY_CORE_ANALYTICS,
@@ -488,18 +489,11 @@ describe("schedule handler", function () {
       );
     });
 
-    it("HACS never answers - give up on it and use the cache", async () => {
-      const event = hacsCacheEvent({
-        refresh_after: new Date().getTime() - 1,
-        domains: ["hacs_valid"],
-      });
-      // The time limit runs out straight away rather than after the real delay.
-      const timeout = jest
-        .spyOn(AbortSignal, "timeout")
-        .mockImplementation(() => AbortSignal.abort());
+    // The time limit runs out straight away rather than after the real delay.
+    const neverAnswers = (silentUrl: string) => {
       (global as any).fetch = MockFetch = jest.fn(
         (url: string, init?: RequestInit) =>
-          url === HACS_INTEGRATIONS_URL
+          url === silentUrl
             ? new Promise((_, reject) => {
                 const signal = init?.signal;
                 if (signal?.aborted) reject(signal.reason);
@@ -507,17 +501,32 @@ describe("schedule handler", function () {
               })
             : Promise.resolve({
                 ok: true,
-                json: jest.fn(async () => ({
-                  core: ["core_valid"],
-                  custom: ["custom_valid"],
-                  hassos: { rpi: "" },
-                })),
+                json: jest.fn(async () =>
+                  url === HACS_INTEGRATIONS_URL
+                    ? { "1234": { domain: "hacs_valid" } }
+                    : {
+                        core: ["core_valid"],
+                        custom: ["custom_valid"],
+                        hassos: { rpi: "" },
+                      }
+                ),
               })
       );
+      return jest
+        .spyOn(AbortSignal, "timeout")
+        .mockImplementation(() => AbortSignal.abort());
+    };
+
+    it("HACS never answers - give up on it and use the cache", async () => {
+      const event = hacsCacheEvent({
+        refresh_after: new Date().getTime() - 1,
+        domains: ["hacs_valid"],
+      });
+      const timeout = neverAnswers(HACS_INTEGRATIONS_URL);
 
       try {
         await handleSchedule(event, MockSentry);
-        expect(timeout).toHaveBeenCalledWith(HACS_FETCH_TIMEOUT);
+        expect(timeout).toHaveBeenCalledWith(FETCH_TIMEOUT);
       } finally {
         timeout.mockRestore();
       }
@@ -530,6 +539,26 @@ describe("schedule handler", function () {
       expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_CUSTOM_INTEGRATIONS,
         bothCounted
+      );
+    });
+
+    it("Brands never answers - give up and fail the run", async () => {
+      const event = hacsCacheEvent({
+        refresh_after: new Date().getTime() + 60_000,
+        domains: ["hacs_valid"],
+      });
+      const timeout = neverAnswers(BRANDS_DOMAINS_URL);
+
+      try {
+        await handleSchedule(event, MockSentry);
+      } finally {
+        timeout.mockRestore();
+      }
+
+      expect(MockSentry.captureException).toHaveBeenCalledTimes(1);
+      expect(event.env.KV.put).not.toHaveBeenCalledWith(
+        KV_KEY_QUEUE,
+        expect.any(String)
       );
     });
 
