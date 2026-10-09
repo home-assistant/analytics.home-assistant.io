@@ -341,12 +341,8 @@ async function fetchExternalData(
   // brands no longer accepts new custom_integrations entries (HA 2026.3.0), so
   // the HACS default repositories are used as an additional source of domains.
   const knownDomains: Set<string> = new Set(
-    brandsDomainsJson.custom.concat(brandsDomainsJson.core)
+    brandsDomainsJson.custom.concat(brandsDomainsJson.core, hacsDomains)
   );
-
-  for (const domain of hacsDomains) {
-    knownDomains.add(domain);
-  }
 
   return {
     knownDomains,
@@ -372,11 +368,19 @@ async function getHacsDomains(
     return cached.domains;
   }
 
-  const storeDomains = (domains: string[], refreshAfter: number) =>
-    event.env.KV.put(
-      KV_KEY_HACS_DOMAINS,
-      JSON.stringify({ refresh_after: refreshAfter, domains })
-    );
+  const storeDomains = async (domains: string[], refreshAfter: number) => {
+    try {
+      await event.env.KV.put(
+        KV_KEY_HACS_DOMAINS,
+        JSON.stringify({ refresh_after: refreshAfter, domains })
+      );
+    } catch (e: any) {
+      sentry.captureMessage(
+        `Could not cache the HACS domains: ${e?.message}`,
+        "warning"
+      );
+    }
+  };
 
   try {
     const hacsIntegrationsJson = await fetchJson<HacsIntegrationsResponse>(

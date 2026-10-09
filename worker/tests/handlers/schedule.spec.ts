@@ -489,6 +489,56 @@ describe("schedule handler", function () {
       );
     });
 
+    const hacsCacheWriteFails = (event) => {
+      (event.env.KV.put as jest.Mock).mockImplementation(async (key: string) => {
+        if (key === KV_KEY_HACS_DOMAINS) {
+          throw Error("KV write failed");
+        }
+      });
+    };
+
+    it("Saving refreshed HACS domains fails - count them anyway", async () => {
+      const event = hacsCacheEvent({
+        refresh_after: new Date().getTime() - 1,
+        domains: [],
+      });
+      hacsCacheWriteFails(event);
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockSentry.captureException).not.toHaveBeenCalled();
+      expect(MockSentry.captureMessage).toHaveBeenCalledTimes(1);
+      expect(MockSentry.captureMessage).toHaveBeenCalledWith(
+        "Could not cache the HACS domains: KV write failed",
+        "warning"
+      );
+      expect(event.env.KV.put).toHaveBeenCalledWith(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        bothCounted
+      );
+    });
+
+    it("HACS is down and saving the retry time fails - keep processing", async () => {
+      const event = hacsCacheEvent({
+        refresh_after: new Date().getTime() - 1,
+        domains: ["hacs_valid"],
+      });
+      hacsDown();
+      hacsCacheWriteFails(event);
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockSentry.captureException).not.toHaveBeenCalled();
+      expect(MockSentry.captureMessage).toHaveBeenCalledWith(
+        "Could not cache the HACS domains: KV write failed",
+        "warning"
+      );
+      expect(event.env.KV.put).toHaveBeenCalledWith(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        bothCounted
+      );
+    });
+
     // The time limit runs out straight away rather than after the real delay.
     const neverAnswers = (silentUrl: string) => {
       (global as any).fetch = MockFetch = jest.fn(
