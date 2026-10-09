@@ -350,25 +350,38 @@ async function fetchExternalData(
   };
 }
 
-// The domains of the HACS default repositories, refreshed at most once a day.
+// The domains of the HACS default repositories, cached in KV and refreshed daily.
 // HACS is not ours and it only widens the set of domains we recognise, so a
-// failed or slow refresh falls back to the cached list rather than failing or
-// holding up the run, and is retried an hour later.
+// failed or slow refresh falls back to the cached list (or to brands alone)
+// rather than failing or holding up the run, and is retried an hour later.
+// When the cache cannot be read and the download fails too, nothing is saved,
+// so a good cache is never replaced with an empty list.
 async function getHacsDomains(
   event: ScheduledWorkerEvent,
   sentry: Toucan
 ): Promise<string[]> {
-  const cached = await event.env.KV.get<CachedHacsDomains>(
-    KV_KEY_HACS_DOMAINS,
-    "json"
-  );
+  let cached: CachedHacsDomains | null;
+  let readFailed = false;
+  try {
+    cached = await event.env.KV.get<CachedHacsDomains>(
+      KV_KEY_HACS_DOMAINS,
+      "json"
+    );
+  } catch (e: any) {
+    sentry.captureMessage(
+      `Could not read the cached HACS domains: ${e?.message}`,
+      "warning"
+    );
+    cached = null;
+    readFailed = true;
+  }
   const timestamp = new Date().getTime();
 
   if (cached && timestamp < cached.refresh_after) {
     return cached.domains;
   }
 
-  const storeDomains = async (domains: string[], refreshAfter: number) => {
+  async function storeDomains(domains: string[], refreshAfter: number) {
     try {
       await event.env.KV.put(
         KV_KEY_HACS_DOMAINS,
@@ -380,7 +393,7 @@ async function getHacsDomains(
         "warning"
       );
     }
-  };
+  }
 
   try {
     const hacsIntegrationsJson = await fetchJson<HacsIntegrationsResponse>(
@@ -407,7 +420,9 @@ async function getHacsDomains(
     const fallback = cached ? "the cached list" : "brands only";
     sentry.captureMessage(`${e?.message} (using ${fallback})`, "warning");
     const domains = cached?.domains || [];
-    await storeDomains(domains, timestamp + HACS_DOMAINS_RETRY_DELAY);
+    if (!readFailed) {
+      await storeDomains(domains, timestamp + HACS_DOMAINS_RETRY_DELAY);
+    }
     return domains;
   }
 }

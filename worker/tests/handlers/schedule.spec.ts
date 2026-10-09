@@ -14,6 +14,7 @@ import {
   ScheduledTask,
   SCHEMA_VERSION_ANALYTICS,
   SCHEMA_VERSION_QUEUE,
+  VERSION_URL,
 } from "../../src/data";
 import { handleSchedule } from "../../src/handlers/schedule";
 import { MockedConsole, MockedScheduledEvent, MockedSentry } from "../mock";
@@ -367,9 +368,6 @@ describe("schedule handler", function () {
       expect(event.env.KV.put).toHaveBeenCalledTimes(6);
     });
 
-    // The HACS domain list is refreshed at most once a day and cached in KV,
-    // so these cover the cache being fresh, and HACS being unreachable with
-    // and without something cached to fall back on.
     const hacsCacheEvent = (hacsCache: any) => {
       const event = MockedScheduledEvent({
         controller: { cron: ScheduledTask.PROCESS_QUEUE },
@@ -539,6 +537,55 @@ describe("schedule handler", function () {
       );
     });
 
+    const hacsCacheReadFails = (event) => {
+      const get = (event.env.KV.get as jest.Mock).getMockImplementation()!;
+      (event.env.KV.get as jest.Mock).mockImplementation(
+        async (key: string, type: string) => {
+          if (key === KV_KEY_HACS_DOMAINS) {
+            throw Error("KV read failed");
+          }
+          return get(key, type);
+        }
+      );
+    };
+
+    it("Reading the cached HACS domains fails - refresh from HACS and keep processing", async () => {
+      const event = hacsCacheEvent(null);
+      hacsCacheReadFails(event);
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockSentry.captureException).not.toHaveBeenCalled();
+      expect(MockSentry.captureMessage).toHaveBeenCalledTimes(1);
+      expect(MockSentry.captureMessage).toHaveBeenCalledWith(
+        "Could not read the cached HACS domains: KV read failed",
+        "warning"
+      );
+      expect(storedHacsCache(event).domains).toEqual(["hacs_valid"]);
+      expect(event.env.KV.put).toHaveBeenCalledWith(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        bothCounted
+      );
+    });
+
+    it("Reading the cached HACS domains fails and HACS is down - keep the cache as it is", async () => {
+      const event = hacsCacheEvent(null);
+      hacsCacheReadFails(event);
+      hacsDown();
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockSentry.captureException).not.toHaveBeenCalled();
+      expect(event.env.KV.put).not.toHaveBeenCalledWith(
+        KV_KEY_HACS_DOMAINS,
+        expect.any(String)
+      );
+      expect(event.env.KV.put).toHaveBeenCalledWith(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        '{"custom_valid":{"total":1,"versions":{"1.2.3":1}}}'
+      );
+    });
+
     // The time limit runs out straight away rather than after the real delay.
     const neverAnswers = (silentUrl: string) => {
       (global as any).fetch = MockFetch = jest.fn(
@@ -606,6 +653,31 @@ describe("schedule handler", function () {
       }
 
       expect(MockSentry.captureException).toHaveBeenCalledTimes(1);
+      expect(event.env.KV.put).not.toHaveBeenCalledWith(
+        KV_KEY_QUEUE,
+        expect.any(String)
+      );
+    });
+
+    it("Version is down - fail the run", async () => {
+      const event = hacsCacheEvent({
+        refresh_after: new Date().getTime() + 60_000,
+        domains: ["hacs_valid"],
+      });
+      (global as any).fetch = MockFetch = jest.fn(async (url: string) => ({
+        ok: url !== VERSION_URL,
+        json: jest.fn(async () => ({
+          core: ["core_valid"],
+          custom: ["custom_valid"],
+          hassos: { rpi: "" },
+        })),
+      }));
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockSentry.captureException).toHaveBeenCalledWith(
+        Error("Could not get board list from version")
+      );
       expect(event.env.KV.put).not.toHaveBeenCalledWith(
         KV_KEY_QUEUE,
         expect.any(String)

@@ -1,9 +1,6 @@
 import { Toucan } from "toucan-js";
 import { FETCH_TIMEOUT } from "../data";
 
-// Fetch a JSON document from one of the external sources we depend on.
-// Keeps the URL, the Sentry extra and the error message for a source together,
-// instead of spreading them over separate fetch/check/parse blocks.
 export const fetchJson = async <T>(
   sentry: Toucan,
   url: string,
@@ -19,7 +16,7 @@ export const fetchJson = async <T>(
   sentry.setExtra(options.sentryExtra, response);
 
   if (!response.ok) {
-    throw Error(options.errorMessage);
+    throw new Error(options.errorMessage);
   }
 
   return response.json<T>();
