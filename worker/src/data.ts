@@ -100,9 +100,8 @@ export interface HacsIntegrationsResponse {
   [repository_id: string]: { domain?: string | null };
 }
 
-export interface CachedHacsDomains {
+export interface HacsDomainsMetadata {
   refresh_after: number;
-  domains: string[];
 }
 
 export interface CfRequest extends Request {

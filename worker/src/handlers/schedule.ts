@@ -25,7 +25,7 @@ import {
   KV_KEY_HACS_DOMAINS,
   BRANDS_DOMAINS_URL,
   BrandsDomainsResponse,
-  CachedHacsDomains,
+  HacsDomainsMetadata,
   HACS_DOMAINS_MAX_AGE,
   HACS_DOMAINS_RETRY_DELAY,
   HACS_INTEGRATIONS_URL,
@@ -354,39 +354,52 @@ async function fetchExternalData(
 // HACS is not ours and it only widens the set of domains we recognise, so a
 // failed or slow refresh falls back to the cached list (or to brands alone)
 // rather than failing or holding up the run, and is retried an hour later.
-// When the cache cannot be read and the download fails too, nothing is saved,
-// so a good cache is never replaced with an empty list.
+// The refresh time lives in the key's metadata so it can be read even when the
+// list cannot. A list that cannot be parsed is treated as missing and gets
+// overwritten, but when the cache cannot be read at all and the download fails
+// too, nothing is saved, so a good cache is never replaced with an empty list.
 async function getHacsDomains(
   event: ScheduledWorkerEvent,
   sentry: Toucan
 ): Promise<string[]> {
-  let cached: CachedHacsDomains | null;
+  let cached: { domains: string[]; refreshAfter?: number } | null = null;
   let readFailed = false;
   try {
-    cached = await event.env.KV.get<CachedHacsDomains>(
-      KV_KEY_HACS_DOMAINS,
-      "json"
-    );
+    const { value, metadata } =
+      await event.env.KV.getWithMetadata<HacsDomainsMetadata>(
+        KV_KEY_HACS_DOMAINS,
+        "text"
+      );
+    if (value !== null) {
+      const domains = parseHacsDomains(value);
+      if (domains) {
+        cached = { domains, refreshAfter: metadata?.refresh_after };
+      } else {
+        sentry.captureMessage(
+          "The cached HACS domains are malformed (refreshing from HACS)",
+          "warning"
+        );
+      }
+    }
   } catch (e: any) {
     sentry.captureMessage(
       `Could not read the cached HACS domains: ${e?.message}`,
       "warning"
     );
-    cached = null;
     readFailed = true;
   }
   const timestamp = new Date().getTime();
 
-  if (cached && timestamp < cached.refresh_after) {
+  if (cached?.refreshAfter && timestamp < cached.refreshAfter) {
     return cached.domains;
   }
 
   async function storeDomains(domains: string[], refreshAfter: number) {
     try {
-      await event.env.KV.put(
-        KV_KEY_HACS_DOMAINS,
-        JSON.stringify({ refresh_after: refreshAfter, domains })
-      );
+      const metadata: HacsDomainsMetadata = { refresh_after: refreshAfter };
+      await event.env.KV.put(KV_KEY_HACS_DOMAINS, JSON.stringify(domains), {
+        metadata,
+      });
     } catch (e: any) {
       sentry.captureMessage(
         `Could not cache the HACS domains: ${e?.message}`,
@@ -424,6 +437,18 @@ async function getHacsDomains(
       await storeDomains(domains, timestamp + HACS_DOMAINS_RETRY_DELAY);
     }
     return domains;
+  }
+}
+
+function parseHacsDomains(value: string): string[] | null {
+  try {
+    const domains = JSON.parse(value);
+    return Array.isArray(domains) &&
+      domains.every((domain) => typeof domain === "string")
+      ? domains
+      : null;
+  } catch {
+    return null;
   }
 }
 
