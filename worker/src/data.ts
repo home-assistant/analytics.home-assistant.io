@@ -8,8 +8,7 @@ export const KV_PREFIX_UUID = "uuid";
 export const KV_MAX_PROCESS_ENTRIES = 800;
 
 // The HACS default repository list changes a few times a day and the queue is
-// processed every minute, so the list is cached in KV and refreshed daily, and
-// a failed refresh is retried after an hour.
+// processed every minute, so the list is cached in KV.
 export const HACS_DOMAINS_MAX_AGE = 86_400_000;
 export const HACS_DOMAINS_RETRY_DELAY = 3_600_000;
 

@@ -353,11 +353,10 @@ async function fetchExternalData(
 // The domains of the HACS default repositories, cached in KV and refreshed daily.
 // HACS is not ours and it only widens the set of domains we recognise, so a
 // failed or slow refresh falls back to the cached list (or to brands alone)
-// rather than failing or holding up the run, and is retried an hour later.
-// The refresh time lives in the key's metadata so it can be read even when the
-// list cannot. A list that cannot be parsed is treated as missing and gets
-// overwritten, but when the cache cannot be read at all and the download fails
-// too, nothing is saved, so a good cache is never replaced with an empty list.
+// rather than failing the run. A list that cannot be parsed is treated as
+// missing and gets overwritten, but when the cache cannot be read at all and
+// the download fails too, nothing is saved, so a good cache is never replaced
+// with an empty list.
 async function getHacsDomains(
   event: ScheduledWorkerEvent,
   sentry: Toucan
