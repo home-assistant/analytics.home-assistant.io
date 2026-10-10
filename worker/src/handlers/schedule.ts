@@ -421,7 +421,10 @@ async function getHacsDomains(
       new Set(
         Object.values(hacsIntegrationsJson)
           .map((repository) => repository.domain)
-          .filter((domain): domain is string => !!domain)
+          .filter(
+            (domain): domain is string =>
+              typeof domain === "string" && domain !== ""
+          )
       )
     );
 

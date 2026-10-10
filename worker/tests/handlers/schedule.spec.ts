@@ -241,6 +241,10 @@ describe("schedule handler", function () {
         })
       );
 
+      (event.env.KV.getWithMetadata as jest.Mock).mockResolvedValue(
+        nothingCached
+      );
+
       await handleSchedule(event, MockSentry);
 
       expect(event.env.KV.get).toHaveBeenCalledWith(KV_KEY_QUEUE, "json");
@@ -251,6 +255,7 @@ describe("schedule handler", function () {
       );
 
       expect(event.env.KV.put).toHaveBeenCalledWith(KV_KEY_QUEUE, expect.any(String));
+      expect(MockSentry.captureMessage).not.toHaveBeenCalled();
       // The queue, plus the refreshed HACS domain cache.
       expect(hacsCacheWrites(event)).toHaveLength(1);
       expect(event.env.KV.put).toHaveBeenCalledTimes(2);
@@ -277,6 +282,10 @@ describe("schedule handler", function () {
         }
       );
 
+      (event.env.KV.getWithMetadata as jest.Mock).mockResolvedValue(
+        nothingCached
+      );
+
       await handleSchedule(event, MockSentry);
 
       expect(event.env.KV.get).toHaveBeenCalledWith(KV_KEY_QUEUE, "json");
@@ -290,6 +299,7 @@ describe("schedule handler", function () {
         KV_KEY_QUEUE,
         expect.stringContaining('"process_complete":false')
       );
+      expect(MockSentry.captureMessage).not.toHaveBeenCalled();
       // The queue, plus the refreshed HACS domain cache.
       expect(hacsCacheWrites(event)).toHaveLength(1);
       expect(event.env.KV.put).toHaveBeenCalledTimes(2);
@@ -573,6 +583,39 @@ describe("schedule handler", function () {
       expect(fetchedUrls()).toContain(HACS_INTEGRATIONS_URL);
       expect(MockSentry.captureMessage).not.toHaveBeenCalled();
       expect(storedHacsCache(event).domains).toEqual(["hacs_valid"]);
+    });
+
+    it("HACS lists domains that are not text - skip them so the saved list can be read back", async () => {
+      const event = hacsCacheEvent(nothingCached);
+      (global as any).fetch = MockFetch = jest.fn(async (url: string) => ({
+        ok: true,
+        json: jest.fn(async () =>
+          url === HACS_INTEGRATIONS_URL
+            ? {
+                "1": { domain: "hacs_valid" },
+                "2": { domain: 42 },
+                "3": { domain: { name: "hacs_object" } },
+                "4": { domain: "hacs_other" },
+              }
+            : {
+                core: ["core_valid"],
+                custom: ["custom_valid"],
+                hassos: { rpi: "" },
+              }
+        ),
+      }));
+
+      await handleSchedule(event, MockSentry);
+
+      expect(MockSentry.captureException).not.toHaveBeenCalled();
+      expect(storedHacsCache(event).domains).toEqual([
+        "hacs_valid",
+        "hacs_other",
+      ]);
+      expect(event.env.KV.put).toHaveBeenCalledWith(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        bothCounted
+      );
     });
 
     const hacsCacheWriteFails = (event) => {
