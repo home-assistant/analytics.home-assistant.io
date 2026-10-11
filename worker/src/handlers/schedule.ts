@@ -351,7 +351,7 @@ async function fetchExternalData(
   };
 }
 
-// The domains of the HACS default repositories, cached in KV and refreshed daily.
+// The domains of the HACS default repositories, cached in KV.
 // HACS is not ours and it only widens the set of domains we recognise, so a
 // failed or slow refresh falls back to the cached list (or to brands alone)
 // rather than failing the run. A list that cannot be parsed is treated as
