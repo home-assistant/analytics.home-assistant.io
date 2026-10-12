@@ -449,6 +449,21 @@ describe("schedule handler", function () {
       );
     };
 
+    const expectRunFailedOnHacs = (event) => {
+      expect(MockSentry.captureException).toHaveBeenCalledWith(
+        Error("Could not get integration list from HACS")
+      );
+      expect(hacsCacheWrites(event)).toHaveLength(0);
+      expect(event.env.KV.put).not.toHaveBeenCalledWith(
+        KV_KEY_CUSTOM_INTEGRATIONS,
+        expect.any(String)
+      );
+      expect(event.env.KV.put).not.toHaveBeenCalledWith(
+        KV_KEY_QUEUE,
+        expect.any(String)
+      );
+    };
+
     const bothCounted =
       '{"custom_valid":{"total":1,"versions":{"1.2.3":1}},' +
       '"hacs_valid":{"total":1,"versions":{"1.2.3":1}}}';
@@ -496,22 +511,13 @@ describe("schedule handler", function () {
       );
     });
 
-    it("HACS is down with nothing cached - keep processing on brands", async () => {
+    it("HACS is down with nothing cached - fail the run", async () => {
       const event = hacsCacheEvent(nothingCached);
       hacsDown();
 
       await handleSchedule(event, MockSentry);
 
-      expect(MockSentry.captureException).not.toHaveBeenCalled();
-      expect(MockSentry.captureMessage).toHaveBeenCalledWith(
-        "Could not get integration list from HACS (using brands only)",
-        "warning"
-      );
-      expectRetryInAnHour(event, []);
-      expect(event.env.KV.put).toHaveBeenCalledWith(
-        KV_KEY_CUSTOM_INTEGRATIONS,
-        '{"custom_valid":{"total":1,"versions":{"1.2.3":1}}}'
-      );
+      expectRunFailedOnHacs(event);
     });
 
     const malformedCaches = [
@@ -549,7 +555,7 @@ describe("schedule handler", function () {
     );
 
     it.each(malformedCaches)(
-      "Cached HACS domains are malformed (%s) and HACS is down - replace them and retry in an hour",
+      "Cached HACS domains are malformed (%s) and HACS is down - fail the run",
       async (_, value) => {
         const event = hacsCacheEvent({
           value,
@@ -559,16 +565,7 @@ describe("schedule handler", function () {
 
         await handleSchedule(event, MockSentry);
 
-        expect(MockSentry.captureException).not.toHaveBeenCalled();
-        expect(MockSentry.captureMessage).toHaveBeenCalledWith(
-          "Could not get integration list from HACS (using brands only)",
-          "warning"
-        );
-        expectRetryInAnHour(event, []);
-        expect(event.env.KV.put).toHaveBeenCalledWith(
-          KV_KEY_CUSTOM_INTEGRATIONS,
-          '{"custom_valid":{"total":1,"versions":{"1.2.3":1}}}'
-        );
+        expectRunFailedOnHacs(event);
       }
     );
 
@@ -697,19 +694,14 @@ describe("schedule handler", function () {
       );
     });
 
-    it("Reading the cached HACS domains fails and HACS is down - keep the cache as it is", async () => {
+    it("Reading the cached HACS domains fails and HACS is down - fail the run", async () => {
       const event = hacsCacheEvent(nothingCached);
       hacsCacheReadFails(event);
       hacsDown();
 
       await handleSchedule(event, MockSentry);
 
-      expect(MockSentry.captureException).not.toHaveBeenCalled();
-      expect(hacsCacheWrites(event)).toHaveLength(0);
-      expect(event.env.KV.put).toHaveBeenCalledWith(
-        KV_KEY_CUSTOM_INTEGRATIONS,
-        '{"custom_valid":{"total":1,"versions":{"1.2.3":1}}}'
-      );
+      expectRunFailedOnHacs(event);
     });
 
     // The time limit runs out straight away rather than after the real delay.

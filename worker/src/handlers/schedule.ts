@@ -351,19 +351,15 @@ async function fetchExternalData(
   };
 }
 
-// The domains of the HACS default repositories, cached in KV.
-// HACS is not ours and it only widens the set of domains we recognise, so a
-// failed or slow refresh falls back to the cached list (or to brands alone)
-// rather than failing the run. A list that cannot be parsed is treated as
-// missing and gets overwritten, but when the cache cannot be read at all and
-// the download fails too, nothing is saved, so a good cache is never replaced
-// with an empty list.
+// The domains of the HACS default repositories, cached in KV. A failed or slow
+// refresh falls back to the cached list, even a stale one. With no usable cache
+// the run fails like it does for brands and version, because counting without
+// the HACS domains would silently drop those integrations from the totals.
 async function getHacsDomains(
   event: ScheduledWorkerEvent,
   sentry: Toucan
 ): Promise<string[]> {
   let cached: { domains: string[]; refreshAfter?: number } | null = null;
-  let readFailed = false;
   try {
     const { value, metadata } =
       await event.env.KV.getWithMetadata<HacsDomainsMetadata>(
@@ -386,7 +382,6 @@ async function getHacsDomains(
       `Could not read the cached HACS domains: ${e?.message}`,
       "warning"
     );
-    readFailed = true;
   }
   const timestamp = new Date().getTime();
 
@@ -433,13 +428,12 @@ async function getHacsDomains(
 
     return domains;
   } catch (e: any) {
-    const fallback = cached ? "the cached list" : "brands only";
-    sentry.captureMessage(`${e?.message} (using ${fallback})`, "warning");
-    const domains = cached?.domains || [];
-    if (!readFailed) {
-      await storeDomains(domains, timestamp + HACS_DOMAINS_RETRY_DELAY);
+    if (!cached) {
+      throw e;
     }
-    return domains;
+    sentry.captureMessage(`${e?.message} (using the cached list)`, "warning");
+    await storeDomains(cached.domains, timestamp + HACS_DOMAINS_RETRY_DELAY);
+    return cached.domains;
   }
 }
 
