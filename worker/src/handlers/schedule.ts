@@ -1,5 +1,5 @@
 // Scheduled taks handler to manage the KV store
-import { array, is, string } from "superstruct";
+import { array, is, nonempty, string } from "superstruct";
 import { Toucan } from "toucan-js";
 import {
   bumpValue,
@@ -444,7 +444,7 @@ async function getHacsDomains(
 function parseHacsDomains(value: string): string[] | null {
   try {
     const domains = JSON.parse(value);
-    return is(domains, array(string())) && domains.length > 0 ? domains : null;
+    return is(domains, nonempty(array(nonempty(string())))) ? domains : null;
   } catch {
     return null;
   }

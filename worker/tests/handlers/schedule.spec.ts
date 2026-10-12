@@ -508,7 +508,6 @@ describe("schedule handler", function () {
         "Could not get integration list from HACS (using the cached list)",
         "warning"
       );
-      // The stale list is kept rather than overwritten with a worse one.
       expectRetryInAnHour(event, ["hacs_valid"]);
       expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_CUSTOM_INTEGRATIONS,
@@ -589,10 +588,11 @@ describe("schedule handler", function () {
       ["not a list", '{"refresh_after":1,"domains":["hacs_valid"]}'],
       ["not a list of domains", '["hacs_valid",1]'],
       ["an empty list", "[]"],
+      ["an empty domain", '[""]'],
     ];
 
     it.each(malformedCaches)(
-      "Cached HACS domains are malformed (%s) - refresh from HACS straight away",
+      "Cached HACS domains are malformed or empty (%s) - refresh from HACS straight away",
       async (_, value) => {
         const event = hacsCacheEvent({
           value,
@@ -620,7 +620,7 @@ describe("schedule handler", function () {
     );
 
     it.each(malformedCaches)(
-      "Cached HACS domains are malformed (%s) and HACS is down - fail the run",
+      "Cached HACS domains are malformed or empty (%s) and HACS is down - fail the run",
       async (_, value) => {
         const event = hacsCacheEvent({
           value,
@@ -651,13 +651,14 @@ describe("schedule handler", function () {
       expect(storedHacsCache(event).domains).toEqual(["hacs_valid"]);
     });
 
-    it("HACS lists domains that are not text - skip them so the saved list can be read back", async () => {
+    it("HACS lists domains that are empty or not text - skip them so the saved list can be read back", async () => {
       const event = hacsCacheEvent(nothingCached);
       hacsAnswersWith({
         "1": { domain: "hacs_valid" },
         "2": { domain: 42 },
         "3": { domain: { name: "hacs_object" } },
         "4": { domain: "hacs_other" },
+        "5": { domain: "" },
       });
 
       await handleSchedule(event, MockSentry);
