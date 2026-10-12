@@ -352,9 +352,10 @@ async function fetchExternalData(
 }
 
 // The domains of the HACS default repositories, cached in KV. A failed or slow
-// refresh falls back to the cached list, even a stale one. With no usable cache
-// the run fails like it does for brands and version, because counting without
-// the HACS domains would silently drop those integrations from the totals.
+// refresh, or one that lists no domains, falls back to the cached list. With no
+// usable cache the run fails like it does for brands and version, because
+// counting without the HACS domains would silently drop those integrations
+// from the totals.
 async function getHacsDomains(
   event: ScheduledWorkerEvent,
   sentry: Toucan
@@ -372,7 +373,7 @@ async function getHacsDomains(
         cached = { domains, refreshAfter: metadata?.refresh_after };
       } else {
         sentry.captureMessage(
-          "The cached HACS domains are malformed (refreshing from HACS)",
+          "The cached HACS domains are malformed or empty (refreshing from HACS)",
           "warning"
         );
       }
@@ -423,6 +424,9 @@ async function getHacsDomains(
           )
       )
     );
+    if (domains.length === 0) {
+      throw new Error("HACS returned no integration domains");
+    }
 
     await storeDomains(domains, timestamp + HACS_DOMAINS_MAX_AGE);
 
@@ -440,7 +444,7 @@ async function getHacsDomains(
 function parseHacsDomains(value: string): string[] | null {
   try {
     const domains = JSON.parse(value);
-    return is(domains, array(string())) ? domains : null;
+    return is(domains, array(string())) && domains.length > 0 ? domains : null;
   } catch {
     return null;
   }
