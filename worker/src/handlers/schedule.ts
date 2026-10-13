@@ -413,10 +413,11 @@ async function getHacsDomains(
       throw new Error("HACS returned no integration domains");
     }
 
+    const metadata: HacsDomainsMetadata = {
+      refresh_after: timestamp + HACS_DOMAINS_MAX_AGE,
+    };
+
     try {
-      const metadata: HacsDomainsMetadata = {
-        refresh_after: timestamp + HACS_DOMAINS_MAX_AGE,
-      };
       await event.env.KV.put(KV_KEY_HACS_DOMAINS, JSON.stringify(domains), {
         metadata,
       });
