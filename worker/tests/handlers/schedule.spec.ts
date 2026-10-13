@@ -4,7 +4,6 @@ import {
   createQueueDefaults,
   FETCH_TIMEOUT,
   HACS_DOMAINS_MAX_AGE,
-  HACS_DOMAINS_RETRY_DELAY,
   HACS_INTEGRATIONS_URL,
   KV_KEY_ADDONS,
   KV_KEY_CORE_ANALYTICS,
@@ -437,16 +436,9 @@ describe("schedule handler", function () {
       }));
     };
 
-    const expectRetryInAnHour = (event, domains: string[]) => {
-      const now = new Date().getTime();
-      const cache = storedHacsCache(event);
-      expect(cache.domains).toEqual(domains);
-      expect(cache.refresh_after).toBeGreaterThan(
-        now + HACS_DOMAINS_RETRY_DELAY - 60_000
-      );
-      expect(cache.refresh_after).toBeLessThanOrEqual(
-        now + HACS_DOMAINS_RETRY_DELAY
-      );
+    // Nothing is saved, so the cache stays stale and the next run tries HACS again.
+    const expectRetryNextRun = (event) => {
+      expect(hacsCacheWrites(event)).toHaveLength(0);
     };
 
     const expectRunFailedOnHacs = (
@@ -508,7 +500,7 @@ describe("schedule handler", function () {
         "Could not get integration list from HACS (using the cached list)",
         "warning"
       );
-      expectRetryInAnHour(event, ["hacs_valid"]);
+      expectRetryNextRun(event);
       expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_CUSTOM_INTEGRATIONS,
         bothCounted
@@ -575,7 +567,7 @@ describe("schedule handler", function () {
           "HACS returned no integration domains (using the cached list)",
           "warning"
         );
-        expectRetryInAnHour(event, ["hacs_valid"]);
+        expectRetryNextRun(event);
         expect(event.env.KV.put).toHaveBeenCalledWith(
           KV_KEY_CUSTOM_INTEGRATIONS,
           bothCounted
@@ -705,29 +697,6 @@ describe("schedule handler", function () {
       );
     });
 
-    it("HACS is down and saving the retry time fails - keep processing", async () => {
-      const event = hacsCacheEvent(
-        cachedList({
-          refresh_after: new Date().getTime() - 1,
-          domains: ["hacs_valid"],
-        })
-      );
-      hacsDown();
-      hacsCacheWriteFails(event);
-
-      await handleSchedule(event, MockSentry);
-
-      expect(MockSentry.captureException).not.toHaveBeenCalled();
-      expect(MockSentry.captureMessage).toHaveBeenCalledWith(
-        "Could not cache the HACS domains: KV write failed",
-        "warning"
-      );
-      expect(event.env.KV.put).toHaveBeenCalledWith(
-        KV_KEY_CUSTOM_INTEGRATIONS,
-        bothCounted
-      );
-    });
-
     const hacsCacheReadFails = (event) => {
       (event.env.KV.getWithMetadata as jest.Mock).mockRejectedValue(
         Error("KV read failed")
@@ -817,6 +786,7 @@ describe("schedule handler", function () {
         expect.stringContaining("(using the cached list)"),
         "warning"
       );
+      expectRetryNextRun(event);
       expect(event.env.KV.put).toHaveBeenCalledWith(
         KV_KEY_CUSTOM_INTEGRATIONS,
         bothCounted

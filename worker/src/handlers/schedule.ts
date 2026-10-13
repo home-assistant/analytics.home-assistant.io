@@ -28,7 +28,6 @@ import {
   BrandsDomainsResponse,
   HacsDomainsMetadata,
   HACS_DOMAINS_MAX_AGE,
-  HACS_DOMAINS_RETRY_DELAY,
   HACS_INTEGRATIONS_URL,
   HacsIntegrationsResponse,
   VERSION_URL,
@@ -390,20 +389,6 @@ async function getHacsDomains(
     return cached.domains;
   }
 
-  async function storeDomains(domains: string[], refreshAfter: number) {
-    try {
-      const metadata: HacsDomainsMetadata = { refresh_after: refreshAfter };
-      await event.env.KV.put(KV_KEY_HACS_DOMAINS, JSON.stringify(domains), {
-        metadata,
-      });
-    } catch (e: any) {
-      sentry.captureMessage(
-        `Could not cache the HACS domains: ${e?.message}`,
-        "warning"
-      );
-    }
-  }
-
   try {
     const hacsIntegrationsJson = await fetchJson<HacsIntegrationsResponse>(
       sentry,
@@ -428,7 +413,19 @@ async function getHacsDomains(
       throw new Error("HACS returned no integration domains");
     }
 
-    await storeDomains(domains, timestamp + HACS_DOMAINS_MAX_AGE);
+    try {
+      const metadata: HacsDomainsMetadata = {
+        refresh_after: timestamp + HACS_DOMAINS_MAX_AGE,
+      };
+      await event.env.KV.put(KV_KEY_HACS_DOMAINS, JSON.stringify(domains), {
+        metadata,
+      });
+    } catch (e: any) {
+      sentry.captureMessage(
+        `Could not cache the HACS domains: ${e?.message}`,
+        "warning"
+      );
+    }
 
     return domains;
   } catch (e: any) {
@@ -436,7 +433,6 @@ async function getHacsDomains(
       throw e;
     }
     sentry.captureMessage(`${e?.message} (using the cached list)`, "warning");
-    await storeDomains(cached.domains, timestamp + HACS_DOMAINS_RETRY_DELAY);
     return cached.domains;
   }
 }
