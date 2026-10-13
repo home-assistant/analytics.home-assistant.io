@@ -374,13 +374,16 @@ describe("schedule handler", function () {
         expect.stringContaining("history:"),
         expect.any(String)
       );
-      const before = new Date().getTime();
+      const now = new Date().getTime();
       expect(storedHacsCache(event)).toEqual({
         refresh_after: expect.any(Number),
         domains: ["hacs_valid"],
       });
       expect(storedHacsCache(event).refresh_after).toBeGreaterThan(
-        before + HACS_DOMAINS_MAX_AGE - 60_000
+        now + HACS_DOMAINS_MAX_AGE - 60_000
+      );
+      expect(storedHacsCache(event).refresh_after).toBeLessThanOrEqual(
+        now + HACS_DOMAINS_MAX_AGE
       );
       expect(MockFetch).toHaveBeenCalledTimes(4);
       expect(event.env.KV.put).toHaveBeenCalledTimes(6);
@@ -630,7 +633,7 @@ describe("schedule handler", function () {
       }
     );
 
-    it("Cached HACS domains have no retry time - refresh from HACS", async () => {
+    it("Cached HACS domains have no refresh time - refresh from HACS", async () => {
       const event = hacsCacheEvent({
         value: JSON.stringify(["hacs_valid"]),
         metadata: null,
