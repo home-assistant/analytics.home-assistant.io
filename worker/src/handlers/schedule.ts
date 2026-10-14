@@ -1,4 +1,5 @@
 // Scheduled taks handler to manage the KV store
+import { array, is, nonempty, string } from "superstruct";
 import { Toucan } from "toucan-js";
 import {
   bumpValue,
@@ -23,11 +24,18 @@ import {
   generateUuidMetadata,
   KV_KEY_ADDONS,
   KV_KEY_CUSTOM_INTEGRATIONS,
+  KV_KEY_HACS_DOMAINS,
   BRANDS_DOMAINS_URL,
+  BrandsDomainsResponse,
+  HacsDomainsMetadata,
+  HACS_DOMAINS_MAX_AGE,
+  HACS_INTEGRATIONS_URL,
+  HacsIntegrationsResponse,
   VERSION_URL,
   VersionResponse,
   ScheduledWorkerEvent,
 } from "../data";
+import { fetchJson } from "../utils/fetch-json";
 import { groupVersions } from "../utils/group-versions";
 import { median } from "../utils/median";
 import { migrateAnalyticsData } from "../utils/migrate";
@@ -237,35 +245,9 @@ async function processQueue(
   }
 
   sentry.addBreadcrumb({
-    message: "Fetching external data from brands and version",
+    message: "Fetching external data from brands, HACS and version",
   });
-  const [brandsDomainsResponse, versionResponse] = await Promise.all([
-    fetch(BRANDS_DOMAINS_URL),
-    fetch(VERSION_URL),
-  ]);
-
-  sentry.setExtra("brandsDomainsResponse", brandsDomainsResponse);
-  sentry.setExtra("versionResponse", versionResponse);
-
-  if (!brandsDomainsResponse.ok) {
-    throw Error("Could not get domain list from brands");
-  }
-  if (!versionResponse.ok) {
-    throw Error("Could not get domain list from brands");
-  }
-
-  const brandsDomainsJson: {
-    core: string[];
-    custom: string[];
-  } = await brandsDomainsResponse.json();
-
-  const osBoardsJson = await versionResponse.json<VersionResponse>();
-
-  const brandsDomains: Set<string> = new Set(
-    brandsDomainsJson.custom.concat(brandsDomainsJson.core)
-  );
-
-  const osBoards: Set<string> = new Set(Object.keys(osBoardsJson.hassos));
+  const { knownDomains, osBoards } = await fetchExternalData(event, sentry);
 
   async function handleEntry(entryKey: string) {
     let entryData;
@@ -275,7 +257,7 @@ async function processQueue(
       queue.data = combineEntryData(
         queue.data,
         entryData,
-        brandsDomains,
+        knownDomains,
         osBoards
       );
     }
@@ -393,6 +375,138 @@ async function findMonthAgo(
   };
 }
 
+// The documents backing these sets are large compared to what we keep from
+// them, so they are parsed and reduced here, out of the scope that stays alive
+// while the queue entries are processed.
+async function fetchExternalData(
+  event: ScheduledWorkerEvent,
+  sentry: Toucan
+): Promise<{
+  knownDomains: Set<string>;
+  osBoards: Set<string>;
+}> {
+  const [brandsDomainsJson, hacsDomains, osBoardsJson] = await Promise.all([
+    fetchJson<BrandsDomainsResponse>(sentry, BRANDS_DOMAINS_URL, {
+      sentryExtra: "brandsDomainsResponse",
+      errorMessage: "Could not get domain list from brands",
+    }),
+    getHacsDomains(event, sentry),
+    fetchJson<VersionResponse>(sentry, VERSION_URL, {
+      sentryExtra: "versionResponse",
+      errorMessage: "Could not get board list from version",
+    }),
+  ]);
+
+  // Reported custom integrations are only counted when we know the domain.
+  // brands no longer accepts new custom_integrations entries (HA 2026.3.0), so
+  // the HACS default repositories are used as an additional source of domains.
+  const knownDomains: Set<string> = new Set(
+    brandsDomainsJson.custom.concat(brandsDomainsJson.core, hacsDomains)
+  );
+
+  return {
+    knownDomains,
+    osBoards: new Set(Object.keys(osBoardsJson.hassos)),
+  };
+}
+
+// The domains of the HACS default repositories, cached in KV. A failed or slow
+// refresh, or one that lists no domains, falls back to the cached list. With no
+// usable cache the run fails like it does for brands and version, because
+// counting without the HACS domains would silently drop those integrations
+// from the totals.
+async function getHacsDomains(
+  event: ScheduledWorkerEvent,
+  sentry: Toucan
+): Promise<string[]> {
+  let cached: { domains: string[]; refreshAfter?: number } | null = null;
+  try {
+    const { value, metadata } =
+      await event.env.KV.getWithMetadata<HacsDomainsMetadata>(
+        KV_KEY_HACS_DOMAINS,
+        "text"
+      );
+    if (value !== null) {
+      const domains = parseHacsDomains(value);
+      if (domains) {
+        cached = { domains, refreshAfter: metadata?.refresh_after };
+      } else {
+        sentry.captureMessage(
+          "The cached HACS domains are malformed or empty (refreshing from HACS)",
+          "warning"
+        );
+      }
+    }
+  } catch (e: any) {
+    sentry.captureMessage(
+      `Could not read the cached HACS domains: ${e?.message}`,
+      "warning"
+    );
+  }
+  const timestamp = new Date().getTime();
+
+  if (cached?.refreshAfter && timestamp < cached.refreshAfter) {
+    return cached.domains;
+  }
+
+  try {
+    const hacsIntegrationsJson = await fetchJson<HacsIntegrationsResponse>(
+      sentry,
+      HACS_INTEGRATIONS_URL,
+      {
+        sentryExtra: "hacsIntegrationsResponse",
+        errorMessage: "Could not get integration list from HACS",
+      }
+    );
+
+    const domains = Array.from(
+      new Set(
+        Object.values(hacsIntegrationsJson)
+          .map((repository) => repository.domain)
+          .filter(
+            (domain): domain is string =>
+              typeof domain === "string" && domain !== ""
+          )
+      )
+    );
+    if (domains.length === 0) {
+      throw new Error("HACS returned no integration domains");
+    }
+
+    const metadata: HacsDomainsMetadata = {
+      refresh_after: timestamp + HACS_DOMAINS_MAX_AGE,
+    };
+
+    try {
+      await event.env.KV.put(KV_KEY_HACS_DOMAINS, JSON.stringify(domains), {
+        metadata,
+      });
+    } catch (e: any) {
+      sentry.captureMessage(
+        `Could not cache the HACS domains: ${e?.message}`,
+        "warning"
+      );
+    }
+
+    return domains;
+  } catch (e: any) {
+    if (!cached) {
+      throw e;
+    }
+    sentry.captureMessage(`${e?.message} (using the cached list)`, "warning");
+    return cached.domains;
+  }
+}
+
+function parseHacsDomains(value: string): string[] | null {
+  try {
+    const domains = JSON.parse(value);
+    return is(domains, nonempty(array(nonempty(string())))) ? domains : null;
+  } catch {
+    return null;
+  }
+}
+
 async function listKV(
   event: ScheduledWorkerEvent,
   prefix: string
@@ -457,7 +571,7 @@ function combineMetadataEntryData(
 function combineEntryData(
   data: QueueData,
   entrydata: IncomingPayload,
-  brandsDomains: Set<string>,
+  knownDomains: Set<string>,
   osBoards: Set<string>
 ): QueueData {
   const reported_integrations = entrydata.integrations || [];
@@ -583,7 +697,7 @@ function combineEntryData(
 
   if (reported_custom_integrations.length) {
     for (const custom_integration of reported_custom_integrations) {
-      if (!brandsDomains.has(custom_integration.domain)) {
+      if (!knownDomains.has(custom_integration.domain)) {
         continue;
       }
 
