@@ -220,10 +220,17 @@ export interface AnalyticsDataCurrent {
   };
 }
 
+export interface MonthAgoData {
+  timestamp: number;
+  integrations: Record<string, number>;
+  reports_integrations: number;
+}
+
 export interface AnalyticsData {
   schema_version: number;
   history: AnalyticsDataHistory[];
   current: AnalyticsDataCurrent;
+  month_ago?: MonthAgoData;
 }
 
 export interface IncomingPayload {
