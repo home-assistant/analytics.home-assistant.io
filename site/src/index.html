@@ -89,6 +89,7 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
   </div>
 </div>
 
+<div class="chart-title">Installations per million inhabitants</div>
 <div id="svgMap"></div>
 
 <script>
@@ -252,14 +253,6 @@ extra_head_contents: <script src="/static/svg-pan-zoom.min.js"></script>
     colorMax: "#004D40",
     hideFlag: true,
     initialZoom: 1.0,
-    data: {
-            data: {
-              installations: {
-                format: "{0} Installations",
-              },
-            },
-            applyData: "installations",
-            values: {{ data.current.countries | countriesForMap }},
-          },
+    data: {{ data.current.countries | countriesForMap }},
   });
 </script>
