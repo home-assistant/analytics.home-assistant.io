@@ -20,14 +20,14 @@ describe("post handler", function () {
   it("First interaction", async () => {
     const event = MockedFetchEvent({});
     await handlePost(event, MockSentry);
-    expect(event.env.KV.getWithMetadata).toBeCalledWith(
+    expect(event.env.KV.getWithMetadata).toHaveBeenCalledWith(
       "uuid:12345678901234567890123456789012",
       "json"
     );
-    expect(MockSentry.addBreadcrumb).toBeCalledWith({
+    expect(MockSentry.addBreadcrumb).toHaveBeenCalledWith({
       message: "First contact for UUID, store payload",
     });
-    expect(event.env.KV.put).toBeCalledTimes(1);
+    expect(event.env.KV.put).toHaveBeenCalledTimes(1);
   });
 
   it("Time has passed", async () => {
@@ -41,16 +41,16 @@ describe("post handler", function () {
     );
 
     await handlePost(event, MockSentry);
-    expect(event.env.KV.getWithMetadata).toBeCalledWith(
+    expect(event.env.KV.getWithMetadata).toHaveBeenCalledWith(
       "uuid:12345678901234567890123456789012",
       "json"
     );
-    expect(MockSentry.addBreadcrumb).toBeCalledWith(
+    expect(MockSentry.addBreadcrumb).toHaveBeenCalledWith(
       expect.objectContaining({
         message: "Threshold has passed, update stored data",
       })
     );
-    expect(event.env.KV.put).toBeCalledTimes(1);
+    expect(event.env.KV.put).toHaveBeenCalledTimes(1);
   });
 
   it("Data changed", async () => {
@@ -77,15 +77,15 @@ describe("post handler", function () {
     );
 
     await handlePost(event, MockSentry);
-    expect(event.env.KV.getWithMetadata).toBeCalledWith(
+    expect(event.env.KV.getWithMetadata).toHaveBeenCalledWith(
       "uuid:12345678901234567890123456789012",
       "json"
     );
-    expect(MockSentry.addBreadcrumb).toBeCalledWith({
+    expect(MockSentry.addBreadcrumb).toHaveBeenCalledWith({
       message: "Payload changed, update stored data",
     });
-    expect(event.env.KV.put).toBeCalledTimes(1);
-    expect(event.env.KV.put).toBeCalledWith(
+    expect(event.env.KV.put).toHaveBeenCalledTimes(1);
+    expect(event.env.KV.put).toHaveBeenCalledWith(
       "uuid:12345678901234567890123456789012",
       expect.any(String),
       expect.objectContaining({
@@ -109,11 +109,11 @@ describe("post handler", function () {
     );
 
     await handlePost(event, MockSentry);
-    expect(event.env.KV.getWithMetadata).toBeCalledWith(
+    expect(event.env.KV.getWithMetadata).toHaveBeenCalledWith(
       "uuid:12345678901234567890123456789012",
       "json"
     );
 
-    expect(event.env.KV.put).toBeCalledTimes(0);
+    expect(event.env.KV.put).toHaveBeenCalledTimes(0);
   });
 });
