@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.1.6",
-    "@cloudflare/workers-types": "^3.17.0",
+    "@cloudflare/workers-types": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^18.15.10",
     "jest": "^30.5.2",
