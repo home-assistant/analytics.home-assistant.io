@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "chart.js": "^4.5.1",
-    "chartjs-adapter-date-fns": "^2.0.1",
+    "chartjs-adapter-date-fns": "^3.0.0",
     "svg-pan-zoom": "^3.6.2",
     "svgmap": "^2.21.0",
     "superstruct": "2.0.2",
