@@ -4,6 +4,47 @@ const dataTable = require("./src/tools/data_table");
 const friendlyNames = require("./src/tools/friendly_names");
 const historyFiltering = require("./src/tools/history_filter");
 const versionTools = require("./src/tools/versions");
+const { COUNTRY_POPULATION } = require("./src/tools/population");
+
+// Countries with a smaller population are still shown on the map, but they are
+// not allowed to define the upper end of the color scale, a handful of
+// installations in a micro state would otherwise flatten the rest of the map.
+const MIN_POPULATION_FOR_SCALE = 100000;
+
+// Build the data for the installation map. The color of a country is based on
+// the number of installations relative to its population, absolute numbers
+// mostly reflect how many people live in a country.
+const mapData = (countries) => {
+  const values = {};
+  let scaleMax = 0;
+
+  for (const [country, installations] of Object.entries(countries || {})) {
+    const population = COUNTRY_POPULATION[country];
+    if (!population) {
+      // Unknown or uninhabited, there is nothing to relate the value to.
+      continue;
+    }
+
+    const perMillion = Math.round((1000000 * (installations || 0)) / population);
+    values[country] = { installations: installations || 0, perMillion };
+
+    if (population >= MIN_POPULATION_FOR_SCALE && perMillion > scaleMax) {
+      scaleMax = perMillion;
+    }
+  }
+
+  return {
+    data: {
+      installations: { format: "{0} Installations" },
+      perMillion: {
+        format: "{0} Installations per million inhabitants",
+        thresholdMax: scaleMax || undefined,
+      },
+    },
+    applyData: "perMillion",
+    values,
+  };
+};
 
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/_static": "static" });
@@ -22,12 +63,7 @@ module.exports = function (eleventyConfig) {
     historyFiltering(history)
   );
   eleventyConfig.addFilter("countriesForMap", (base) =>
-    JSON.stringify(
-      Object.keys(base || {}).reduce(
-        (obj, key) => ({ ...obj, [key]: { installations: base[key] || 0 } }),
-        {}
-      )
-    )
+    JSON.stringify(mapData(base))
   );
   eleventyConfig.addFilter("calculatePercentage", (total, part, decimal) =>
     calculate.percentage(total, part, decimal)
